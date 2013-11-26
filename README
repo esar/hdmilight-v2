@@ -1,0 +1,24 @@
+For latest version, go to http://hacks.esar.org.uk/
+
+How to use:
+
+1) Manufacture the HDMI receiver board that can be found in 
+   the 'board' directory (CADSoft Eagle format).
+2) Open the 'fpga/hdmilight.xise' project in Xilinx ISE and
+   generate a bit file.
+3) Edit 'firmware/config_lights.h' to set light definitions.
+4) Run make in the 'firmware' directory to produce 'image.elf'
+5) Merge the firmware into the bit file (from firmware directory):
+   /opt/Xilinx/14.4/ISE_DS/ISE/bin/lin64/data2mem -bm ../fpga/progmem_bd.bmm -bt ../fpga/HdmilightTop.bit -bd image.elf -o b ../hdmilight.bit
+6) Upload hdmilight.bit to the Papilio
+7) Install the HDMI receiver board on to a Papilio One 250K FPGA board.
+8) Connect LED strips to output pins
+9) Open a serial terminal to the Papilio
+10) Give the command to initialise I2C: 
+   I I
+11) Give the command to configure the light definitions and 
+   the ADV611 chip: 
+   I C
+12) Connect HDMI source to receiver board
+13) It should now be working.
+

@@ -1,0 +1,76 @@
+##################################################################################
+## BPC3003_2.03+.ucf
+##
+## Author: Jack Gassett
+##
+## Details: http://gadgetforge.gadgetfactory.net/gf/project/butterfly_one/
+##
+## Contains assignment and iostandard information for
+## all used pins as well as timing and area constraints for Papilio One 2.03 and higher boards. Papilio One boards started using 32Mhz oscillators at version 2.02 and above.
+##
+##################################################################################
+
+# Crystal Clock - use 32MHz onboard oscillator
+NET "clk" LOC = "P89" | IOSTANDARD = LVCMOS25 | PERIOD = 31.25ns ;
+
+NET "ADV_AP" LOC = "P91";
+NET "ADV_SCLK" LOC = "P92";
+NET "ADV_LRCLK" LOC = "P94";
+NET "ADV_MCLK" LOC = "P95";
+
+NET "ADV_SCL" LOC = "P98";
+NET "ADV_SDA" LOC = "P2" | IOSTANDARD = LVCMOS33;
+NET "ADV_INT1" LOC = "P3" | IOSTANDARD = LVCMOS33;
+NET "ADV_RST" LOC = "P4" | IOSTANDARD = LVCMOS33;
+
+NET "ADV_HS" LOC = "P85";
+NET "ADV_VS" LOC = "P86";
+NET "ADV_DE" LOC = "P84";
+NET "ADV_LLC" LOC = "P54";
+
+NET "ADV_P<0>" LOC = "P83";
+NET "ADV_P<1>" LOC = "P79";
+NET "ADV_P<2>" LOC = "P78";
+NET "ADV_P<3>" LOC = "P70";
+NET "ADV_P<4>" LOC = "P71";
+NET "ADV_P<5>" LOC = "P67";
+NET "ADV_P<6>" LOC = "P68";
+NET "ADV_P<7>" LOC = "P65";
+NET "ADV_P<8>" LOC = "P66";
+NET "ADV_P<9>" LOC = "P62";
+NET "ADV_P<10>" LOC = "P63";
+NET "ADV_P<11>" LOC = "P60";
+NET "ADV_P<12>" LOC = "P61";
+NET "ADV_P<13>" LOC = "P57";
+NET "ADV_P<14>" LOC = "P58";
+NET "ADV_P<15>" LOC = "P53";
+NET "ADV_P<16>" LOC = "P40";
+NET "ADV_P<17>" LOC = "P41";
+NET "ADV_P<18>" LOC = "P35";
+NET "ADV_P<19>" LOC = "P36";
+NET "ADV_P<20>" LOC = "P33";
+NET "ADV_P<21>" LOC = "P34";
+NET "ADV_P<22>" LOC = "P26";
+NET "ADV_P<23>" LOC = "P32";
+
+NET "OUTPUT<0>" LOC = "P5" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<1>" LOC = "P9" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<2>" LOC = "P10" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<3>" LOC = "P11" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<4>" LOC = "P12" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<5>" LOC = "P15" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<6>" LOC = "P16" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+NET "OUTPUT<7>" LOC = "P17" | IOSTANDARD = LVCMOS33 | DRIVE = 24 | SLEW = FAST;
+
+NET "ADV_LLC" CLOCK_DEDICATED_ROUTE = FALSE;
+
+NET "ADV_LLC" TNM_NET = "ADV_LLC";
+TIMESPEC "TS_ADV_LLC" = PERIOD "ADV_LLC" 5 ns HIGH 50%;
+NET "ambilight/hscale4/COUNT(0)" TNM_NET = "MC_GRP_FFS";
+TIMESPEC "TS_MC_GRP_FFS" = FROM "MC_GRP_FFS" TO "MC_GRP_FFS" TS_ADV_LLC*2;
+#NET "ambilight/hscale4/COUNT(0)" TNM_NET = RAMS "MC_GRP_RAMS";
+#TIMESPEC "TS_MC_GRP_RAMS" = FROM "MC_GRP_RAMS" TO "MC_GRP_RAMS" TS_ADV_LLC*2;
+
+## RS232
+NET "rx"  LOC = "P88" | IOSTANDARD = LVCMOS25 ;
+NET "tx"  LOC = "P90" | IOSTANDARD = LVCMOS25 | DRIVE = 4 | SLEW = SLOW ;
