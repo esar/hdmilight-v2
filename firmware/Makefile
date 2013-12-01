@@ -1,3 +1,5 @@
+MAX_IMAGE_SIZE = 8192
+
 PRG            = image
 OBJ            = main.o serial.o printf.o timer.o i2c.o
 
@@ -23,7 +25,11 @@ LDFLAGS += -Wl,-gc-sections
 OBJCOPY        = avr-objcopy
 OBJDUMP        = avr-objdump
 
-all: $(PRG).elf lst text
+MAKEMEM = ../tools/makemem
+
+all: $(PRG).elf lst text mem
+
+main.o: config_lights.h config_hdmi.h
 
 $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -43,6 +49,7 @@ text: bin
 
 hex:  $(PRG).hex
 bin:  $(PRG).bin
+mem:  $(PRG).mem
 srec: $(PRG).srec
 
 %.hex: %.elf
@@ -54,3 +61,6 @@ srec: $(PRG).srec
 %.bin: %.elf
 	$(OBJCOPY) -j .text -j .data -O binary $< $@
 	
+%.mem: %.bin
+	$(MAKEMEM) $< $(MAX_IMAGE_SIZE) > $@
+

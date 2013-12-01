@@ -7,11 +7,16 @@ How to use:
 2) Open the 'fpga/hdmilight.xise' project in Xilinx ISE and
    generate a bit file.
 3) Edit 'firmware/config_lights.h' to set light definitions.
-4) Run make in the 'firmware' directory to produce 'image.elf'
-5) Merge the firmware into the bit file (from firmware directory):
-   /opt/Xilinx/14.4/ISE_DS/ISE/bin/lin64/data2mem -bm ../fpga/progmem_bd.bmm -bt ../fpga/HdmilightTop.bit -bd image.elf -o b ../hdmilight.bit
-6) Upload hdmilight.bit to the Papilio
-7) Install the HDMI receiver board on to a Papilio One 250K FPGA board.
+4) Edit 'Makefile' in the top level directory and set
+   the DATA2MEM path for the Xilinx data2mem tooli location
+   on your system.
+5) Run 'make' in the top level directory, which will build
+   'tools/makemem', then the firmware image, then merge
+   the firware image into the fpga bitfile.
+   The final result should be hdmilight.bit in the top
+   level directory.
+6) Upload hdmilight.bit to a Papilio One 250K FPGA board
+7) Install the HDMI receiver board on to the Papilio board.
 8) Connect LED strips to output pins
 9) Open a serial terminal to the Papilio
 10) Give the command to initialise I2C: 
