@@ -51,11 +51,16 @@ static unsigned long g_lightTable[] PROGMEM =
 	DEFINE_LIGHT(0, 0, 0, 0, 0, 7),    // 11
 	DEFINE_LIGHT(0, 0, 0, 0, 0, 7),    // 12
 
-	DEFINE_LIGHT( 0, 32,  8, 32, 3, 0),   // 13
-	DEFINE_LIGHT( 0, 31,  8, 31, 3, 0),   // 14
-	DEFINE_LIGHT( 0, 30,  8, 30, 3, 0),   // 15
-	DEFINE_LIGHT( 0, 29,  8, 29, 3, 0),   // 16
-	DEFINE_LIGHT( 0, 28,  8, 28, 3, 0),   // 17
+DEFINE_LIGHT( 59, 28,  59, 28, 0, 0),   // 13
+DEFINE_LIGHT( 60, 28,  60, 28, 0, 0),   // 14
+DEFINE_LIGHT( 61, 28,  61, 28, 0, 0),   // 15
+DEFINE_LIGHT( 62, 28,  62, 28, 0, 0),   // 16
+DEFINE_LIGHT( 63, 28,  63, 28, 0, 0),   // 17
+	//DEFINE_LIGHT( 0, 32,  8, 32, 3, 0),   // 13
+	//DEFINE_LIGHT( 0, 31,  8, 31, 3, 0),   // 14
+	//DEFINE_LIGHT( 0, 30,  8, 30, 3, 0),   // 15
+	//DEFINE_LIGHT( 0, 29,  8, 29, 3, 0),   // 16
+	//DEFINE_LIGHT( 0, 28,  8, 28, 3, 0),   // 17
 	DEFINE_LIGHT( 0, 27,  8, 27, 3, 0),   // 18
 	DEFINE_LIGHT( 0, 26,  8, 26, 3, 0),   // 19
 	DEFINE_LIGHT( 0, 25,  8, 25, 3, 0),   // 20
@@ -186,12 +191,12 @@ static unsigned long g_lightTable[] PROGMEM =
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 141
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 142
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 143
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 144
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 145
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 146
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 147
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 148
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 149
+	DEFINE_LIGHT( 0, 33,  8, 33, 3, 4),   // 144
+	DEFINE_LIGHT( 0, 32,  8, 32, 3, 4),   // 145
+	DEFINE_LIGHT( 0, 31,  8, 31, 3, 4),   // 146
+	DEFINE_LIGHT( 0, 30,  8, 30, 3, 4),   // 147
+	DEFINE_LIGHT( 0, 29,  8, 29, 3, 4),   // 148
+	DEFINE_LIGHT( 0, 28,  8, 28, 3, 4),   // 149
 	DEFINE_LIGHT( 0, 27,  8, 27, 3, 4),   // 150
 	DEFINE_LIGHT( 0, 26,  8, 26, 3, 4),   // 151
 	DEFINE_LIGHT( 0, 25,  8, 25, 3, 4),   // 152
@@ -219,6 +224,24 @@ static unsigned long g_lightTable[] PROGMEM =
 	DEFINE_LIGHT( 0,  3,  8,  3, 3, 4),   // 174
 	DEFINE_LIGHT( 0,  2,  8,  2, 3, 4),   // 175
 	DEFINE_LIGHT( 0,  1,  8,  1, 3, 4),   // 176
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 220
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 221
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 222
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 223
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 224
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 225
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 226
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 227
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 228
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 229
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 230
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 231
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 232
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 233
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 234
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 235
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 236
+	DEFINE_LIGHT( 0,  0,  0,  0, 0, 4),   // 237
 
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 177
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 178
@@ -230,39 +253,58 @@ static unsigned long g_lightTable[] PROGMEM =
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 184
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 185
 	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 186
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 187
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 188
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 189
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 190
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 191
-	DEFINE_LIGHT( 0,  0,  0,  0, 0, 2),   // 192
-	DEFINE_LIGHT( 53, 27, 60, 27, 3, 2),   // 193
-	DEFINE_LIGHT( 53, 26, 60, 26, 3, 2),   // 194
-	DEFINE_LIGHT( 53, 25, 60, 25, 3, 2),   // 195
-	DEFINE_LIGHT( 53, 24, 60, 24, 3, 2),   // 196
-	DEFINE_LIGHT( 53, 23, 60, 23, 3, 2),   // 197
-	DEFINE_LIGHT( 53, 22, 60, 22, 3, 2),   // 198
-	DEFINE_LIGHT( 53, 21, 60, 21, 3, 2),   // 199
-	DEFINE_LIGHT( 53, 20, 60, 20, 3, 2),   // 200
-	DEFINE_LIGHT( 53, 19, 60, 19, 3, 2),   // 201
-	DEFINE_LIGHT( 53, 18, 60, 18, 3, 2),   // 202
-	DEFINE_LIGHT( 53, 17, 60, 17, 3, 2),   // 203
-	DEFINE_LIGHT( 53, 16, 60, 16, 3, 2),   // 204
-	DEFINE_LIGHT( 53, 15, 60, 15, 3, 2),   // 205
-	DEFINE_LIGHT( 53, 14, 60, 14, 3, 2),   // 206
-	DEFINE_LIGHT( 53, 13, 60, 13, 3, 2),   // 207
-	DEFINE_LIGHT( 53, 12, 60, 12, 3, 2),   // 208
-	DEFINE_LIGHT( 53, 11, 60, 11, 3, 2),   // 209
-	DEFINE_LIGHT( 53, 10, 60, 10, 3, 2),   // 210
-	DEFINE_LIGHT( 53,  9, 60,  9, 3, 2),   // 211
-	DEFINE_LIGHT( 53,  8, 60,  8, 3, 2),   // 212
-	DEFINE_LIGHT( 53,  7, 60,  7, 3, 2),   // 213
-	DEFINE_LIGHT( 53,  6, 60,  6, 3, 2),   // 214
-	DEFINE_LIGHT( 53,  5, 60,  5, 3, 2),   // 215
-	DEFINE_LIGHT( 53,  4, 60,  4, 3, 2),   // 216
-	DEFINE_LIGHT( 53,  3, 60,  3, 3, 2),   // 217
-	DEFINE_LIGHT( 53,  2, 60,  2, 3, 2),   // 218
-	DEFINE_LIGHT( 53,  1, 60,  1, 3, 2),   // 219
+	DEFINE_LIGHT( 56, 33, 63, 33, 3, 2),   // 187
+	DEFINE_LIGHT( 56, 32, 63, 32, 3, 2),   // 188
+	DEFINE_LIGHT( 56, 31, 63, 31, 3, 2),   // 189
+	DEFINE_LIGHT( 56, 30, 63, 30, 3, 2),   // 190
+	DEFINE_LIGHT( 56, 29, 63, 29, 3, 2),   // 191
+	DEFINE_LIGHT( 56, 28, 63, 28, 3, 2),   // 192
+	DEFINE_LIGHT( 56, 27, 63, 27, 3, 2),   // 193
+	DEFINE_LIGHT( 56, 26, 63, 26, 3, 2),   // 194
+	DEFINE_LIGHT( 56, 25, 63, 25, 3, 2),   // 195
+	DEFINE_LIGHT( 56, 24, 63, 24, 3, 2),   // 196
+	DEFINE_LIGHT( 56, 23, 63, 23, 3, 2),   // 197
+	DEFINE_LIGHT( 56, 22, 63, 22, 3, 2),   // 198
+	DEFINE_LIGHT( 56, 21, 63, 21, 3, 2),   // 199
+	DEFINE_LIGHT( 56, 20, 63, 20, 3, 2),   // 200
+	DEFINE_LIGHT( 56, 19, 63, 19, 3, 2),   // 201
+	DEFINE_LIGHT( 56, 18, 63, 18, 3, 2),   // 202
+	DEFINE_LIGHT( 56, 17, 63, 17, 3, 2),   // 203
+	DEFINE_LIGHT( 56, 16, 63, 16, 3, 2),   // 204
+	DEFINE_LIGHT( 56, 15, 63, 15, 3, 2),   // 205
+	DEFINE_LIGHT( 56, 14, 63, 14, 3, 2),   // 206
+	DEFINE_LIGHT( 56, 13, 63, 13, 3, 2),   // 207
+	DEFINE_LIGHT( 56, 12, 63, 12, 3, 2),   // 208
+	DEFINE_LIGHT( 56, 11, 63, 11, 3, 2),   // 209
+	DEFINE_LIGHT( 56, 10, 63, 10, 3, 2),   // 210
+	DEFINE_LIGHT( 56,  9, 63,  9, 3, 2),   // 211
+	DEFINE_LIGHT( 56,  8, 63,  8, 3, 2),   // 212
+	DEFINE_LIGHT( 56,  7, 63,  7, 3, 2),   // 213
+	DEFINE_LIGHT( 56,  6, 63,  6, 3, 2),   // 214
+	DEFINE_LIGHT( 56,  5, 63,  5, 3, 2),   // 215
+	DEFINE_LIGHT( 56,  4, 63,  4, 3, 2),   // 216
+	DEFINE_LIGHT( 56,  3, 63,  3, 3, 2),   // 217
+	DEFINE_LIGHT( 56,  2, 63,  2, 3, 2),   // 218
+	DEFINE_LIGHT( 56,  1, 63,  1, 3, 2),   // 219
+
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 238
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 239
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 240
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 241
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 242
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 243
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 244
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 245
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 246
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 247
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 248
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 249
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 250
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 251
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 252
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 253
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 254
+	DEFINE_LIGHT(  0,  0,  0,  0, 0, 2),   // 255
 
 	0xFFFFFFFF
 
