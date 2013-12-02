@@ -431,6 +431,7 @@ void doConfig(char** argv, char argc)
 {
 	struct ConfigTable* p;
 	int i;
+	int silent = (argc == 1 && argv[0][0] == '1' && argv[0][1] == '\0');
 
 	for(i = 0; pgm_read_dword(&g_lightTable[i]) != 0xffffffff; ++i)
 	{
@@ -448,7 +449,8 @@ void doConfig(char** argv, char argc)
 		AMBILIGHT_DATA = LIGHT_SHIFT(light);
 		AMBILIGHT_COMPONENT = 5;
 		AMBILIGHT_DATA = LIGHT_OUTPUT(light);
-		printf("OK\n");
+		if(!silent)
+			printf("OK\n");
 	}
 
 	for(p = g_configTable; pgm_read_byte(&p->address) != 0; ++p)
@@ -457,12 +459,23 @@ void doConfig(char** argv, char argc)
 		unsigned char subaddress = pgm_read_byte(&p->subaddress);
 		unsigned char data = pgm_read_byte(&p->data);
 
-		printf("%d %d %d : ", address, subaddress, data);
-		i2c_start();
-		printf("%s ", i2c_write(address)    ? "ACK" : "NACK");
-		printf("%s ", i2c_write(subaddress) ? "ACK" : "NACK");
-		printf("%s\n", i2c_write(data)      ? "ACK" : "NACK");
-		i2c_stop();
+		if(!silent)
+		{
+			printf("%d %d %d : ", address, subaddress, data);
+			i2c_start();
+			printf("%s ", i2c_write(address)    ? "ACK" : "NACK");
+			printf("%s ", i2c_write(subaddress) ? "ACK" : "NACK");
+			printf("%s\n", i2c_write(data)      ? "ACK" : "NACK");
+			i2c_stop();
+		}
+		else
+		{
+			i2c_start();
+			i2c_write(address);
+			i2c_write(subaddress);
+			i2c_write(data);
+			i2c_stop();
+		}
 	}
 }
 
@@ -502,13 +515,29 @@ void doI2CRead(char** argv, char argc)
 
 int main()
 {
+	int i;
+	char* argv[8];
+	int argc;
+
 	printf_register(serial_putchar);
 	
+	printf("waiting...");
+
+	// Wait a short while
+	for(i = 0; i < 10000; ++i)
+		asm volatile ("nop");
+
+	printf("configuring...");
+
+	i2c_init();
+	argv[0] = "1";
+	argc = 1;
+	doConfig(argv, argc);
+
+	printf("done.\n");
+
 	while (1)
 	{
-		char* argv[8];
-		int argc;
-
 		printf("\n> ");
 
 		argc = readcmd(argv, 8);
