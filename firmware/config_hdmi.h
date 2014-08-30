@@ -28,7 +28,7 @@ struct ConfigTable
 
 };
 
-static struct ConfigTable g_configTable[] PROGMEM = 
+static const struct ConfigTable g_configTable[] PROGMEM = 
 {
 /*
 	{ 0x98, 0xFD, 0x44 },

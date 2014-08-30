@@ -140,7 +140,7 @@ char readcmd(char** argv, char maxargs)
 				if(1)
 				{
 					unsigned char p = current;
-					unsigned char len;
+					unsigned char len = 0;
 					unsigned char i;
 
 					for(i = 0; i < history + 1; ++i)
@@ -429,7 +429,7 @@ void doRead(char** argv, char argc)
 
 void doConfig(char** argv, char argc)
 {
-	struct ConfigTable* p;
+	const struct ConfigTable* p;
 	int i;
 	int silent = (argc == 1 && argv[0][0] == '1' && argv[0][1] == '\0');
 

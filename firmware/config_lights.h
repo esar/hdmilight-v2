@@ -35,7 +35,7 @@
 #define LIGHT_SHIFT(x)  (((x) >> 24) & 15)
 #define LIGHT_OUTPUT(x) (((x) >> 28) & 7)
 
-static unsigned long g_lightTable[] PROGMEM = 
+static const unsigned long g_lightTable[] PROGMEM = 
 {
 	DEFINE_LIGHT(0, 0, 0, 0, 0, 7),    // 0
 	DEFINE_LIGHT(0, 0, 0, 0, 0, 7),    // 1
