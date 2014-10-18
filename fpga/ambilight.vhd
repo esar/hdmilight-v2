@@ -78,6 +78,10 @@ signal resultData : std_logic_vector(31 downto 0);
 signal resultLatched : std_logic_vector(31 downto 0);
 signal statusLatched : std_logic_vector(7 downto 0);
 
+signal delayedResultVblank : std_logic;
+signal delayedResultAddr : std_logic_vector(7 downto 0);
+signal delayedResultData : std_logic_vector(31 downto 0);
+
 signal outputStart : std_logic;
 signal outputBusy  : std_logic;
 signal outputAddr  : std_logic_vector( 7 downto 0);
@@ -120,8 +124,10 @@ lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
 															      configAddrA, configDataA,
 															      cfgclk, resultAddr, resultData);
 
-resultDistributor : entity work.resultDistributor port map(cfgclk, vblank, 
-                                                           resultAddr, resultData, 
+resultDelay : entity work.resultDelay port map(cfgclk, vblank, resultAddr, resultData, delayedResultVblank, delayedResultAddr, delayedResultData);
+
+resultDistributor : entity work.resultDistributor port map(cfgclk, delayedResultVblank, 
+                                                           delayedResultAddr, delayedResultData, 
 																			  outputBusy, outputStart,
 																			  outputAddr, outputData);
 
