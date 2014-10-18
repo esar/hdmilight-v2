@@ -36,7 +36,7 @@ use ieee.numeric_std.all;
 entity resultDistributor is
     Port ( clk : in  STD_LOGIC;
            vblank : in  STD_LOGIC;
-			  resultAddr : out STD_LOGIC_VECTOR (8 downto 0);
+			  resultAddr : out STD_LOGIC_VECTOR (7 downto 0);
            resultData : in  STD_LOGIC_VECTOR (31 downto 0);
 			  
            busy : in  STD_LOGIC;
@@ -71,7 +71,7 @@ begin
 	end if;
 end process;
 
-resultAddr <= "0" & count;
+resultAddr <= count;
 outputAddr <= resultData(31 downto 24);
 outputData <= resultData(23 downto  0);
 

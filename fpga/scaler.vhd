@@ -50,23 +50,6 @@ end scaler;
 
 architecture Behavioral of scaler is
 
-COMPONENT line_buffer_ram
-  PORT (
-    clka : IN STD_LOGIC;
-    rsta : IN STD_LOGIC;
-    ena : IN STD_LOGIC;	 
-    wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addra : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
-    dina : IN STD_LOGIC_VECTOR(63 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
-    clkb : IN STD_LOGIC;
-    web : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addrb : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
-    dinb : IN STD_LOGIC_VECTOR(63 DOWNTO 0);
-    doutb : OUT STD_LOGIC_VECTOR(63 DOWNTO 0)
-  );
-END COMPONENT;
-
 signal HSYNC_LAST  : std_logic;
 signal END_OF_LINE : std_logic;
 
@@ -94,7 +77,7 @@ signal Y_COUNT_LAST    : std_logic_vector(10 downto 0);
 signal Y_COUNT_LAST_CE : std_logic;
 
 signal LINEBUF_RST  : std_logic;
-signal LINEBUF_WE   : std_logic_vector(0 downto 0);
+signal LINEBUF_WE   : std_logic;
 signal LINEBUF_ADDR : std_logic_vector(6 downto 0);
 signal LINEBUF_D    : std_logic_vector(63 downto 0);
 signal LINEBUF_Q    : std_logic_vector(63 downto 0);
@@ -102,20 +85,26 @@ signal LINEBUF_DB   : std_logic_vector(63 downto 0);
 
 begin
 
-line_buffer : line_buffer_ram
+line_buffer : entity work.blockram
+  GENERIC MAP(
+    ADDR => 7,
+	 DATA => 64
+  )
   PORT MAP (
-    clka => CLK,
-    rsta => LINEBUF_RST,
-	 ena => CE2,
-    wea => LINEBUF_WE,
-    addra => LINEBUF_ADDR,
-    dina => LINEBUF_D,
-    douta => LINEBUF_Q,
-    clkb => LINE_BUF_CLK,
-    web => "0",
-    addrb => LINE_BUF_ADDR,
-    dinb => (others => '0'),
-    doutb => LINEBUF_DB
+    a_clk => CLK,
+    a_rst => LINEBUF_RST,
+	 a_en => CE2,
+    a_wr => LINEBUF_WE,
+    a_addr => LINEBUF_ADDR,
+    a_din => LINEBUF_D,
+    a_dout => LINEBUF_Q,
+    b_clk => LINE_BUF_CLK,
+	 b_en => '1',
+    b_wr => '0',
+	 b_rst => '0',
+    b_addr => LINE_BUF_ADDR,
+    b_din => (others => '0'),
+    b_dout => LINEBUF_DB
   );
 
 --hscale4 : entity work.hscale4 port map(CLK, HSYNC, VSYNC, R, G, B,
@@ -214,7 +203,7 @@ Y_COUNT_LAST_CE <= END_OF_LINE;
 
 LINEBUF_ADDR  <= Y_COUNT(5) & X_COUNT(9 downto 4);
 LINEBUF_RST   <= '1' when Y_COUNT(4 downto 0) = "00000" and X_COUNT(3 downto 1) = "000" else '0';
-LINEBUF_WE(0) <= X_COUNT(0);
+LINEBUF_WE <= X_COUNT(0);
 LINEBUF_D(63 downto 48) <= (others => '0');
 LINEBUF_D(47 downto 32) <= std_logic_vector(unsigned(LINEBUF_Q(47 downto 32)) + unsigned(RAVG));
 LINEBUF_D(31 downto 16) <= std_logic_vector(unsigned(LINEBUF_Q(31 downto 16)) + unsigned(GAVG));

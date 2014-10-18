@@ -56,22 +56,6 @@ end lightAverager;
 
 architecture Behavioral of lightAverager is
 
-COMPONENT resultRam
-  PORT (
-    clka : IN STD_LOGIC;
-    ena : IN STD_LOGIC;
-    wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addra : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
-    dina : IN STD_LOGIC_VECTOR(71 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(71 DOWNTO 0);
-    clkb : IN STD_LOGIC;
-    web : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addrb : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
-    dinb : IN STD_LOGIC_VECTOR(71 DOWNTO 0);
-    doutb : OUT STD_LOGIC_VECTOR(71 DOWNTO 0)
-  );
-END COMPONENT;
-
                          -- count is overflow (1), xpos (6), light (8), read/write (1) = 16 bits
 signal COUNT           : std_logic_vector(15 downto 0);
 signal FRAME           : std_logic := '0';
@@ -84,7 +68,7 @@ signal WRITE_ADDR      : std_logic_vector(7 downto 0);
 signal WRITE_DATA      : std_logic_vector(71 downto 0);
 
 signal RESULT_RAM_ADDR   : std_logic_vector(8 downto 0);
-signal RESULT_RAM_WE     : std_logic_vector(0 downto 0);
+signal RESULT_RAM_WE     : std_logic;
 signal RESULT_RAM_D      : std_logic_vector(71 downto 0);
 signal RESULT_RAM_Q      : std_logic_vector(71 downto 0);
 
@@ -125,19 +109,26 @@ signal WRITE_ENABLE_p2 : std_logic;
 
 begin
 
-resultBuffer : resultRam
+resultBuffer : entity work.blockram
+  GENERIC MAP(
+    ADDR => 9,
+	 DATA => 72
+  )
   PORT MAP (
-    clka => CLK,
-    ena => CE,
-    wea => RESULT_RAM_WE,
-    addra => RESULT_RAM_ADDR,
-    dina => RESULT_RAM_D,
-    douta => RESULT_RAM_Q,
-    clkb => RESULT_CLK,
-    web => "0",
-    addrb => RESULT_RAM_B_ADDR,
-    dinb => (others=> '0'),
-    doutb => RESULT_RAM_B_Q
+    a_clk => CLK,
+    a_en => CE,
+    a_wr => RESULT_RAM_WE,
+	 a_rst => '0',
+    a_addr => RESULT_RAM_ADDR,
+    a_din => RESULT_RAM_D,
+    a_dout => RESULT_RAM_Q,
+    b_clk => RESULT_CLK,
+	 b_en => '1',
+    b_wr => '0',
+	 b_rst => '0',
+    b_addr => RESULT_RAM_B_ADDR,
+    b_din => (others=> '0'),
+    b_dout => RESULT_RAM_B_Q
   );
 
 process(CLK)
@@ -259,7 +250,7 @@ CONFIG_ADDR <= "0" & LIGHT_ADDR;
 LINE_BUF_ADDR   <= YPOS(0) & XPOS;
 
 RESULT_RAM_ADDR  <= (not FRAME) & LIGHT_ADDR when WRITE_CYCLE = '0' else (not FRAME) & WRITE_ADDR;
-RESULT_RAM_WE(0) <= '0'                      when WRITE_CYCLE = '0' else WRITE_ENABLE;
+RESULT_RAM_WE    <= '0'                      when WRITE_CYCLE = '0' else WRITE_ENABLE;
 RESULT_RAM_D     <= WRITE_DATA;
 
 RESULT_RAM_B_ADDR <= FRAME & RESULT_ADDR(7 downto 0);

@@ -52,21 +52,6 @@ end ambilight;
 
 architecture Behavioral of ambilight is
 
-COMPONENT configRam
-  PORT (
-    clka : IN STD_LOGIC;
-    wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addra : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
-    dina : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    douta : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-    clkb : IN STD_LOGIC;
-    web : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
-    addrb : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
-    dinb : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    doutb : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
-  );
-END COMPONENT;
-
 signal ce2 : std_logic;
 signal ce4 : std_logic;
 signal hblank_delayed : std_logic;
@@ -82,7 +67,7 @@ signal lineReady : std_logic;
 
 signal configAddrA : std_logic_vector(8 downto 0);
 signal configDataA : std_logic_vector(31 downto 0);
-signal configWeB : std_logic_vector(0 downto 0);
+signal configWeB : std_logic;
 signal configAddrB : std_logic_vector(8 downto 0);
 signal configDataOutB : std_logic_vector(31 downto 0);
 signal configDataInB : std_logic_vector(31 downto 0);
@@ -102,18 +87,26 @@ signal driverOutput : std_logic;
 
 begin
 
-conf : configRam
+conf : entity work.blockram
+  GENERIC MAP (
+    DATA => 32,
+	 ADDR => 9
+  )
   PORT MAP (
-    clka => vidclk,
-    wea => "0",
-    addra => configAddrA,
-    dina => (others => '0'),
-    douta => configDataA,
-    clkb => cfgclk,
-    web => configWeB,
-    addrb => configAddrB,
-    dinb => configDataInB,
-    doutb => configDataOutB
+    a_clk => vidclk,
+	 a_en => '1',
+    a_wr => '0',
+	 a_rst => '0',
+    a_addr => configAddrA,
+    a_din => (others => '0'),
+    a_dout => configDataA,
+    b_clk => cfgclk,
+	 b_en => '1',
+    b_wr => configWeB,
+	 b_rst => '0',
+    b_addr => configAddrB,
+    b_din => configDataInB,
+    b_dout => configDataOutB
   );
 
 hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, viddata_r, viddata_g, viddata_b,
@@ -126,8 +119,6 @@ lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
                                                    lineBufferAddr, lineBufferData,
 															      configAddrA, configDataA,
 															      cfgclk, resultAddr, resultData);
-
-
 
 resultDistributor : entity work.resultDistributor port map(cfgclk, vblank, 
                                                            resultAddr, resultData, 
@@ -147,7 +138,7 @@ begin
 	end if;
 end process;
 
-configWeB(0) <= cfgwe;
+configWeB <= cfgwe;
 configAddrB <= "0" & cfglight;
 --resultAddr <= "0" & cfglight;
 
