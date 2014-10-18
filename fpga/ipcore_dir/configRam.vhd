@@ -22,7 +22,7 @@
 --    devices, or systems.  Use in such applications are expressly            --
 --    prohibited.                                                             --
 --                                                                            --
---    (c) Copyright 1995-2013 Xilinx, Inc.                                    --
+--    (c) Copyright 1995-2014 Xilinx, Inc.                                    --
 --    All rights reserved.                                                    --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ END COMPONENT;
       c_disable_warn_bhv_coll => 0,
       c_disable_warn_bhv_range => 0,
       c_enable_32bit_address => 0,
-      c_family => "spartan3",
+      c_family => "spartan6",
       c_has_axi_id => 0,
       c_has_ena => 0,
       c_has_enb => 0,
@@ -135,7 +135,7 @@ END COMPONENT;
       c_write_mode_b => "WRITE_FIRST",
       c_write_width_a => 32,
       c_write_width_b => 32,
-      c_xdevicefamily => "spartan3e"
+      c_xdevicefamily => "spartan6"
     );
 -- synthesis translate_on
 BEGIN

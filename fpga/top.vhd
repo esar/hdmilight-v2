@@ -161,7 +161,7 @@ begin
 -- Instantiation
 -----------------------------------------------
 
-ambilight : entity ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank, vblank,
+ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank, vblank,
                                       CLK16,
 												  ambilightCfgWe,
 												  ambilightCfgLight,

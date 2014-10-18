@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.4
-# Date: Wed May 22 17:52:41 2013
+# Date: Fri Jul 11 10:38:08 2014
 #
 ##############################################################
 #
@@ -22,16 +22,16 @@ SET asysymbol = true
 SET busformat = BusFormatAngleBracketNotRipped
 SET createndf = false
 SET designentry = VHDL
-SET device = xc3s250e
-SET devicefamily = spartan3e
+SET device = xc6slx9
+SET devicefamily = spartan6
 SET flowvendor = Other
 SET formalverification = false
 SET foundationsym = false
 SET implementationfiletype = Ngc
-SET package = vq100
+SET package = tqg144
 SET removerpms = false
 SET simulationfiles = Behavioral
-SET speedgrade = -4
+SET speedgrade = -3
 SET verilogsim = false
 SET vhdlsim = true
 # END Project Options
@@ -105,4 +105,4 @@ CSET write_width_b=64
 MISC pkg_timestamp=2012-11-19T16:22:25Z
 # END Extra information
 GENERATE
-# CRC: debce612
+# CRC: b79f12d7
