@@ -44,8 +44,11 @@ entity lightAverager is
 		LINE_BUF_ADDR : out std_logic_vector(6 downto 0);
 		LINE_BUF_DATA : in  std_logic_vector(23 downto 0);
 
-		CONFIG_ADDR : out std_logic_vector(8 downto 0);
-		CONFIG_DATA : in  std_logic_vector(31 downto 0);
+		CFG_CLK : in std_logic;
+		CFG_WE : in std_logic;
+		CFG_ADDR : in std_logic_vector(11 downto 0);
+		CFG_DIN : in std_logic_vector(7 downto 0);
+		CFG_DOUT : out std_logic_vector(7 downto 0);
 
 		RESULT_CLK  : in  std_logic;
 		RESULT_ADDR : in  std_logic_vector(8 downto 0);
@@ -66,6 +69,9 @@ signal LIGHT_ADDR      : std_logic_vector(7 downto 0);
 signal WRITE_ENABLE    : std_logic;
 signal WRITE_ADDR      : std_logic_vector(7 downto 0);
 signal WRITE_DATA      : std_logic_vector(71 downto 0);
+
+signal CONFIG_ADDR     : std_logic_vector(8 downto 0);
+signal CONFIG_DATA     : std_logic_vector(31 downto 0);
 
 signal RESULT_RAM_ADDR   : std_logic_vector(8 downto 0);
 signal RESULT_RAM_WE     : std_logic;
@@ -131,6 +137,18 @@ resultBuffer : entity work.blockram
     b_dout => RESULT_RAM_B_Q
   );
 
+configRam : entity work.lightConfigRam
+	PORT MAP (
+		a_clk => CFG_CLK,
+		a_wr => CFG_WE,
+		a_addr => CFG_ADDR,
+		a_din => CFG_DIN,
+		a_dout => CFG_DOUT,
+		b_clk => CLK,
+		b_addr => CONFIG_ADDR,
+		b_dout => CONFIG_DATA
+	);
+	
 process(CLK)
 begin
 	if(rising_edge(CLK)) then

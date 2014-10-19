@@ -149,8 +149,9 @@ signal viddata_b : std_logic_vector(7 downto 0);
 signal hblank : std_logic;
 signal vblank : std_logic;
 signal ambilightCfgWe : std_logic;
-signal ambilightCfgLight : std_logic_vector(7 downto 0);
-signal ambilightCfgComponent : std_logic_vector(3 downto 0);
+signal ambilightCfgAddrLow : std_logic_vector(7 downto 0);
+signal ambilightCfgAddrHigh : std_logic_vector(7 downto 0);
+signal ambilightCfgAddr : std_logic_vector(12 downto 0);
 signal ambilightCfgDataIn : std_logic_vector(7 downto 0);
 signal ambilightCfgDataOut : std_logic_vector(7 downto 0);
 signal driverOutput : std_logic_vector(7 downto 0);
@@ -164,8 +165,7 @@ begin
 ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank, vblank,
                                       CLK16,
 												  ambilightCfgWe,
-												  ambilightCfgLight,
-												  ambilightCfgComponent,
+												  ambilightCfgAddr,
 												  ambilightCfgDataIn,
 												  ambilightCfgDataOut,
 												  driverOutput);
@@ -263,9 +263,9 @@ begin
 					MCU_TIMER_LATCHED <= MCU_TIMER_VAL;
 					
 				when X"46"  =>
-					ambilightCfgLight <= MCU_IO_DATA_WRITE;
+					ambilightCfgAddrLow <= MCU_IO_DATA_WRITE;
 				when X"47"  =>
-					ambilightCfgComponent <= MCU_IO_DATA_WRITE(3 downto 0);
+					ambilightCfgAddrHigh <= MCU_IO_DATA_WRITE;
 				when X"48"  =>
 					ambilightCfgDataIn <= MCU_IO_DATA_WRITE;
 					ambilightCfgWe <= '1';
@@ -376,5 +376,7 @@ viddata_b <= ADV_P(15 downto 8);
 viddata_r <= ADV_P(7 downto 0);
 hblank <= not ADV_HS;
 vblank <= not ADV_VS;
+
+ambilightCfgAddr <= ambilightCfgAddrHigh(4 downto 0) & ambilightCfgAddrLow;
 
 end Behavioral;

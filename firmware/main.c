@@ -33,8 +33,8 @@
 
 #define BELL    '\a'
 
-#define AMBILIGHT_LIGHT     _SFR_IO8(0x26)
-#define AMBILIGHT_COMPONENT _SFR_IO8(0x27)
+#define AMBILIGHT_ADDR_LOW  _SFR_IO8(0x26)
+#define AMBILIGHT_ADDR_HIGH _SFR_IO8(0x27)
 #define AMBILIGHT_DATA      _SFR_IO8(0x28)
 
 /*
@@ -283,9 +283,9 @@ char readcmd(char** argv, char maxargs)
 }
 */
 
-char strtoint(char* str)
+unsigned char strtoint(char* str)
 {
-	char x;
+	unsigned char x;
 
 	for(x = 0; *str != '\0'; ++str)
 	{
@@ -296,25 +296,100 @@ char strtoint(char* str)
 	return x;
 }
 	
+void setLight(unsigned int light, 
+              unsigned char xmin, unsigned char xmax,
+              unsigned char ymin, unsigned char ymax,
+              unsigned char shift, unsigned char output)
+{
+	//  31      28      24          18          12          6           0
+	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	// | | out   | shift | ymax      | ymin      | xmax      | xmin      |
+	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	// |                 |               |               |               |
+
+	light <<= 2;
+	AMBILIGHT_ADDR_HIGH = light >> 8;
+	light &= 0xff;
+	AMBILIGHT_ADDR_LOW = light;
+	AMBILIGHT_DATA = (xmin & 0x3f) | (xmax << 6);
+	AMBILIGHT_ADDR_LOW = light + 1;
+	AMBILIGHT_DATA = ((xmax & 0x3f) >> 2) | (ymin << 4);
+	AMBILIGHT_ADDR_LOW = light + 2;
+	AMBILIGHT_DATA = ((ymin & 0x3f) >> 4) | (ymax << 2);
+	AMBILIGHT_ADDR_LOW = light + 3;
+	AMBILIGHT_DATA = (shift & 0xf) | (output << 4);
+}
+
+void getLight(unsigned int light,
+              unsigned char* xmin, unsigned char* xmax,
+              unsigned char* ymin, unsigned char* ymax,
+              unsigned char* shift, unsigned char* output)
+{
+	unsigned char a, b, c, d;
+
+	light <<= 2;
+	AMBILIGHT_ADDR_HIGH = light >> 8;
+	light &= 0xff;
+	AMBILIGHT_ADDR_LOW = light;
+	asm("nop");
+	a = AMBILIGHT_DATA;
+	AMBILIGHT_ADDR_LOW = light + 1;
+	asm("nop");
+	b = AMBILIGHT_DATA;
+	AMBILIGHT_ADDR_LOW = light + 2;
+	asm("nop");
+	c = AMBILIGHT_DATA;
+	AMBILIGHT_ADDR_LOW = light + 3;
+	asm("nop");
+	d = AMBILIGHT_DATA;
+
+	*xmin = a & 0x3f;
+	*xmax = (a >> 6) | ((b & 0x0f) << 2);
+	*ymin = (b >> 4) | ((c & 3) << 4);
+	*ymax = c >> 2;
+	*shift = d & 0xf;
+	*output = d >> 4;
+}
+
 void doSet(char** argv, char argc)
 {
-	if(argc == 7)
+	if(argc == 8)
 	{
-		AMBILIGHT_LIGHT = strtoint(argv[1]);
-		AMBILIGHT_COMPONENT = 0;
-		AMBILIGHT_DATA = strtoint(argv[2]);
-		AMBILIGHT_COMPONENT = 1;
-		AMBILIGHT_DATA = strtoint(argv[3]);
-		AMBILIGHT_COMPONENT = 2;
-		AMBILIGHT_DATA = strtoint(argv[4]);
-		AMBILIGHT_COMPONENT = 3;
-		AMBILIGHT_DATA = strtoint(argv[5]);
-		AMBILIGHT_COMPONENT = 4;
-		AMBILIGHT_DATA = strtoint(argv[6]);
+		setLight(strtoint(argv[1]),
+		         strtoint(argv[2]),
+		         strtoint(argv[3]),
+		         strtoint(argv[4]),
+		         strtoint(argv[5]),
+		         strtoint(argv[6]),
+		         strtoint(argv[7]));
 		printf("OK\n");
 	}
 	else
-		printf("err: light xmin xmax ymin ymax shift\n");
+		printf("err: light xmin xmax ymin ymax shift output\n");
+}
+
+void doDelay(char** argv, char argc)
+{
+	if(argc == 2)
+	{
+		if(argv[1][0] == 'S')
+		{
+			AMBILIGHT_ADDR_HIGH = 0x08;
+			AMBILIGHT_ADDR_LOW = 0x00;
+			AMBILIGHT_DATA = strtoint(argv[1]);
+		}
+		else if(argv[1][0] == 'G')
+		{
+			unsigned int val;
+			AMBILIGHT_ADDR_HIGH = 0x08;
+			AMBILIGHT_ADDR_LOW = 0x00;
+			asm("nop");
+			val = AMBILIGHT_DATA;
+			printf("%d\n", val);
+		}
+	}
+	else
+		printf("err: [G|S] num_frames\n");
 }
 
 void doGet(char** argv, char argc)
@@ -322,28 +397,15 @@ void doGet(char** argv, char argc)
 	if(argc == 2)
 	{
 		unsigned int light = strtoint(argv[1]);
-		unsigned int xmin;
-		unsigned int xmax;
-		unsigned int ymin;
-		unsigned int ymax;
-		unsigned int shift;
-		AMBILIGHT_LIGHT = light;
-		AMBILIGHT_COMPONENT = 0;
-		asm("nop");
-		xmin = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 1;
-		asm("nop");
-		xmax = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 2;
-		asm("nop");
-		ymin = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 3;
-		asm("nop");
-		ymax = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 4;
-		asm("nop");
-		shift = AMBILIGHT_DATA;
-		printf("%d: %d %d %d %d %d\n", light, xmin, xmax, ymin, ymax, shift);
+		unsigned char xmin;
+		unsigned char xmax;
+		unsigned char ymin;
+		unsigned char ymax;
+		unsigned char shift;
+		unsigned char output;
+
+		getLight(light, &xmin, &xmax, &ymin, &ymax, &shift, &output);
+		printf("%d: %d %d %d %d %d %d\n", light, xmin, xmax, ymin, ymax, shift, output);
 	}
 	else
 		printf("err: light\n");
@@ -352,7 +414,8 @@ void doGet(char** argv, char argc)
 void doStatus(char** argv, char argc)
 {
 	unsigned int status;
-	AMBILIGHT_COMPONENT = 15;
+	AMBILIGHT_ADDR_HIGH = 0x18;
+	AMBILIGHT_ADDR_LOW = 0;
 	asm("nop");
 	status = AMBILIGHT_DATA;
 	printf("status: %d\n", status);
@@ -385,19 +448,24 @@ void doResult(char** argv, char argc)
 		unsigned int cr;
 		unsigned int cb;
 		unsigned int y;
-		AMBILIGHT_LIGHT = light;
-		AMBILIGHT_COMPONENT = 15;
+		AMBILIGHT_ADDR_HIGH = 0x18;
+		AMBILIGHT_ADDR_LOW = 0x00;
 		asm("nop");
 		do { cr = AMBILIGHT_DATA; } while((cr & 1) == 0);
-		AMBILIGHT_COMPONENT = 8;
+
+		light <<= 2;
+		AMBILIGHT_ADDR_HIGH = 0x10 | (light >> 8); 
+		AMBILIGHT_ADDR_LOW = light;
 		asm("nop");
 		cr = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 9;
+		AMBILIGHT_ADDR_LOW = light + 1;
 		asm("nop");
 		cb = AMBILIGHT_DATA;
-		AMBILIGHT_COMPONENT = 10;
+		AMBILIGHT_ADDR_LOW = light + 2;
 		asm("nop");
 		y = AMBILIGHT_DATA;
+		light >>= 2;
+
 		printf("%d: %d %d %d\n", light, cr, cb, y);
 	}
 }
@@ -436,19 +504,10 @@ void doConfig(char** argv, char argc)
 	for(i = 0; pgm_read_dword(&g_lightTable[i]) != 0xffffffff; ++i)
 	{
 		unsigned long light = pgm_read_dword(&g_lightTable[i]);
-		AMBILIGHT_LIGHT = i;
-		AMBILIGHT_COMPONENT = 0;
-		AMBILIGHT_DATA = LIGHT_XMIN(light);
-		AMBILIGHT_COMPONENT = 1;
-		AMBILIGHT_DATA = LIGHT_XMAX(light);
-		AMBILIGHT_COMPONENT = 2;
-		AMBILIGHT_DATA = LIGHT_YMIN(light);
-		AMBILIGHT_COMPONENT = 3;
-		AMBILIGHT_DATA = LIGHT_YMAX(light);
-		AMBILIGHT_COMPONENT = 4;
-		AMBILIGHT_DATA = LIGHT_SHIFT(light);
-		AMBILIGHT_COMPONENT = 5;
-		AMBILIGHT_DATA = LIGHT_OUTPUT(light);
+		setLight(i, 
+		         LIGHT_XMIN(light), LIGHT_XMAX(light),
+		         LIGHT_YMIN(light), LIGHT_YMIN(light),
+		         LIGHT_SHIFT(light), LIGHT_OUTPUT(light));
 		if(!silent)
 			printf("OK\n");
 	}
@@ -521,20 +580,20 @@ int main()
 
 	printf_register(serial_putchar);
 	
-	printf("waiting...");
+	//printf("waiting...");
 
 	// Wait a short while
 	for(i = 0; i < 10000; ++i)
 		asm volatile ("nop");
 
-	printf("configuring...");
+	//printf("configuring...");
 
-	i2c_init();
-	argv[0] = "1";
-	argc = 1;
-	doConfig(argv, argc);
+	//i2c_init();
+	//argv[0] = "1";
+	//argc = 1;
+	//doConfig(argv, argc);
 
-	printf("done.\n");
+	//printf("done.\n");
 
 	while (1)
 	{

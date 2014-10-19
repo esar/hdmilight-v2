@@ -32,6 +32,10 @@ use ieee.numeric_std.all;
 
 entity resultDelay is
     Port ( clk : in  STD_LOGIC;
+	        cfg_we : in STD_LOGIC;
+			  cfg_addr : in STD_LOGIC_VECTOR (1 downto 0);
+			  cfg_din : in STD_LOGIC_VECTOR (7 downto 0);
+			  cfg_dout : out STD_LOGIC_VECTOR (7 downto 0);
            in_vblank : in  STD_LOGIC;
            in_addr : out  STD_LOGIC_VECTOR (8 downto 0);
            in_data : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -42,8 +46,8 @@ end resultDelay;
 
 architecture Behavioral of resultDelay is
 
-signal delay_frames : std_logic_vector(2 downto 0) := "010";
-signal delay_ticks : std_logic_vector(23 downto 0) := "000000000000001111101000";
+signal delay_frames : std_logic_vector(7 downto 0);
+signal delay_ticks : std_logic_vector(23 downto 0);
 
 signal lastvblank : std_logic;
 signal start : std_logic;
@@ -82,6 +86,17 @@ delayRam : entity work.blockram
     b_dout => ram_data_out
   );
 
+configRegisters : entity work.resultDelayRegisters
+	PORT MAP (
+		clk => clk,
+		we => cfg_we,
+		addr => cfg_addr,
+		din => cfg_din,
+		dout => cfg_dout,
+		frameCount => delay_frames,
+		tickCount => delay_ticks
+	);
+
 -- generate start pulse when incoming vblank goes high
 process(clk)
 begin
@@ -112,7 +127,7 @@ end process;
 process(clk)
 begin
 	if(rising_edge(clk)) then
-		count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delay_frames));
+		count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delay_frames(2 downto 0)));
 	end if;
 end process;
 
