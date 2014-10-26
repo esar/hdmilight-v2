@@ -151,7 +151,7 @@ signal vblank : std_logic;
 signal ambilightCfgWe : std_logic;
 signal ambilightCfgAddrLow : std_logic_vector(7 downto 0);
 signal ambilightCfgAddrHigh : std_logic_vector(7 downto 0);
-signal ambilightCfgAddr : std_logic_vector(12 downto 0);
+signal ambilightCfgAddr : std_logic_vector(15 downto 0);
 signal ambilightCfgDataIn : std_logic_vector(7 downto 0);
 signal ambilightCfgDataOut : std_logic_vector(7 downto 0);
 signal driverOutput : std_logic_vector(7 downto 0);
@@ -377,6 +377,6 @@ viddata_r <= ADV_P(7 downto 0);
 hblank <= not ADV_HS;
 vblank <= not ADV_VS;
 
-ambilightCfgAddr <= ambilightCfgAddrHigh(4 downto 0) & ambilightCfgAddrLow;
+ambilightCfgAddr <= ambilightCfgAddrHigh & ambilightCfgAddrLow;
 
 end Behavioral;

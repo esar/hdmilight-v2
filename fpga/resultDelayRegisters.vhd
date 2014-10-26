@@ -1,22 +1,25 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+--
+-- Copyright (C) 2014 Stephen Robinson
+--
+-- This file is part of HDMI-Light
+--
+-- HDMI-Light is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 2 of the License, or
+-- (at your option) any later version.
+--
+-- HDMI-Light is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
 -- 
--- Create Date:    11:40:08 10/19/2014 
--- Design Name: 
--- Module Name:    resultDelayRegisters - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- You should have received a copy of the GNU General Public License
+-- along with this code (see the file names COPING).  
+-- If not, see <http://www.gnu.org/licenses/>.
 --
 ----------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_unsigned.all;
@@ -46,7 +49,7 @@ architecture Behavioral of resultDelayRegisters is
 constant ADDR_WIDTH : integer := 2;
 constant DATA_WIDTH : integer := 8;
 type mem_type is array ( (2**ADDR_WIDTH)-1 downto 0 ) of std_logic_vector(DATA_WIDTH-1 downto 0);
-shared variable mem : mem_type := ("00000010", "00000000", "00000011", "11101000");
+shared variable mem : mem_type := ("11101000", "00000011", "00000000", "00000010");
 
 begin
 

@@ -1,9 +1,9 @@
-MAX_IMAGE_SIZE = 8192
+MAX_IMAGE_SIZE = 16384
 
 PRG            = image
 OBJ            = main.o serial.o printf.o timer.o i2c.o
 
-MCU_TARGET     = atmega8
+MCU_TARGET     = atmega16
 OPTIMIZE       = -Os
 
 DEFS           = 
@@ -17,7 +17,7 @@ CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 LDFLAGS       = -Wl,-Map,$(PRG).map
 
 # Strip unused code
-CFLAGS += -ffunction-sections -fno-unroll-loops -fno-inline
+CFLAGS += -ffunction-sections -fno-unroll-loops -fno-inline -fno-jump-tables
 LDFLAGS += -Wl,-gc-sections  
 
 #LDFLAGS += --cref -nostartfiles

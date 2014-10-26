@@ -1,20 +1,22 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+--
+-- Copyright (C) 2014 Stephen Robinson
+--
+-- This file is part of HDMI-Light
+--
+-- HDMI-Light is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 2 of the License, or
+-- (at your option) any later version.
+--
+-- HDMI-Light is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
 -- 
--- Create Date:    13:16:01 10/19/2014 
--- Design Name: 
--- Module Name:    lightConfigRam - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- You should have received a copy of the GNU General Public License
+-- along with this code (see the file names COPING).  
+-- If not, see <http://www.gnu.org/licenses/>.
 --
 ----------------------------------------------------------------------------------
 
@@ -39,8 +41,8 @@ port (
 end lightConfigRam;
  
 architecture Behavioral of lightConfigRam is
-	 type mem_t is array (0 to 2047) of std_logic_vector(7 downto 0);
-    shared variable mem : mem_t := (others => "11111111");
+	type mem_t is array (0 to 2047) of std_logic_vector(7 downto 0);
+	shared variable mem : mem_t := (others => "11111111");
 begin
  
 -- Port A

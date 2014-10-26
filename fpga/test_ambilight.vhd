@@ -44,11 +44,10 @@ ARCHITECTURE behavior OF test_ambilight IS
          vblank : IN  std_logic;
          cfgclk : IN  std_logic;
          cfgwe : IN  std_logic;
-         cfglight : IN  std_logic_vector(7 downto 0);
-         cfgcomponent : IN  std_logic_vector(3 downto 0);
+         cfgaddr : IN  std_logic_vector(13 downto 0);
          cfgdatain : IN  std_logic_vector(7 downto 0);
          cfgdataout : OUT  std_logic_vector(7 downto 0);
-         output : OUT  std_logic
+         output : OUT  std_logic_vector(7 downto 0)
         );
     END COMPONENT;
     
@@ -62,13 +61,12 @@ ARCHITECTURE behavior OF test_ambilight IS
    signal vblank : std_logic := '0';
    signal cfgclk : std_logic := '0';
    signal cfgwe : std_logic := '0';
-   signal cfglight : std_logic_vector(7 downto 0) := (others => '0');
-   signal cfgcomponent : std_logic_vector(3 downto 0) := (others => '0');
+   signal cfgaddr : std_logic_vector(13 downto 0) := (others => '0');
    signal cfgdatain : std_logic_vector(7 downto 0) := (others => '0');
 
  	--Outputs
    signal cfgdataout : std_logic_vector(7 downto 0);
-   signal output : std_logic;
+   signal output : std_logic_vector(7 downto 0);
 
    -- Clock period definitions
    constant vidclk_period : time := 10 ns;
@@ -86,8 +84,7 @@ BEGIN
           vblank => vblank,
           cfgclk => cfgclk,
           cfgwe => cfgwe,
-          cfglight => cfglight,
-          cfgcomponent => cfgcomponent,
+          cfgaddr => cfgaddr,
           cfgdatain => cfgdatain,
           cfgdataout => cfgdataout,
           output => output
@@ -119,32 +116,31 @@ BEGIN
 
       wait for vidclk_period*10;
 
-		cfglight <= (others => '0');
-		cfgcomponent <= x"0";
+		cfgaddr <= "00000000000000";
 		wait for cfgclk_period*2;
 		cfgdatain <= x"00";
 		cfgwe <= '1';
 		wait for cfgclk_period*2;
 		
-		cfgcomponent <= x"1";
+		cfgaddr <= "00000000000001";
 		wait for cfgclk_period*2;
 		cfgdatain <= x"07";
 		cfgwe <= '1';
 		wait for cfgclk_period*2;
 		
-		cfgcomponent <= x"2";
+		cfgaddr <= "00000000000010";
 		wait for cfgclk_period*2;
 		cfgdatain <= x"00";
 		cfgwe <= '1';
 		wait for cfgclk_period*2;
 		
-		cfgcomponent <= x"3";
+		cfgaddr <= "00000000000011";
 		wait for cfgclk_period*2;
 		cfgdatain <= x"07";
 		cfgwe <= '1';
 		wait for cfgclk_period*2;
 		
-		cfgcomponent <= x"4";
+		cfgaddr <= "00000000000100";
 		wait for cfgclk_period*2;
 		cfgdatain <= x"06";
 		cfgwe <= '1';

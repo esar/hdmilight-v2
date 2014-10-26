@@ -4,7 +4,8 @@ syntax: glob
 *.bin
 *.elf
 *.lst
-*.mem
+firmware/image.mem
+combined.mem
 fpga/progmem_bd.bmm
 tools/makemem
 
@@ -51,4 +52,11 @@ _ngo
 *.xrpt
 *.xml
 *.gise
-
+*.exe
+*.wdb
+*.xmsgs
+*.cmd
+*.ini
+*.vdbl
+*.vdbx
+fpga/isim/*

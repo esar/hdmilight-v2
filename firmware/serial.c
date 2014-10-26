@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <stdio.h>
 #include "serial.h"
 
 //-----------------------------------------------------------------
@@ -12,13 +13,36 @@
 	#define UART_RX_ERROR	(1<<4)
 #define UART_UDR	_SFR_IO8(0x21)
 
+
+int serial_stdio_rx(FILE* stream)
+{
+	// Read character in from UART0 Recieve Buffer and return
+	if (serial_haschar())
+		return UART_UDR;
+	else
+		return -1;
+}
+
+int serial_stdio_tx(char c, FILE* stream)
+{
+	if (c == '\n')
+		serial_stdio_tx('\r', stream);
+
+	UART_UDR = c;
+	while (UART_USR & UART_TX_BUSY);
+
+	return 0;
+}
+
 //-------------------------------------------------------------
 // serial_init: 
 //-------------------------------------------------------------
-void serial_init (void)           
-{      
-
+void serial_init (void)
+{
+	static FILE serial_stream = FDEV_SETUP_STREAM(serial_stdio_tx, serial_stdio_rx, _FDEV_SETUP_RW);
+	stdout = stdin = &serial_stream;
 }
+
 //-------------------------------------------------------------
 // serial_putchar: Write character to Serial Port (used by printf)
 //-------------------------------------------------------------

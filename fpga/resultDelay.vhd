@@ -1,60 +1,50 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+--
+-- Copyright (C) 2014 Stephen Robinson
+--
+-- This file is part of HDMI-Light
+--
+-- HDMI-Light is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 2 of the License, or
+-- (at your option) any later version.
+--
+-- HDMI-Light is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
 -- 
--- Create Date:    17:04:21 10/18/2014 
--- Design Name: 
--- Module Name:    resultDelay - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- You should have received a copy of the GNU General Public License
+-- along with this code (see the file names COPING).  
+-- If not, see <http://www.gnu.org/licenses/>.
 --
 ----------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity resultDelay is
     Port ( clk : in  STD_LOGIC;
-	        cfg_we : in STD_LOGIC;
-			  cfg_addr : in STD_LOGIC_VECTOR (1 downto 0);
-			  cfg_din : in STD_LOGIC_VECTOR (7 downto 0);
-			  cfg_dout : out STD_LOGIC_VECTOR (7 downto 0);
            in_vblank : in  STD_LOGIC;
            in_addr : out  STD_LOGIC_VECTOR (8 downto 0);
            in_data : in  STD_LOGIC_VECTOR (31 downto 0);
            out_vblank : out  STD_LOGIC;
-           out_addr : in  STD_LOGIC_VECTOR (7 downto 0);
-           out_data : out  STD_LOGIC_VECTOR (31 downto 0));
+           out_addr : in  STD_LOGIC_VECTOR (8 downto 0);
+           out_data : out  STD_LOGIC_VECTOR (31 downto 0);
+			  delayFrames : in std_logic_vector(7 downto 0);
+			  delayTicks  : in std_logic_vector(23 downto 0)
+			  );
 end resultDelay;
 
 architecture Behavioral of resultDelay is
-
-signal delay_frames : std_logic_vector(7 downto 0);
-signal delay_ticks : std_logic_vector(23 downto 0);
 
 signal lastvblank : std_logic;
 signal start : std_logic;
 signal enable : std_logic;
 signal count : std_logic_vector(8 downto 0);
 signal tickcount : std_logic_vector(23 downto 0);
-signal count_ram_in : std_logic_vector(2 downto 0);
+signal count_ram_in : std_logic_vector(2 downto 0) := "000";
 signal count_ram_out : std_logic_vector(2 downto 0);
 
 signal ram_wr_in : std_logic;
@@ -86,16 +76,6 @@ delayRam : entity work.blockram
     b_dout => ram_data_out
   );
 
-configRegisters : entity work.resultDelayRegisters
-	PORT MAP (
-		clk => clk,
-		we => cfg_we,
-		addr => cfg_addr,
-		din => cfg_din,
-		dout => cfg_dout,
-		frameCount => delay_frames,
-		tickCount => delay_ticks
-	);
 
 -- generate start pulse when incoming vblank goes high
 process(clk)
@@ -117,19 +97,12 @@ begin
 	if(rising_edge(clk)) then
 		if(start = '1') then
 			count_ram_in <= std_logic_vector(unsigned(count_ram_in) + 1);
-		else
-			count_ram_in <= count_ram_in;
 		end if;
 	end if;
 end process;
 
 -- set the read address to the write address minus the required delay (in whole frames)
-process(clk)
-begin
-	if(rising_edge(clk)) then
-		count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delay_frames(2 downto 0)));
-	end if;
-end process;
+count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delayFrames(2 downto 0)));
 
 -- counter for copying the 256 values from the current set of results to the delay ram
 process(clk)
@@ -150,7 +123,7 @@ process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(enable = '1') then
-			tickcount <= delay_ticks;
+			tickcount <= delayTicks;
 		elsif(unsigned(tickcount) /= 0) then
 			tickcount <= std_logic_vector(unsigned(tickcount) - 1);
 		end if;
@@ -159,14 +132,15 @@ end process;
 
 enable <= not count(8);
 
-out_vblank <= '1' when unsigned(tickcount) = 0 else '0';
+-- signal out_vblank after copy has finished and tickcount has reached zero
+out_vblank <= '1' when unsigned(tickcount) = 0 and enable = '0' else '0';
 
 in_addr <= "0" & count(7 downto 0);
 ram_addr_in <= count_ram_in & count(7 downto 0);
 ram_data_in <= in_data;
 ram_wr_in <= enable;
 
-ram_addr_out <= count_ram_out & out_addr;
+ram_addr_out <= count_ram_out & out_addr(7 downto 0);
 out_data <= ram_data_out;
 
 end Behavioral;

@@ -17,3 +17,46 @@ ADDRESS_SPACE progmem RAMB16 [0x00:0x3FFF]
   END_BUS_BLOCK;
 END_ADDRESS_SPACE;
 
+ADDRESS_SPACE outputmap RAMB16 [0x4000:0x5FFF]
+  BUS_BLOCK
+	 ambilight/outputMapRam/Mram_memOdd1 [7:0];
+    ambilight/outputMapRam/Mram_memEven1 [15:8];
+  END_BUS_BLOCK;
+  BUS_BLOCK
+	 ambilight/outputMapRam/Mram_memOdd2 [7:0];
+    ambilight/outputMapRam/Mram_memEven2 [15:8];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+ADDRESS_SPACE colourcoef RAMB16 [0x6000:0x6FFF]
+  BUS_BLOCK
+    ambilight/colourCoefRam/Mram_memOdd1 [7:0];
+	 ambilight/colourCoefRam/Mram_memEven1 [15:8];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+ADDRESS_SPACE area RAMB16 [0x7000:0x77FF]
+  BUS_BLOCK
+    ambilight/lightAverager/configRam/Mram_mem [7:0];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+ADDRESS_SPACE gammar RAMB16 [0x8000:0x87FF]
+  BUS_BLOCK
+    ambilight/gammaTableRRam/Mram_mem [7:0];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+ADDRESS_SPACE gammag RAMB16 [0x8800:0x8FFF]
+  BUS_BLOCK
+    ambilight/gammaTableGRam/Mram_mem [7:0];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+ADDRESS_SPACE gammab RAMB16 [0x9000:0x97FF]
+  BUS_BLOCK
+    ambilight/gammaTableBRam/Mram_mem [7:0];
+  END_BUS_BLOCK;
+END_ADDRESS_SPACE;
+
+

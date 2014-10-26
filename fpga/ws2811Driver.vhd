@@ -35,9 +35,9 @@ use ieee.numeric_std.all;
 
 entity ws2811Driver is
     Port ( clk : in  STD_LOGIC;
+	        idle : out STD_LOGIC;
            load : in  STD_LOGIC;
            datain : in  STD_LOGIC_VECTOR (23 downto 0);
-           busy : out  STD_LOGIC := '0';
            dataout : out  STD_LOGIC);
 end ws2811Driver;
 
@@ -46,7 +46,6 @@ architecture Behavioral of ws2811Driver is
 signal bitcount : std_logic_vector(4 downto 0);
 signal subbitcount : std_logic_vector(4 downto 0);
 
---signal count       : std_logic_vector(9 downto 0) := "1011111000";
 signal countEnable : std_logic;
 
 signal shiftData   : std_logic_vector(23 downto 0);
@@ -73,17 +72,6 @@ begin
 	end if;
 end process;
 
---process(clk)
---begin
---	if(rising_edge(clk)) then
---		if(load = '1') then
---			count <= (others => '0');
---		elsif(countEnable = '1') then
---			count <= std_logic_vector(unsigned(count) + 1);
---		end if;
---	end if;
---end process;
-
 process(clk)
 begin
 	if(rising_edge(clk)) then
@@ -102,19 +90,9 @@ begin
 	end if;
 end process;
 
-process(clk)
-begin
-	if(rising_edge(clk)) then
-		if(load = '1') then
-			busy <= '1';
-		elsif (bitcount = "10111" and subbitcount = "10001") then
-			busy <= '0';
-		end if;
-	end if;
-end process;
-
 -- freeze counter when it reaches 24 bytes (24*4 clocks)
 countEnable <= '0' when bitcount = "10111" and subbitcount = "10011" else '1';
+idle <= not countEnable;
 
 -- enable shift every 4 clocks
 shiftEnable <= '1' when subbitcount = "10011" else '0';
