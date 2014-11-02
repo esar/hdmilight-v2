@@ -46,6 +46,8 @@ signal count : std_logic_vector(8 downto 0);
 signal tickcount : std_logic_vector(23 downto 0);
 signal count_ram_in : std_logic_vector(2 downto 0) := "000";
 signal count_ram_out : std_logic_vector(2 downto 0);
+signal done : std_logic;
+signal lastdone : std_logic;
 
 signal ram_wr_in : std_logic;
 signal ram_addr_in : std_logic_vector(10 downto 0);
@@ -133,7 +135,17 @@ end process;
 enable <= not count(8);
 
 -- signal out_vblank after copy has finished and tickcount has reached zero
-out_vblank <= '1' when unsigned(tickcount) = 0 and enable = '0' else '0';
+done <= '1' when unsigned(tickcount) = 0 and enable = '0' else '0';
+process(clk)
+begin
+	if(rising_edge(clk)) then
+		out_vblank <= '0';
+		if(done = '1' and lastdone = '0') then
+			out_vblank <= '1';
+		end if;
+		lastdone <= done;
+	end if;
+end process;
 
 in_addr <= "0" & count(7 downto 0);
 ram_addr_in <= count_ram_in & count(7 downto 0);
