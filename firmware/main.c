@@ -692,25 +692,42 @@ void cmdGetStatus(uint8_t argc, char** argv)
 
 void cmdGetResult(uint8_t argc, char** argv)
 {
-	if(argc == 2)
+	if(argc == 2 || argc == 3)
 	{
-		uint8_t index, maxIndex;
+		uint8_t index, minIndex, maxIndex, repeat;
 
-		getrange(argv[1], &index, &maxIndex);
+		if(argc == 3)
+			repeat = getint(&argv[2]);
+		else
+			repeat = 1;
+
+		getrange(argv[1], &minIndex, &maxIndex);
+
+		while(repeat--)
+		{
+		index = minIndex;
 		do
 		{
 			uint8_t i;
+			uint16_t address;
+			int value;
+
+			address = AMBILIGHT_BASE_ADDR_RESULT;
+			AMBILIGHT_ADDR_HIGH = address >> 8;
+			AMBILIGHT_ADDR_LOW  = address & 0xff;
+			AMBILIGHT_DATA = index;
+
+			address = AMBILIGHT_BASE_ADDR_STATUS;
+			AMBILIGHT_ADDR_HIGH = address >> 8;
+			AMBILIGHT_ADDR_LOW  = address & 0xff;
+			asm("nop");
+			do { value = AMBILIGHT_DATA; } while((value & 1) == 0);
 
 			printf_P(PSTR("%d: "), index);
-			for(i = 0; i < 4; ++i)
+			for(i = 0; i < 12; ++i)
 			{
-				int value;
-				uint16_t address = AMBILIGHT_BASE_ADDR_STATUS;
-				AMBILIGHT_ADDR_HIGH = address >> 8;
-				AMBILIGHT_ADDR_LOW  = address & 0xff;
-				do { value = AMBILIGHT_DATA; } while((value & 1) == 0);
-
-				address = AMBILIGHT_BASE_ADDR_RESULT + (index * 4) + i;
+				address = AMBILIGHT_BASE_ADDR_RESULT;
+				address += 4 + i;
 				AMBILIGHT_ADDR_HIGH = address >> 8;
 				AMBILIGHT_ADDR_LOW  = address & 0xff;
 				asm("nop");
@@ -720,6 +737,7 @@ void cmdGetResult(uint8_t argc, char** argv)
 			printf_P(PSTR(" \n"));
 
 		} while(index++ < maxIndex);
+		}
 	}
 	//else
 		//printf("err: GR index\n");
@@ -759,7 +777,7 @@ void cmdCfgLight(uint8_t argc, char** argv)
 		unsigned long light = pgm_read_dword(&g_lightTable[i]);
 		setLight(i, 
 		         LIGHT_XMIN(light), LIGHT_XMAX(light),
-		         LIGHT_YMIN(light), LIGHT_YMIN(light),
+		         LIGHT_YMIN(light), LIGHT_YMAX(light),
 		         LIGHT_SHIFT(light), LIGHT_OUTPUT(light));
 		if(!silent)
 			printf_P(PSTR("OK\n"));
@@ -826,6 +844,45 @@ void cmdCfgI2C(uint8_t argc, char** argv)
 			i2c_write(subaddress);
 			i2c_write(data);
 			i2c_stop();
+		}
+	}
+}
+
+void cmdGetAddr(uint8_t argc, char** argv)
+{
+	if(argc == 2)
+	{
+		uint16_t addr;
+		uint8_t  count;
+
+		addr = getint(&argv[1]);
+		count = getint(&argv[2]);
+		while(count--)
+		{
+			AMBILIGHT_ADDR_HIGH = addr >> 8;
+			AMBILIGHT_ADDR_LOW  = addr & 0xff;
+			asm("nop");
+			printf_P(PSTR("%02x "), AMBILIGHT_DATA);
+			++addr;
+		}
+	}
+}
+
+void cmdSetAddr(uint8_t argc, char** argv)
+{
+	if(argc > 2)
+	{
+		uint16_t address = getint(&argv[1]);
+
+		argv += 2;
+		argc -= 2;
+		while(argc > 0)
+		{
+			AMBILIGHT_ADDR_HIGH = address >> 8;
+			AMBILIGHT_ADDR_LOW  = address & 0xff;
+			AMBILIGHT_DATA = getint(&argv[0]);
+			++argv;
+			--argc;
 		}
 	}
 }
@@ -967,6 +1024,8 @@ void cmdCfgAll(uint8_t argc, char** argv)
 }
 
 char cmdBlankUsage[] PROGMEM = "";
+char cmdGetAddrUsage[] PROGMEM = "addr count";
+char cmdSetAddrUsage[] PROGMEM = "addr byte0 [byte1] [...]";
 char cmdGetColourUsage[] PROGMEM = "index row";
 char cmdSetColourUsage[] PROGMEM = "index row Ri Rf Gi Gf Bi Bf";
 char cmdSetDelayUsage[] PROGMEM = "num_frames num_ticks";
@@ -993,6 +1052,8 @@ int main()
 
 	} cmds[] = 
 	{
+		{ "GA", cmdGetAddr,   cmdGetAddrUsage   },
+		{ "SA", cmdSetAddr,   cmdSetAddrUsage   },
 		{ "GC", cmdGetColour, cmdGetColourUsage },
 		{ "SC", cmdSetColour, cmdSetColourUsage },
 		{ "CC", cmdCfgColour, cmdBlankUsage     },

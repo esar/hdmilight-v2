@@ -126,6 +126,13 @@ signal resultDelayCfgWe   : std_logic;
 signal resultDelayFrameCount : std_logic_vector(7 downto 0);
 signal resultDelayTickCount  : std_logic_vector(23 downto 0);
 
+signal storeResult : std_logic;
+signal storeResultDelayed : std_logic;
+signal resultLatchAddr : std_logic_vector(31 downto 0);
+signal delayedResultLatched : std_logic_vector(31 downto 0);
+signal driverResultLatched : std_logic_vector(31 downto 0);
+signal resultCfgWe     : std_logic;
+
 signal cfgArea   : std_logic;
 signal cfgOutput : std_logic;
 signal cfgCoef   : std_logic;
@@ -292,22 +299,66 @@ resultDelayRegisters : entity work.resultDelayRegisters
 			tickCount  => resultDelayTickCount
 		);
 
+process(cfgclk)
+begin
+	if(rising_edge(cfgclk)) then
+		storeResult <= '0';
+		storeResultDelayed <= '0';
+		if(resultAddr(7 downto 0) = resultLatchAddr(7 downto 0)) then
+			storeResult <= '1';
+		end if;
+		if(delayedResultAddr(7 downto 0) = resultLatchAddr(7 downto 0)) then
+			storeResultDelayed <= '1';
+		end if;
+	end if;
+end process;
 
 process(cfgclk)
 begin
 	if(rising_edge(cfgclk)) then
 		statusLatched <= "000000" & hblank & vblank;
-		if(resultAddr(7 downto 0) = cfgaddr(9 downto 2)) then
+		if(storeResult = '1') then
 			resultLatched <= resultData;
+		end if;
+		if(storeResultDelayed = '1') then
+			delayedResultLatched <= delayedResultData;
+		end if;
+		if(outputMapAddr = resultLatchAddr(11 downto 0) and driverStart /= "00000000") then
+			driverResultLatched <= "00000000" & driverData;
 		end if;
 	end if;
 end process;
 
-with cfgaddr(1 downto 0) select resultCfgDout <=
-	resultLatched(7 downto 0) when "00",
-	resultLatched(15 downto 8) when "01",
-	resultLatched(23 downto 16) when "10",
-	resultLatched(31 downto 24) when "11";
+process(cfgclk)
+begin
+	if(rising_edge(cfgclk)) then
+		if(resultCfgWe = '1') then
+			if(cfgaddr(10 downto 0) = "00000000000") then
+				resultLatchAddr(7 downto 0) <= cfgdatain;
+			elsif(cfgaddr(10 downto 0) = "00000000001") then
+				resultLatchAddr(15 downto 8) <= cfgdatain;
+			end if;
+		end if;
+	end if;
+end process;
+
+with cfgaddr(3 downto 0) select resultCfgDout <=
+	resultLatchAddr( 7 downto 0)       when "0000",
+	resultLatchAddr(15 downto 8)       when "0001",
+	"00000000"                         when "0010",
+	"00000000"                         when "0011",
+	resultLatched(7 downto 0)          when "0100",
+	resultLatched(15 downto 8)         when "0101",
+	resultLatched(23 downto 16)        when "0110",
+	resultLatched(31 downto 24)        when "0111",
+	delayedResultLatched( 7 downto  0) when "1000",
+	delayedResultLatched(15 downto  8) when "1001",
+	delayedResultLatched(23 downto 16) when "1010",
+	delayedResultLatched(31 downto 24) when "1011",
+	driverResultLatched( 7 downto  0)  when "1100",
+	driverResultLatched(15 downto  8)  when "1101",
+	driverResultLatched(23 downto 16)  when "1110",
+	driverResultLatched(31 downto 24)  when "1111";
 
 cfgOutput <= '1' when cfgaddr(15 downto 11) = "00000" or         -- 0x0000 - 0x1FFF
                       cfgaddr(15 downto 11) = "00001" or
@@ -344,6 +395,7 @@ gammaTableRCfgWr   <= cfgwe when cfgGammaR = '1' else '0';
 gammaTableGCfgWr   <= cfgwe when cfgGammaG = '1' else '0';
 gammaTableBCfgWr   <= cfgwe when cfgGammaB = '1' else '0';
 resultDelayCfgWe   <= cfgwe when cfgDelay  = '1' else '0';
+resultCfgWe        <= cfgwe when cfgResult = '1' else '0';
 	
 outputMapCfgDin    <= cfgdatain;
 colourCoefCfgDin   <= cfgdatain;
