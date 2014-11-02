@@ -106,7 +106,7 @@ begin
 	end if;
 end process;
 
-a_sel <= a_addr(11) & a_addr(0);
+a_sel <= a_addr(12) & a_addr(0);
 with a_sel select a_dout <=
 	a_doutOdd1 when "00",
 	a_doutEven1 when "01",
@@ -117,31 +117,31 @@ with a_sel select a_dout <=
 process(b_clk)
 begin
 	if(rising_edge(b_clk)) then
-		b_data1( 7 downto  0) <= memOdd1(conv_integer(b_addr(8 downto 0)));
+		b_data1( 7 downto  0) <= memOdd1(conv_integer(b_addr(10 downto 0)));
 	end if;
 end process;
 
 process(b_clk)
 begin
 	if(rising_edge(b_clk)) then
-		b_data2( 7 downto  0) <= memOdd2(conv_integer(b_addr(8 downto 0)));
+		b_data2( 7 downto  0) <= memOdd2(conv_integer(b_addr(10 downto 0)));
 	end if;
 end process;
 
 process(b_clk)
 begin
 	if(rising_edge(b_clk)) then
-		b_data1(15 downto  8) <= memEven1(conv_integer(b_addr(8 downto 0) & "00"));
+		b_data1(15 downto  8) <= memEven1(conv_integer(b_addr(10 downto 0)));
 	end if;
 end process;
  
 process(b_clk)
 begin
 	if(rising_edge(b_clk)) then
-		b_data2(15 downto  8) <= memEven2(conv_integer(b_addr(8 downto 0) & "00"));
+		b_data2(15 downto  8) <= memEven2(conv_integer(b_addr(10 downto 0)));
 	end if;
 end process;
 
-b_data <= b_data1 when b_addr(9) = '0' else b_data2;
+b_data <= b_data1 when b_addr(11) = '0' else b_data2;
 	
 end Behavioral;
