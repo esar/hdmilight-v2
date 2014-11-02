@@ -146,8 +146,8 @@ signal vidclk : std_logic;
 signal viddata_r : std_logic_vector(7 downto 0);
 signal viddata_g : std_logic_vector(7 downto 0);
 signal viddata_b : std_logic_vector(7 downto 0);
-signal hblank : std_logic;
-signal vblank : std_logic;
+signal hblank : std_logic_vector(1 downto 0);
+signal vblank : std_logic_vector(1 downto 0);
 signal ambilightCfgWe : std_logic;
 signal ambilightCfgAddrLow : std_logic_vector(7 downto 0);
 signal ambilightCfgAddrHigh : std_logic_vector(7 downto 0);
@@ -162,7 +162,7 @@ begin
 -- Instantiation
 -----------------------------------------------
 
-ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank, vblank,
+ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank(1), vblank(1),
                                       CLK16,
 												  ambilightCfgWe,
 												  ambilightCfgAddr,
@@ -363,6 +363,14 @@ begin
 	end if;
 end process;
 
+process(ADV_LLC)
+begin
+	if(rising_edge(ADV_LLC)) then
+		hblank <= hblank(0) & (not ADV_HS);
+		vblank <= vblank(0) & (not ADV_VS);
+	end if;
+end process;
+
 -----------------------------------------------
 -- Combinatorial
 ----------------------------------------------- 
@@ -382,8 +390,8 @@ vidclk <= ADV_LLC;
 --viddata_g <= ADV_P(23 downto 16);
 --viddata_b <= ADV_P(15 downto 8);
 --viddata_r <= ADV_P(7 downto 0);
-hblank <= not ADV_HS;
-vblank <= not ADV_VS;
+--hblank <= not ADV_HS;
+--vblank <= not ADV_VS;
 
 ambilightCfgAddr <= ambilightCfgAddrHigh & ambilightCfgAddrLow;
 

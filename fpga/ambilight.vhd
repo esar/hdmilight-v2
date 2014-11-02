@@ -25,7 +25,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -76,6 +76,7 @@ signal resultCfgDout : std_logic_vector(7 downto 0);
 signal statusLatched : std_logic_vector(7 downto 0);
 
 
+signal vblank_cfgclk : std_logic_vector(1 downto 0);
 signal vblanklast : std_logic;
 signal startDistribution : std_logic;
 signal delayedStartDistribution : std_logic;
@@ -144,6 +145,7 @@ signal cfgStatus : std_logic;
 signal cfgDelay  : std_logic;
 signal cfgVect   : std_logic_vector(8 downto 0);
 
+signal disabledOutput : std_logic_vector(7 downto 0);
 begin
 
 hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, viddata_r, viddata_g, viddata_b,
@@ -160,11 +162,18 @@ lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
 process(cfgclk)
 begin
 	if(rising_edge(cfgclk)) then
+		vblank_cfgclk <= vblank_cfgclk(0) & vblank;
+	end if;
+end process;
+
+process(cfgclk)
+begin
+	if(rising_edge(cfgclk)) then
 		startDistribution <= '0';
-		if(vblank = '1' and vblanklast = '0') then
+		if(vblank_cfgclk(1) = '1' and vblanklast = '0') then
 			startDistribution <= '1';
 		end if;
-		vblanklast <= vblank;
+		vblanklast <= vblank_cfgclk(1);
 	end if;
 end process;
 		
@@ -198,6 +207,9 @@ ws2811Driver5 : entity work.ws2811Driver port map(cfgclk, driverReady(5), driver
 ws2811Driver6 : entity work.ws2811Driver port map(cfgclk, driverReady(6), driverStart(6), driverData, output(6));
 ws2811Driver7 : entity work.ws2811Driver port map(cfgclk, driverReady(7), driverStart(7), driverData, output(7));
 
+--output(5) <= delayedStartDistribution;
+--output(6) <= startDistribution;
+--output(7) <= vblank;
 
 outputMapRam : entity work.outputconfigRam
 	 port map(
