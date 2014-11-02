@@ -354,6 +354,14 @@ begin
 	end if;
 end process;
 
+process(ADV_LLC)
+begin
+	if(rising_edge(ADV_LLC)) then
+		viddata_g <= ADV_P(23 downto 16);
+		viddata_b <= ADV_P(15 downto  8);
+		viddata_r <= ADV_P( 7 downto  0);
+	end if;
+end process;
 
 -----------------------------------------------
 -- Combinatorial
@@ -371,9 +379,9 @@ ADV_SDA <= PORTD(6) when DDRD(6) = '1' else 'Z';
 PIND <= ADV_SCL & ADV_SDA & "000000";
 
 vidclk <= ADV_LLC;
-viddata_g <= ADV_P(23 downto 16);
-viddata_b <= ADV_P(15 downto 8);
-viddata_r <= ADV_P(7 downto 0);
+--viddata_g <= ADV_P(23 downto 16);
+--viddata_b <= ADV_P(15 downto 8);
+--viddata_r <= ADV_P(7 downto 0);
 hblank <= not ADV_HS;
 vblank <= not ADV_VS;
 
