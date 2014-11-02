@@ -357,6 +357,13 @@ void setColour(uint8_t index, uint8_t row, int ri, int rf, int gi, int gf, int b
 	// +-\/+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |   |   byte 6      |    byte 5     |    byte 4     |    byte 3     |    byte 2     |    byte 1     |    byte 0     |
 
+	ri &= 0x1ff;
+	rf &= 0x1ff;
+	gi &= 0x1ff;
+	gf &= 0x1ff;
+	bi &= 0x1ff;
+	bf &= 0x1ff;
+
 	bits = rf;
 	bytes[0] = bits & 0xff;
 	bits = (bits >> 8) | (ri << 1);
