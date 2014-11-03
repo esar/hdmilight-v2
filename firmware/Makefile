@@ -1,7 +1,17 @@
 MAX_IMAGE_SIZE = 16384
 
 PRG            = image
-OBJ            = main.o serial.o printf.o timer.o i2c.o
+OBJ            = main.o serial.o timer.o i2c.o \
+                 cmd_addr.o    \
+                 cmd_colour.o  \
+                 cmd_delay.o   \
+                 cmd_gamma.o   \
+                 cmd_i2c.o     \
+                 cmd_light.o   \
+                 cmd_output.o  \
+                 cmd_port.o    \
+                 cmd_result.o  \
+                 cmd_status.o
 
 MCU_TARGET     = atmega16
 OPTIMIZE       = -Os
