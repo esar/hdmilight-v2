@@ -230,7 +230,7 @@ int getint(char** str)
 {
 	char* s = *str;
 	uint8_t neg = 0;
-	uint8_t x = 0;
+	uint16_t x = 0;
 
 	if(s[0] == '-')
 	{
@@ -300,7 +300,7 @@ char cmdGetAddrUsage[] PROGMEM = "addr count";
 char cmdSetAddrUsage[] PROGMEM = "addr byte0 [byte1] [...]";
 char cmdGetColourUsage[] PROGMEM = "index row";
 char cmdSetColourUsage[] PROGMEM = "index row Ri Rf Gi Gf Bi Bf";
-char cmdSetDelayUsage[] PROGMEM = "num_frames num_ticks";
+char cmdSetDelayUsage[] PROGMEM = "num_frames num_ticks smooth_ratio";
 char cmdGetGammaUsage[] PROGMEM = "table channel index";
 char cmdSetGammaUsage[] PROGMEM = "table channel index value";
 char cmdGetI2CUsage[] PROGMEM = "addr";

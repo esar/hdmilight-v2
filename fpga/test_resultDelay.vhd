@@ -49,7 +49,8 @@ ARCHITECTURE behavior OF test_resultDelay IS
          out_addr : IN  std_logic_vector(8 downto 0);
          out_data : OUT  std_logic_vector(31 downto 0);
          delayFrames : IN  std_logic_vector(7 downto 0);
-         delayTicks : IN  std_logic_vector(23 downto 0)
+         delayTicks : IN  std_logic_vector(23 downto 0);
+			temporalSmoothingRatio : IN std_logic_vector(8 downto 0)
         );
     END COMPONENT;
     
@@ -61,6 +62,7 @@ ARCHITECTURE behavior OF test_resultDelay IS
    signal out_addr : std_logic_vector(8 downto 0) := (others => '0');
    signal delayFrames : std_logic_vector(7 downto 0) := x"01";
    signal delayTicks : std_logic_vector(23 downto 0) := x"000020";
+	signal temporalSmoothingRatio : std_logic_vector(8 downto 0) := "100000000";
 
  	--Outputs
    signal in_addr : std_logic_vector(8 downto 0);
@@ -84,7 +86,8 @@ BEGIN
           out_addr => out_addr,
           out_data => out_data,
           delayFrames => delayFrames,
-          delayTicks => delayTicks
+          delayTicks => delayTicks,
+			 temporalsmoothingRatio => temporalSmoothingRatio
         );
 
    -- Clock process definitions
@@ -96,7 +99,12 @@ BEGIN
 		wait for clk_period/2;
    end process;
  
-	in_data <= in_addr(7 downto 0) & in_addr(7 downto 0) & in_addr(7 downto 0) & in_addr(7 downto 0);
+	process(clk)
+	begin
+		if(rising_edge(clk)) then
+			in_data <= in_addr(7 downto 0) & in_addr(7 downto 0) & in_addr(7 downto 0) & in_addr(7 downto 0);
+		end if;
+	end process;
 
 	process(clk)
 	begin

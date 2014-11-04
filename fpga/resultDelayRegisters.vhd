@@ -35,21 +35,23 @@ use ieee.std_logic_unsigned.all;
 
 entity resultDelayRegisters is
     Port ( clk : in  STD_LOGIC;
-           addr : in  STD_LOGIC_VECTOR (1 downto 0);
+           addr : in  STD_LOGIC_VECTOR (2 downto 0);
            din : in  STD_LOGIC_VECTOR (7 downto 0);
 			  dout : out STD_LOGIC_VECTOR (7 downto 0);
            we : in  STD_LOGIC;
 			  
            frameCount : out  STD_LOGIC_VECTOR (7 downto 0);
-           tickCount : out  STD_LOGIC_VECTOR (23 downto 0));
+           tickCount : out  STD_LOGIC_VECTOR (23 downto 0);
+           temporalSmoothingRatio : out STD_LOGIC_VECTOR (8 downto 0)
+    );
 end resultDelayRegisters;
 
 architecture Behavioral of resultDelayRegisters is
 
-constant ADDR_WIDTH : integer := 2;
+constant ADDR_WIDTH : integer := 3;
 constant DATA_WIDTH : integer := 8;
 type mem_type is array ( (2**ADDR_WIDTH)-1 downto 0 ) of std_logic_vector(DATA_WIDTH-1 downto 0);
-shared variable mem : mem_type := ("11101000", "00000011", "00000000", "00000010");
+shared variable mem : mem_type := ("11101000", "00000011", "00000000", "00000010", "00000000", "00000000", "00000000", "00000000");
 
 begin
 
@@ -65,6 +67,7 @@ end process;
 
 frameCount <= mem(0);
 tickCount <= mem(1) & mem(2) & mem(3);
+temporalSmoothingRatio <= mem(4)(0) & mem(5);
 
 end Behavioral;
 

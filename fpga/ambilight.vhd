@@ -120,12 +120,13 @@ signal gammaTableBCfgWr   : std_logic;
 signal gammaTableBCfgAddr : std_logic_vector(10 downto 0);
 signal gammaTableBCfgDin  : std_logic_vector(7 downto 0);
 signal gammaTableBCfgDout : std_logic_vector(7 downto 0);
-signal resultDelayCfgAddr : std_logic_vector(1 downto 0);
+signal resultDelayCfgAddr : std_logic_vector(2 downto 0);
 signal resultDelayCfgDin  : std_logic_vector(7 downto 0);
 signal resultDelayCfgDout : std_logic_vector(7 downto 0);
 signal resultDelayCfgWe   : std_logic;
 signal resultDelayFrameCount : std_logic_vector(7 downto 0);
 signal resultDelayTickCount  : std_logic_vector(23 downto 0);
+signal resultDelayTemporalSmoothingRatio : std_logic_vector(8 downto 0);
 
 signal storeResult : std_logic;
 signal storeResultDelayed : std_logic;
@@ -178,9 +179,9 @@ begin
 end process;
 		
 resultDelay : entity work.resultDelay port map(cfgclk, 
-															  startDistribution, resultAddr, resultData, 
-															  delayedStartDistribution, delayedResultAddr, delayedResultData,
-															  resultDelayFrameCount, resultDelayTickCount);
+                                               startDistribution, resultAddr, resultData, 
+                                               delayedStartDistribution, delayedResultAddr, delayedResultData,
+                                               resultDelayFrameCount, resultDelayTickCount, resultDelayTemporalSmoothingRatio);
 
 
 areaResultR <= delayedResultData(23 downto 16);
@@ -308,7 +309,8 @@ resultDelayRegisters : entity work.resultDelayRegisters
 			dout => resultDelayCfgDout,
 			we   => resultDelayCfgWe,
 			frameCount => resultDelayFrameCount,
-			tickCount  => resultDelayTickCount
+			tickCount  => resultDelayTickCount,
+			temporalSmoothingRatio => resultDelayTemporalSmoothingRatio
 		);
 
 process(cfgclk)
@@ -423,7 +425,7 @@ lightCfgAddr       <= cfgaddr(11 downto 0);
 gammaTableRCfgAddr <= cfgaddr(10 downto 0);
 gammaTableGCfgAddr <= cfgaddr(10 downto 0);
 gammaTableBCfgAddr <= cfgaddr(10 downto 0);
-resultDelayCfgAddr <= cfgaddr(1 downto 0);
+resultDelayCfgAddr <= cfgaddr(2 downto 0);
 															 
 end Behavioral;
 

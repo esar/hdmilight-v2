@@ -32,9 +32,10 @@ entity resultDelay is
            out_vblank : out  STD_LOGIC;
            out_addr : in  STD_LOGIC_VECTOR (8 downto 0);
            out_data : out  STD_LOGIC_VECTOR (31 downto 0);
-			  delayFrames : in std_logic_vector(7 downto 0);
-			  delayTicks  : in std_logic_vector(23 downto 0)
-			  );
+           delayFrames : in std_logic_vector(7 downto 0);
+           delayTicks  : in std_logic_vector(23 downto 0);
+	   temporalSmoothingRatio : in std_logic_vector(8 downto 0)
+    );
 end resultDelay;
 
 architecture Behavioral of resultDelay is
@@ -42,12 +43,24 @@ architecture Behavioral of resultDelay is
 signal lastvblank : std_logic;
 signal start : std_logic;
 signal enable : std_logic;
-signal count : std_logic_vector(8 downto 0);
+signal count : std_logic_vector(10 downto 0);
 signal tickcount : std_logic_vector(23 downto 0);
 signal count_ram_in : std_logic_vector(2 downto 0) := "000";
+signal count_ram_in_prev : std_logic_vector(2 downto 0);
 signal count_ram_out : std_logic_vector(2 downto 0);
 signal done : std_logic;
 signal lastdone : std_logic;
+
+signal coef  : std_logic_vector(9 downto 0);
+signal Rin   : std_logic_vector(7 downto 0);
+signal Gin   : std_logic_vector(7 downto 0);
+signal Bin   : std_logic_vector(7 downto 0);
+signal Rprod : std_logic_vector(35 downto 0);
+signal Gprod : std_logic_vector(35 downto 0);
+signal Bprod : std_logic_vector(35 downto 0);
+signal Radd  : std_logic_vector(35 downto 0) := (others => '0');
+signal Gadd  : std_logic_vector(35 downto 0) := (others => '0');
+signal Badd  : std_logic_vector(35 downto 0) := (others => '0');
 
 signal ram_wr_in : std_logic;
 signal ram_addr_in : std_logic_vector(10 downto 0);
@@ -65,14 +78,14 @@ delayRam : entity work.blockram
     a_clk => clk,
     a_en => '1',
     a_wr => ram_wr_in,
-	 a_rst => '0',
+    a_rst => '0',
     a_addr => ram_addr_in,
     a_din => ram_data_in,
     a_dout => open,
     b_clk => clk,
-	 b_en => '1',
+    b_en => '1',
     b_wr => '0',
-	 b_rst => '0',
+    b_rst => '0',
     b_addr => ram_addr_out,
     b_din => (others=> '0'),
     b_dout => ram_data_out
@@ -98,6 +111,7 @@ process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(start = '1') then
+			count_ram_in_prev <= count_ram_in;
 			count_ram_in <= std_logic_vector(unsigned(count_ram_in) + 1);
 		end if;
 	end if;
@@ -107,6 +121,8 @@ end process;
 count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delayFrames(2 downto 0)));
 
 -- counter for copying the 256 values from the current set of results to the delay ram
+-- while applying temporal smoothing. There are two counts per item copied, one for a read
+-- cycle to get the old value and one for a write cycle to write the new value
 process(clk)
 begin
 	if(rising_edge(clk)) then
@@ -120,6 +136,39 @@ begin
 	end if;
 end process;
 
+
+-- select the inputs for the multiplies:
+--     read cycle:  multiply the new incoming data with (1 - temporalSmoothingRatio) while 
+--                  the read of the old value is in progress
+--     write cycle: multiply the previous value that has just completed reading with temporalSmoothingRatio 
+--                  and add the result to the read cycle's result
+coef  <= std_logic_vector(512 - unsigned('0' & temporalSmoothingRatio)) when count(1 downto 0) = "01" else ('0' & temporalSmoothingRatio);
+with count(1 downto 0) select Rin <=
+     in_data( 7 downto  0) when "01",
+     ram_data_out( 7 downto  0) when "10",
+     (others => '0') when others;
+with count(1 downto 0) select Gin <=
+     in_data(15 downto  8) when "01",
+     ram_data_out(15 downto  8) when "10",
+     (others => '0') when others;
+with count(1 downto 0) select Bin <=
+     in_data(23 downto  16) when "01",
+     ram_data_out(23 downto 16) when "10",
+     (others => '0') when others;
+Radd  <= (others => '0') when count(1 downto 0) /= "10" else Rprod;
+Gadd  <= (others => '0') when count(1 downto 0) /= "10" else Gprod;
+Badd  <= (others => '0') when count(1 downto 0) /= "10" else Bprod;
+
+process(clk)
+begin
+	if(rising_edge(clk)) then
+		Rprod <= std_logic_vector(unsigned("0" & Rin & "000000000") * unsigned("00000000" & coef) + unsigned(Radd));
+		Gprod <= std_logic_vector(unsigned("0" & Gin & "000000000") * unsigned("00000000" & coef) + unsigned(Gadd));
+		Bprod <= std_logic_vector(unsigned("0" & Bin & "000000000") * unsigned("00000000" & coef) + unsigned(Badd));
+	end if;
+end process;
+
+
 -- counter for tick delay, start counting down toward zero when copying of current results finishes
 process(clk)
 begin
@@ -132,7 +181,7 @@ begin
 	end if;
 end process;
 
-enable <= not count(8);
+enable <= not count(10);
 
 -- signal out_vblank after copy has finished and tickcount has reached zero
 done <= '1' when unsigned(tickcount) = 0 and enable = '0' else '0';
@@ -147,12 +196,12 @@ begin
 	end if;
 end process;
 
-in_addr <= "0" & count(7 downto 0);
-ram_addr_in <= count_ram_in & count(7 downto 0);
-ram_data_in <= in_data;
-ram_wr_in <= enable;
+in_addr <= "0" & count(9 downto 2);
+ram_addr_in <= count_ram_in & count(9 downto 2);
+ram_data_in <= "00000000" & Bprod(25 downto 18) & Gprod(25 downto 18) & Rprod(25 downto 18);
+ram_wr_in <= '1' when count(1 downto 0) = "11" else '0';
 
-ram_addr_out <= count_ram_out & out_addr(7 downto 0);
+ram_addr_out <= (count_ram_in_prev & count(9 downto 2)) when enable = '1' else (count_ram_out & out_addr(7 downto 0));
 out_data <= ram_data_out;
 
 end Behavioral;
