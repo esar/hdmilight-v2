@@ -121,8 +121,11 @@ end process;
 count_ram_out <= std_logic_vector(unsigned(count_ram_in) - unsigned(delayFrames(2 downto 0)));
 
 -- counter for copying the 256 values from the current set of results to the delay ram
--- while applying temporal smoothing. There are two counts per item copied, one for a read
--- cycle to get the old value and one for a write cycle to write the new value
+-- while applying temporal smoothing. There are four counts per item copied:
+--     1) start read of incoming value and prev value
+--     2) multiply incoming value with ratio
+--     3) multiply previous value with inverse ratio
+--     4) write result
 process(clk)
 begin
 	if(rising_edge(clk)) then
@@ -137,11 +140,7 @@ begin
 end process;
 
 
--- select the inputs for the multiplies:
---     read cycle:  multiply the new incoming data with (1 - temporalSmoothingRatio) while 
---                  the read of the old value is in progress
---     write cycle: multiply the previous value that has just completed reading with temporalSmoothingRatio 
---                  and add the result to the read cycle's result
+-- select the inputs for the multiplies
 coef  <= std_logic_vector(512 - unsigned('0' & temporalSmoothingRatio)) when count(1 downto 0) = "01" else ('0' & temporalSmoothingRatio);
 with count(1 downto 0) select Rin <=
      in_data( 7 downto  0) when "01",
