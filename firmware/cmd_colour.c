@@ -28,9 +28,8 @@
 #include "ambilight.h"
 
 
-void setColour(uint8_t index, uint8_t row, int ri, int rf, int gi, int gf, int bi, int bf)
+void setColour(uint8_t index, uint8_t row, uint32_t r, uint32_t g, uint32_t b)
 {
-	uint16_t bits;
 	uint8_t* address = AMBILIGHT_BASE_ADDR_COLOUR;
 	address += (uint16_t)index * 32;
 	address += row * 8;
@@ -41,29 +40,10 @@ void setColour(uint8_t index, uint8_t row, int ri, int rf, int gi, int gf, int b
 	// +-\/+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |   |   byte 6      |    byte 5     |    byte 4     |    byte 3     |    byte 2     |    byte 1     |    byte 0     |
 
-	ri &= 0x1ff;
-	rf &= 0x1ff;
-	gi &= 0x1ff;
-	gf &= 0x1ff;
-	bi &= 0x1ff;
-	bf &= 0x1ff;
-
-	bits = rf;
-	address[0] = bits & 0xff;
-	bits = (bits >> 8) | (ri << 1);
-	address[1] = bits & 0xff;
-	bits = (bits >> 8) | (gf << 2);
-	address[2] = bits & 0xff;
-	bits = (bits >> 8) | (gi << 3);
-	address[3] = bits & 0xff;
-	bits = (bits >> 8) | (bf << 4);
-	address[4] = bits & 0xff;
-	bits = (bits >> 8) | (bi << 5);
-	address[5] = bits & 0xff;
-	address[6] = bits >> 8;
-	address[7] = 0;
-
-	printf_P(PSTR("%d %d %d %d %d %d %d %d\n"), address[0], address[1], address[2], address[3], address[4], address[5], address[6], address[7]);
+	address[0] = address[1] = address[2] = address[3] = address[4] = address[5] = address[6] = address[7] = 0;
+	*((uint32_t*)(address + 0))  = (r & 0x3FFFFUL);
+	*((uint32_t*)(address + 2)) |= (g & 0x3FFFFUL) << 2;
+	*((uint32_t*)(address + 4)) |= (b & 0x3FFFFUL) << 4;
 }
 
 void getColour(uint8_t index, uint8_t row, int* ri, int* rf, int* gi, int* gf, int* bi, int* bf)
@@ -89,18 +69,15 @@ void getColour(uint8_t index, uint8_t row, int* ri, int* rf, int* gi, int* gf, i
 
 void cmdSetColour(uint8_t argc, char** argv)
 {
-	if(argc == 9)
+	if(argc == 6)
 	{
-		int ri, rf, gi, gf, bi, bf;
+		uint32_t r, g, b;
 		uint8_t index, maxIndex;
 		uint8_t row, minRow, maxRow;
 
-		ri = getint(&argv[3]);
-		rf = getint(&argv[4]);
-		gi = getint(&argv[5]);
-		gf = getint(&argv[6]);
-		bi = getint(&argv[7]);
-		bf = getint(&argv[8]);
+		r = getfixed_9_9(argv[3]);
+		g = getfixed_9_9(argv[4]);
+		b = getfixed_9_9(argv[5]);
 		
 		getrange(argv[1], &index, &maxIndex);
 		getrange(argv[2], &minRow, &maxRow);
@@ -109,7 +86,7 @@ void cmdSetColour(uint8_t argc, char** argv)
 			row = minRow;
 			do
 			{
-				setColour(index, row, ri, rf, gi, gf, bi, bf);
+				setColour(index, row, r, g, b);
 				
 			} while(row++ < maxRow);
 			
@@ -152,10 +129,10 @@ void cmdCfgColour(uint8_t argc, char** argv)
 	int i;
 	for(i = 0; i < 8; ++i)
 	{
-		setColour(i, 0, 1, 0, 0, 0, 0, 0);
-		setColour(i, 1, 0, 0, 1, 0, 0, 0);
-		setColour(i, 2, 0, 0, 0, 0, 1, 0);
-		setColour(i, 3, 0, 0, 0, 0, 0, 0);
+		setColour(i, 0, 0x200, 0,     0);
+		setColour(i, 1, 0,     0x200, 0);
+		setColour(i, 2, 0,     0,     0x200);
+		setColour(i, 3, 0,     0,     0);
 	}
 }
 

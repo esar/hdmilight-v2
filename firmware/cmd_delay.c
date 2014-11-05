@@ -56,7 +56,7 @@ void cmdSetDelay(uint8_t argc, char** argv)
 	{
 		uint8_t frames = getint(&argv[1]);
 		uint32_t ticks = getint(&argv[2]);
-		uint16_t temporalSmoothingRatio = getint(&argv[3]);
+		uint32_t temporalSmoothingRatio = getfixed_9_9(argv[3]);
 		uint8_t* address = (uint8_t*)AMBILIGHT_BASE_ADDR_DELAY;
 
 		address[0] = frames;

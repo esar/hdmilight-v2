@@ -39,6 +39,7 @@ extern uint8_t silent;
 char readcmd(char** argv, char maxargs);
 int getint(char** str);
 void getrange(char* str, uint8_t* min, uint8_t* max);
+uint32_t getfixed_9_9(const char* p);
 
 void cmdGetAddr(uint8_t argc, char** argv);
 void cmdSetAddr(uint8_t argc, char** argv);

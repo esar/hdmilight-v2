@@ -271,6 +271,44 @@ void getrange(char* str, uint8_t* min, uint8_t* max)
 	}
 }
 
+uint32_t getfixed_9_9(const char* p)
+{
+	uint32_t accum = 0;
+	int divisor = 1;
+	int gotPoint = 0;
+	int neg = 0;
+
+	if(*p == '-')
+	{
+		neg = 1;
+		++p;
+	}
+	
+	while(1)
+	{
+		if(*p == '.')
+		{
+			if(gotPoint)
+				break;
+			gotPoint = 1;
+		}
+		else
+		{
+			if(*p >= '0' && *p <= '9')
+				accum = (accum * 10) + (*p - '0');
+			else
+				break;
+
+			if(gotPoint)
+				divisor *= 10;
+		}
+		++p;
+	}
+
+	accum = (accum << 9) / divisor;
+	return neg ? 0 - accum : accum;
+}
+
 void cmdCfgAll(uint8_t argc, char** argv)
 {
 	cmdCfgI2C(argc, argv);
@@ -394,3 +432,4 @@ int main()
 
 	}
 }
+
