@@ -30,7 +30,7 @@
 	
 void setGamma(uint8_t channel, uint8_t table, uint8_t index, uint8_t value)
 {
-	uint16_t address = AMBILIGHT_BASE_ADDR_GAMMAR;
+	uint8_t* address = AMBILIGHT_BASE_ADDR_GAMMAR;
 
 	if(channel == 0)
 		address = AMBILIGHT_BASE_ADDR_GAMMAR;
@@ -42,9 +42,7 @@ void setGamma(uint8_t channel, uint8_t table, uint8_t index, uint8_t value)
 	address += (uint16_t)table * 256;
 	address += index;
 
-	AMBILIGHT_ADDR_HIGH = address >> 8;
-	AMBILIGHT_ADDR_LOW  = address & 0xff;
-	AMBILIGHT_DATA = value;
+	*address = value;
 }
 
 void cmdGetGamma(uint8_t argc, char** argv)
@@ -67,7 +65,7 @@ void cmdGetGamma(uint8_t argc, char** argv)
 				do
 				{
 					int value;
-					uint16_t address = AMBILIGHT_BASE_ADDR_GAMMAR;
+					uint8_t* address = AMBILIGHT_BASE_ADDR_GAMMAR;
 					if(channel == 0)
 						address = AMBILIGHT_BASE_ADDR_GAMMAR;
 					else if(channel == 1)
@@ -77,10 +75,7 @@ void cmdGetGamma(uint8_t argc, char** argv)
 					address += (uint16_t)table * 256;
 					address += index;
 
-					AMBILIGHT_ADDR_HIGH = address >> 8;
-					AMBILIGHT_ADDR_LOW  = address & 0xff;
-					asm("nop");
-					value = AMBILIGHT_DATA;
+					value = *address;
 
 					printf_P(PSTR("%d: %d: %d: %d\n"), table, channel, index, value);
 

@@ -39,7 +39,7 @@ entity data_path is
             I_AMOD      : in  std_logic_vector( 5 downto 0);
             I_BIT       : in  std_logic_vector( 3 downto 0);
             I_DDDDD     : in  std_logic_vector( 4 downto 0);
-            I_DIN       : in  std_logic_vector( 7 downto 0);
+            I_DIN       : in  std_logic_vector(15 downto 0);
             I_IMM       : in  std_logic_vector(15 downto 0);
             I_JADR      : in  std_logic_vector(15 downto 0);
             I_OPC       : in  std_logic_vector(15 downto 0);
@@ -56,7 +56,7 @@ entity data_path is
             I_WE_XYZS   : in  std_logic;
  
             Q_ADR       : out std_logic_vector(15 downto 0);
-            Q_DOUT      : out std_logic_vector( 7 downto 0);
+            Q_DOUT      : out std_logic_vector(15 downto 0);
             Q_INT_ENA   : out std_logic;
             Q_LOAD_PC   : out std_logic;
             Q_NEW_PC    : out std_logic_vector(15 downto 0);
@@ -64,7 +64,8 @@ entity data_path is
             Q_PC        : out std_logic_vector(15 downto 0);
             Q_RD_IO     : out std_logic;
             Q_SKIP      : out std_logic;
-            Q_WE_IO     : out std_logic);
+            Q_WE_IO     : out std_logic;
+            Q_WE_SRAM   : out std_logic_vector(1 downto 0));
 end data_path;
 
 architecture Behavioral of data_path is
@@ -122,18 +123,6 @@ signal F_R              : std_logic_vector(15 downto 0);
 signal F_S              : std_logic_vector( 7 downto 0);
 signal F_Z              : std_logic_vector(15 downto 0);
 
-component data_mem
-    port (  I_CLK       : in  std_logic;
-
-            I_ADR       : in  std_logic_vector(10 downto 0);
-            I_DIN       : in  std_logic_vector(15 downto 0);
-            I_WE        : in  std_logic_vector( 1 downto 0);
-
-            Q_DOUT      : out std_logic_vector(15 downto 0));
-end component;
-
-signal M_DOUT           : std_logic_vector(15 downto 0);
-
 signal L_DIN            : std_logic_vector( 7 downto 0);
 signal L_WE_SRAM        : std_logic_vector( 1 downto 0);
 signal L_FLAGS_98       : std_logic_vector( 9 downto 8);
@@ -181,15 +170,6 @@ begin
                 Q_S         => F_S,   -- Q_Rxx(F_ADR)
                 Q_Z         => F_Z);
 
-    sram : data_mem
-    port map(   I_CLK   => I_CLK,
-
-                I_ADR   => F_ADR(10 downto 0),
-                I_DIN   => A_DOUT,
-                I_WE    => L_WE_SRAM,
-
-                Q_DOUT  => M_DOUT);
-
     -- remember A_FLAGS(9 downto 8) (within the current instruction).
     --
     flg98: process(I_CLK)
@@ -228,11 +208,11 @@ begin
         end case;
     end process;
 
-    Q_ADR     <= F_ADR;
-    Q_DOUT    <= A_DOUT(7 downto 0);
-    Q_INT_ENA <= A_FLAGS(7);
-    Q_OPC     <= I_OPC;
-    Q_PC      <= I_PC;
+    Q_ADR       <= F_ADR;
+    Q_DOUT      <= A_DOUT;
+    Q_INT_ENA   <= A_FLAGS(7);
+    Q_OPC       <= I_OPC;
+    Q_PC        <= I_PC;
 
     Q_RD_IO   <= '0'                    when (F_ADR < X"20")
             else (I_RD_M and not I_PMS) when (F_ADR < X"5D")
@@ -240,17 +220,17 @@ begin
     Q_WE_IO   <= '0'                    when (F_ADR < X"20")
             else I_WE_M(0)              when (F_ADR < X"5D")
             else '0';
-    L_WE_SRAM <= "00"   when  (F_ADR < X"0060") else I_WE_M;
-    L_DIN     <= I_DIN  when (I_PMS = '1')
-            else F_S    when  (F_ADR < X"0020")
-            else I_DIN  when  (F_ADR < X"005D")
-            else F_S    when  (F_ADR < X"0060")
-            else M_DOUT(7 downto 0);
+    Q_WE_SRAM <= "00"  when  (F_ADR < X"0060") else I_WE_M;
+    L_DIN     <= I_DIN(7 downto 0)  when (I_PMS = '1')
+            else F_S                when  (F_ADR < X"0020")
+            else I_DIN(7 downto 0)  when  (F_ADR < X"005D")
+            else F_S                when  (F_ADR < X"0060")
+            else I_DIN(7 downto 0);
 
     -- compute potential new PC value from Z, (SP), or IMM.
     --
     Q_NEW_PC <= F_Z    when I_PC_OP = PC_LD_Z       -- IJMP, ICALL
-           else M_DOUT when I_PC_OP = PC_LD_S       -- RET, RETI
+           else I_DIN  when I_PC_OP = PC_LD_S       -- RET, RETI
            else I_JADR;                             -- JMP adr
 
 end Behavioral;

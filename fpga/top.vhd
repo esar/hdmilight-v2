@@ -62,18 +62,29 @@ PORT(
 	);
 END COMPONENT;
 
+component data_mem
+    port (  I_CLK       : in  std_logic;
+
+            I_ADR       : in  std_logic_vector(10 downto 0);
+            I_DIN       : in  std_logic_vector(15 downto 0);
+            I_WE        : in  std_logic_vector( 1 downto 0);
+
+            Q_DOUT      : out std_logic_vector(15 downto 0));
+end component;
+
 component cpu_core
     port (  I_CLK       : in  std_logic;
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
-            I_DIN       : in  std_logic_vector( 7 downto 0);
+            I_DIN       : in  std_logic_vector(15 downto 0);
 
             Q_OPC       : out std_logic_vector(15 downto 0);
             Q_PC        : out std_logic_vector(15 downto 0);
-            Q_DOUT      : out std_logic_vector( 7 downto 0);
-            Q_ADR_IO    : out std_logic_vector( 7 downto 0);
+            Q_DOUT      : out std_logic_vector(15 downto 0);
+            Q_ADR       : out std_logic_vector(15 downto 0);
             Q_RD_IO     : out std_logic;
-            Q_WE_IO     : out std_logic);
+            Q_WE_IO     : out std_logic;
+				Q_WE_SRAM   : out std_logic_vector(1 downto 0));
 end component;
 
 component uart
@@ -129,9 +140,15 @@ signal MCU_PC : std_logic_vector(16-1 downto 0):=(others=>'0');
 -- MCU IO bus control
 signal MCU_IO_RD: std_logic:= '0';
 signal MCU_IO_WR: std_logic:= '0';
-signal MCU_IO_ADDR : std_logic_vector(8-1 downto 0):=(others=>'0');
+signal MCU_SRAM_WR : std_logic_vector(1 downto 0);
+signal MCU_ADDR : std_logic_vector(15 downto 0):=(others=>'0');
+signal MCU_DOUT : std_logic_vector(15 downto 0);
+signal MCU_DIN  : std_logic_vector(15 downto 0);
 signal MCU_IO_DATA_READ : std_logic_vector(8-1 downto 0):=(others=>'0');
-signal MCU_IO_DATA_WRITE : std_logic_vector(8-1 downto 0):=(others=>'0');
+
+signal SRAM_WE   : std_logic_vector(1 downto 0);
+signal SRAM_DOUT : std_logic_vector(15 downto 0);
+signal SRAM_DIN  : std_logic_vector(15 downto 0);
 
 -- MCU TMR
 signal MCU_TIMER_VAL : std_logic_vector(32-1 downto 0):=(others=>'0');
@@ -148,12 +165,10 @@ signal viddata_g : std_logic_vector(7 downto 0);
 signal viddata_b : std_logic_vector(7 downto 0);
 signal hblank : std_logic_vector(1 downto 0);
 signal vblank : std_logic_vector(1 downto 0);
-signal ambilightCfgWe : std_logic;
-signal ambilightCfgAddrLow : std_logic_vector(7 downto 0);
-signal ambilightCfgAddrHigh : std_logic_vector(7 downto 0);
-signal ambilightCfgAddr : std_logic_vector(15 downto 0);
-signal ambilightCfgDataIn : std_logic_vector(7 downto 0);
-signal ambilightCfgDataOut : std_logic_vector(7 downto 0);
+signal AMBILIGHT_CFG_WE   : std_logic;
+signal AMBILIGHT_CFG_ADDR : std_logic_vector(15 downto 0);
+signal AMBILIGHT_CFG_DIN  : std_logic_vector(7 downto 0);
+signal AMBILIGHT_CFG_DOUT : std_logic_vector(7 downto 0);
 signal driverOutput : std_logic_vector(7 downto 0);
 
 begin
@@ -164,10 +179,10 @@ begin
 
 ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank(1), vblank(1),
                                       CLK16,
-												  ambilightCfgWe,
-												  ambilightCfgAddr,
-												  ambilightCfgDataIn,
-												  ambilightCfgDataOut,
+												  AMBILIGHT_CFG_WE,
+												  AMBILIGHT_CFG_ADDR,
+												  AMBILIGHT_CFG_DIN,
+												  AMBILIGHT_CFG_DOUT,
 												  driverOutput);
 
 												  
@@ -178,6 +193,15 @@ Inst_DCM32to16: DCM32to16 PORT MAP(
 	CLK0_OUT => open
 );
 
+SRAM : data_mem port map(
+	I_CLK   => CLK16,
+	I_ADR   => MCU_ADDR(10 downto 0),
+	I_DIN   => SRAM_DIN,
+	I_WE    => SRAM_WE,
+	Q_DOUT  => SRAM_DOUT
+);
+
+
 -- Simple fixed baud UART             
 U2_UART: uart port map ( CLK16, RST, UART_TX_DATA, UART_RX_DATA, UART_WR, UART_RD, 
 						 UART_TX_AVAIL, UART_TX_BUSY, UART_RX_AVAIL, UART_RX_FULL, UART_RX_ERROR, 
@@ -187,15 +211,16 @@ U2_UART: uart port map ( CLK16, RST, UART_TX_DATA, UART_RX_DATA, UART_WR, UART_R
 U3_AVR_MCU:  cpu_core port map (
 					 I_CLK       => MCU_CLK,
                 I_CLR       => MCU_RST,
-                I_DIN       => MCU_IO_DATA_READ,
+                I_DIN       => MCU_DIN,
                 I_INTVEC    => "000000",
 
-                Q_ADR_IO    => MCU_IO_ADDR,
-                Q_DOUT      => MCU_IO_DATA_WRITE,
+                Q_ADR       => MCU_ADDR,
+                Q_DOUT      => MCU_DOUT,
                 Q_OPC       => MCU_INST,
                 Q_PC        => MCU_PC,
                 Q_RD_IO     => MCU_IO_RD,
-                Q_WE_IO     => MCU_IO_WR);
+                Q_WE_IO     => MCU_IO_WR,
+                Q_WE_SRAM   => MCU_SRAM_WR);
  			
 -----------------------------------------------
 -- Implementation
@@ -230,15 +255,14 @@ begin
 
 		UART_WR <= '0';
 		UART_RD <= '0';
-		ambilightCfgWe <= '0';
 		
 		-- IO Read Cycle
 		if (MCU_IO_RD = '1') then
 								
-			case MCU_IO_ADDR is
+			case MCU_ADDR is
 			
 				-- 0x21 -> Uart - UDR - TX BUF
-				when X"41"  => 
+				when X"0041"  => 
             		UART_RD <= '1';
 									
 				when others => 
@@ -250,30 +274,22 @@ begin
 		-- IO Write Cycle
 		if (MCU_IO_WR = '1') then
 								
-			case MCU_IO_ADDR is
+			case MCU_ADDR is
 			
 				-- 0x21 -> Uart - UDR - TX BUF
-				when X"41"  => 
-            	UART_TX_DATA <= MCU_IO_DATA_WRITE;
+				when X"0041"  => 
+					UART_TX_DATA <= MCU_DOUT(7 downto 0);
 					UART_WR <= '1';
 					
 				-- 0x22 -> 32-bit Timer Control
-				when X"42"  =>		
+				when X"0042"  =>		
 					-- Take snapshot of current timer value				
 					MCU_TIMER_LATCHED <= MCU_TIMER_VAL;
 					
-				when X"46"  =>
-					ambilightCfgAddrLow <= MCU_IO_DATA_WRITE;
-				when X"47"  =>
-					ambilightCfgAddrHigh <= MCU_IO_DATA_WRITE;
-				when X"48"  =>
-					ambilightCfgDataIn <= MCU_IO_DATA_WRITE;
-					ambilightCfgWe <= '1';
-					
-				when X"49"  =>
-					DDRD <= MCU_IO_DATA_WRITE;
-				when X"4b"  =>
-					PORTD <= MCU_IO_DATA_WRITE;
+				when X"0049"  =>
+					DDRD <= MCU_DOUT(7 downto 0);
+				when X"004b"  =>
+					PORTD <= MCU_DOUT(7 downto 0);
 				
 				when others => 
 				
@@ -285,41 +301,38 @@ begin
 end process;
 
 -- Asynchronous IO Read Process
-process (MCU_IO_RD, MCU_IO_ADDR, UART_RX_ERROR, UART_TX_BUSY, UART_RX_FULL, UART_TX_AVAIL, UART_RX_AVAIL, UART_RX_DATA, MCU_TIMER_LATCHED,
-         ambilightCfgDataOut, DDRD, PIND, PORTD)
+process (MCU_IO_RD, MCU_ADDR, UART_RX_ERROR, UART_TX_BUSY, UART_RX_FULL, UART_TX_AVAIL, UART_RX_AVAIL, UART_RX_DATA, MCU_TIMER_LATCHED,
+         DDRD, PIND, PORTD)
 
 begin
 
 	-- Read cycle?
 	if (MCU_IO_RD = '1') then 
 							
-		case MCU_IO_ADDR is
+		case MCU_ADDR is
 		
 			-- 0x20 -> Uart - USR - Status Reg
-			when X"40"  => 
+			when X"0040"  => 
 				MCU_IO_DATA_READ <= "000" & UART_RX_ERROR & UART_TX_BUSY & UART_RX_FULL & UART_TX_AVAIL & UART_RX_AVAIL;					
 			-- 0x21 -> Uart - UDR - RX BUF
-			when X"41"  =>			
+			when X"0041"  =>			
 				MCU_IO_DATA_READ <= UART_RX_DATA;
 									
 			-- 0x22,23,24,25 -> 32-bit Timer 
-			when X"42"  =>	
+			when X"0042"  =>	
 				MCU_IO_DATA_READ <= MCU_TIMER_LATCHED(7 downto 0);
-			when X"43"  =>	
+			when X"0043"  =>	
 				MCU_IO_DATA_READ <= MCU_TIMER_LATCHED(15 downto 8);
-			when X"44"  =>	
+			when X"0044"  =>	
 				MCU_IO_DATA_READ <= MCU_TIMER_LATCHED(23 downto 16);
-			when X"45"  =>	
+			when X"0045"  =>	
 				MCU_IO_DATA_READ <= MCU_TIMER_LATCHED(31 downto 24);
 								
-			when X"48"  =>
-				MCU_IO_DATA_READ <= ambilightCfgDataOut;
-				
-			when X"49"  =>
+			when X"0049"  =>
 				MCU_IO_DATA_READ <= DDRD;
-			when X"4a"  =>
+			when X"004a"  =>
 				MCU_IO_DATA_READ <= PIND;
-			when X"4b"  => 
+			when X"004b"  => 
 				MCU_IO_DATA_READ <= PORTD;
 				
 			when others => 
@@ -378,6 +391,16 @@ MCU_CLK <= CLK16;
 MCU_RST <= RST;
 MCU_RUN <= '1';
 
+MCU_DIN <= "00000000" & MCU_IO_DATA_READ when MCU_IO_RD = '1' else
+           SRAM_DOUT when MCU_ADDR(15) = '0' else
+           "00000000" & AMBILIGHT_CFG_DOUT;
+
+AMBILIGHT_CFG_DIN  <= MCU_DOUT(7 downto 0);
+AMBILIGHT_CFG_ADDR <= '0' & MCU_ADDR(14 downto 0);
+AMBILIGHT_CFG_WE   <= MCU_SRAM_WR(0) and MCU_ADDR(15);
+
+SRAM_DIN <= MCU_DOUT;
+SRAM_WE  <= MCU_SRAM_WR when MCU_ADDR(15) = '0' else "00";
 
 ADV_RST <= '1';
 OUTPUT <= driverOutput;
@@ -393,6 +416,5 @@ vidclk <= ADV_LLC;
 --hblank <= not ADV_HS;
 --vblank <= not ADV_VS;
 
-ambilightCfgAddr <= ambilightCfgAddrHigh & ambilightCfgAddrLow;
 
 end Behavioral;

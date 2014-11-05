@@ -31,7 +31,9 @@
 void setColour(uint8_t index, uint8_t row, int ri, int rf, int gi, int gf, int bi, int bf)
 {
 	uint16_t bits;
-	uint8_t bytes[8];
+	uint8_t* address = AMBILIGHT_BASE_ADDR_COLOUR;
+	address += (uint16_t)index * 32;
+	address += row * 8;
 
 	//       54                45                36                27                18                 9                 0
 	// +-/\+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -47,62 +49,41 @@ void setColour(uint8_t index, uint8_t row, int ri, int rf, int gi, int gf, int b
 	bf &= 0x1ff;
 
 	bits = rf;
-	bytes[0] = bits & 0xff;
+	address[0] = bits & 0xff;
 	bits = (bits >> 8) | (ri << 1);
-	bytes[1] = bits & 0xff;
+	address[1] = bits & 0xff;
 	bits = (bits >> 8) | (gf << 2);
-	bytes[2] = bits & 0xff;
+	address[2] = bits & 0xff;
 	bits = (bits >> 8) | (gi << 3);
-	bytes[3] = bits & 0xff;
+	address[3] = bits & 0xff;
 	bits = (bits >> 8) | (bf << 4);
-	bytes[4] = bits & 0xff;
+	address[4] = bits & 0xff;
 	bits = (bits >> 8) | (bi << 5);
-	bytes[5] = bits & 0xff;
-	bytes[6] = bits >> 8;
-	bytes[7] = 0;
+	address[5] = bits & 0xff;
+	address[6] = bits >> 8;
+	address[7] = 0;
 
-	printf_P(PSTR("%d %d %d %d %d %d %d %d\n"), bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7]);
-	for(bits = 0; bits < 8; ++bits)
-	{
-		uint16_t address = AMBILIGHT_BASE_ADDR_COLOUR;
-		address += (uint16_t)index * 32;
-		address += row * 8;
-		address += bits;
-		AMBILIGHT_ADDR_HIGH = address >> 8;
-		AMBILIGHT_ADDR_LOW  = address & 0xff;
-		AMBILIGHT_DATA = bytes[bits];
-	}
+	printf_P(PSTR("%d %d %d %d %d %d %d %d\n"), address[0], address[1], address[2], address[3], address[4], address[5], address[6], address[7]);
 }
 
 void getColour(uint8_t index, uint8_t row, int* ri, int* rf, int* gi, int* gf, int* bi, int* bf)
 {
-	int i;
-	uint8_t bytes[8];
 	uint16_t bits;
+	uint8_t* address = AMBILIGHT_BASE_ADDR_COLOUR;
+	address += (uint16_t)index * 32;
+	address += row * 8;
 	
-	for(i = 0; i < 8; ++i)
-	{
-		uint16_t address = AMBILIGHT_BASE_ADDR_COLOUR;
-		address += (uint16_t)index * 32;
-		address += row * 8;
-		address += i;
-		AMBILIGHT_ADDR_HIGH = address >> 8;
-		AMBILIGHT_ADDR_LOW  = address & 0xff;
-		asm("nop");
-		bytes[i] = AMBILIGHT_DATA;
-	}
-
-	bits = (bytes[1] << 8) | bytes[0];
+	bits = (address[1] << 8) | address[0];
 	*rf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (bytes[2] << 7);
+	bits = (bits >> 9) | (address[2] << 7);
 	*ri = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (bytes[3] << 6);
+	bits = (bits >> 9) | (address[3] << 6);
 	*gf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (bytes[4] << 5);
+	bits = (bits >> 9) | (address[4] << 5);
 	*gi = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (bytes[5] << 4);
+	bits = (bits >> 9) | (address[5] << 4);
 	*bf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (bytes[6] << 3);
+	bits = (bits >> 9) | (address[6] << 3);
 	*bi = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
 }
 

@@ -47,29 +47,22 @@ void cmdGetResult(uint8_t argc, char** argv)
 		do
 		{
 			uint8_t i;
-			uint16_t address;
+			volatile uint8_t* address;
 			int value;
 
 			address = AMBILIGHT_BASE_ADDR_RESULT;
-			AMBILIGHT_ADDR_HIGH = address >> 8;
-			AMBILIGHT_ADDR_LOW  = address & 0xff;
-			AMBILIGHT_DATA = index;
+			address[0] = index;
 
 			address = AMBILIGHT_BASE_ADDR_STATUS;
-			AMBILIGHT_ADDR_HIGH = address >> 8;
-			AMBILIGHT_ADDR_LOW  = address & 0xff;
-			asm("nop");
-			do { value = AMBILIGHT_DATA; } while((value & 1) == 0);
+			while((address[0] & 1) == 0)
+				asm("nop"); 
 
 			printf_P(PSTR("%d: "), index);
 			for(i = 0; i < 12; ++i)
 			{
 				address = AMBILIGHT_BASE_ADDR_RESULT;
 				address += 4 + i;
-				AMBILIGHT_ADDR_HIGH = address >> 8;
-				AMBILIGHT_ADDR_LOW  = address & 0xff;
-				asm("nop");
-				value = AMBILIGHT_DATA;
+				value = *address;
 				printf_P(PSTR("%d "), value);
 			}
 			printf_P(PSTR(" \n"));

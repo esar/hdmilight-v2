@@ -31,10 +31,7 @@
 void cmdGetStatus(uint8_t argc, char** argv)
 {
 	unsigned int status;
-	uint16_t address = AMBILIGHT_BASE_ADDR_STATUS;
-	AMBILIGHT_ADDR_HIGH = address >> 8;
-	AMBILIGHT_ADDR_LOW = address & 0xff;
-	asm("nop");
-	status = AMBILIGHT_DATA;
+	volatile uint8_t* address = AMBILIGHT_BASE_ADDR_STATUS;
+	status = *address;
 	printf_P(PSTR("status: %d\n"), status);
 }

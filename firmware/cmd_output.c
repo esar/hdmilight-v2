@@ -36,39 +36,27 @@ void setOutput(uint8_t output, uint16_t light, uint8_t area, uint8_t coef, uint8
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |               |               |
 
-	uint16_t address = AMBILIGHT_BASE_ADDR_OUTPUT;
+	uint8_t* address = AMBILIGHT_BASE_ADDR_OUTPUT;
 	address += (uint16_t)output * 1024;
 	address += light * 2;
 
 	if(enabled)
 		enabled = 0x80;
 
-	AMBILIGHT_ADDR_HIGH = address >> 8;
-	AMBILIGHT_ADDR_LOW  = address & 0xff;
-	AMBILIGHT_DATA = area & 0xff;
-	AMBILIGHT_ADDR_LOW  = (address + 1) & 0xff;
-	AMBILIGHT_DATA = enabled | ((coef & 7) << 4) | ((gamma & 7) << 1) | ((area >> 8) & 1);
+	address[0] = area & 0xff;
+	address[1] = enabled | ((coef & 7) << 4) | ((gamma & 7) << 1) | ((area >> 8) & 1);
 }
 
 void getOutput(uint8_t output, uint16_t light, int* area, int* coef, int* gamma, int* enabled)
 {
-	uint8_t bytes[2];
-	uint16_t address = AMBILIGHT_BASE_ADDR_OUTPUT;
+	uint8_t* address = AMBILIGHT_BASE_ADDR_OUTPUT;
 	address += (uint16_t)output * 1024;
 	address += light * 2;
 
-	AMBILIGHT_ADDR_HIGH = address >> 8;
-	AMBILIGHT_ADDR_LOW  = address & 0xff;
-	asm("nop");
-	bytes[0] = AMBILIGHT_DATA;
-	AMBILIGHT_ADDR_LOW = (address + 1) & 0xff;
-	asm("nop");
-	bytes[1] = AMBILIGHT_DATA;
-
-	*area = (((uint16_t)bytes[1] & 1) << 8) | bytes[0];
-	*gamma = (bytes[1] >> 1) & 7;
-	*coef = (bytes[1] >> 4) & 7;
-	*enabled = bytes[1] & 0x80;
+	*area = (((uint16_t)address[1] & 1) << 8) | address[0];
+	*gamma = (address[1] >> 1) & 7;
+	*coef = (address[1] >> 4) & 7;
+	*enabled = address[1] & 0x80;
 }
 
 void cmdSetOutput(uint8_t argc, char** argv)
