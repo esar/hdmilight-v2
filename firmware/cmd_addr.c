@@ -30,21 +30,13 @@
 
 void cmdGetAddr(uint8_t argc, char** argv)
 {
-	if(argc == 2)
+	if(argc == 3)
 	{
-		uint16_t addr;
-		uint8_t  count;
+		uint8_t* addr = (uint8_t*)getint(&argv[1]) + 0x8000;
+		uint8_t  count = getint(&argv[2]);
 
-		addr = getint(&argv[1]);
-		count = getint(&argv[2]);
 		while(count--)
-		{
-			AMBILIGHT_ADDR_HIGH = addr >> 8;
-			AMBILIGHT_ADDR_LOW  = addr & 0xff;
-			asm("nop");
-			printf_P(PSTR("%02x "), AMBILIGHT_DATA);
-			++addr;
-		}
+			printf_P(PSTR("%02x "), *addr++);
 	}
 }
 
@@ -52,15 +44,13 @@ void cmdSetAddr(uint8_t argc, char** argv)
 {
 	if(argc > 2)
 	{
-		uint16_t address = getint(&argv[1]);
+		uint8_t* address = (uint8_t*)getint(&argv[1]) + 0x8000;
 
 		argv += 2;
 		argc -= 2;
 		while(argc > 0)
 		{
-			AMBILIGHT_ADDR_HIGH = address >> 8;
-			AMBILIGHT_ADDR_LOW  = address & 0xff;
-			AMBILIGHT_DATA = getint(&argv[0]);
+			*address++ = getint(&argv[0]);
 			++argv;
 			--argc;
 		}

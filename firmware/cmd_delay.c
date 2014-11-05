@@ -35,27 +35,14 @@ void cmdGetDelay(uint8_t argc, char** argv)
 		int frames;
 		uint32_t ticks;
 		uint16_t temporalSmoothingRatio;
-		uint16_t address = AMBILIGHT_BASE_ADDR_DELAY;
-		AMBILIGHT_ADDR_HIGH = address >> 8;
-		AMBILIGHT_ADDR_LOW  = address & 0xff;
-		asm("nop");
-		frames = AMBILIGHT_DATA;
-		AMBILIGHT_ADDR_LOW = (address + 1) & 0xff;
-		asm("nop");
-		ticks = AMBILIGHT_DATA;
-		AMBILIGHT_ADDR_LOW = (address + 2) & 0xff;
-		asm("nop");
-		ticks = (ticks << 8) | AMBILIGHT_DATA;
-		AMBILIGHT_ADDR_LOW = (address + 3) & 0xff;
-		asm("nop");
-		ticks = (ticks << 8) | AMBILIGHT_DATA;
+		uint8_t* address = (uint8_t*)AMBILIGHT_BASE_ADDR_DELAY;
+		frames = address[0];
+		ticks  = address[1];
+		ticks  = (ticks << 8) | address[2]; 
+		ticks  = (ticks << 8) | address[3];
 		ticks /= 16;
-		AMBILIGHT_ADDR_LOW = (address + 4) & 0xff;
-		asm("nop");
-		temporalSmoothingRatio = AMBILIGHT_DATA;
-		AMBILIGHT_ADDR_LOW = (address + 5) & 0xff;
-		asm("nop");
-		temporalSmoothingRatio = (temporalSmoothingRatio << 8) | AMBILIGHT_DATA;
+		temporalSmoothingRatio = address[4];
+		temporalSmoothingRatio = (temporalSmoothingRatio << 8) | address[5];
 
 		printf_P(PSTR("%d %ld %d\n"), frames, ticks, temporalSmoothingRatio);
 	}
@@ -70,23 +57,17 @@ void cmdSetDelay(uint8_t argc, char** argv)
 		uint8_t frames = getint(&argv[1]);
 		uint32_t ticks = getint(&argv[2]);
 		uint16_t temporalSmoothingRatio = getint(&argv[3]);
-		uint16_t address = AMBILIGHT_BASE_ADDR_DELAY;
-		AMBILIGHT_ADDR_HIGH = address >> 8;
-		AMBILIGHT_ADDR_LOW  = address & 0xff;
-		AMBILIGHT_DATA = frames;
+		uint8_t* address = (uint8_t*)AMBILIGHT_BASE_ADDR_DELAY;
+
+		address[0] = frames;
 
 		ticks *= 16;
-		AMBILIGHT_ADDR_LOW = (address + 1) & 0xff;
-		AMBILIGHT_DATA = 0;
-		AMBILIGHT_ADDR_LOW = (address + 2) & 0xff;
-		AMBILIGHT_DATA = ticks >> 8;
-		AMBILIGHT_ADDR_LOW = (address + 3) & 0xff;
-		AMBILIGHT_DATA = ticks & 0xff;
+		address[1] = 0;
+		address[2] = ticks >> 8;
+		address[3] = ticks & 0xff;
 
-		AMBILIGHT_ADDR_LOW = (address + 4) & 0xff;
-		AMBILIGHT_DATA = temporalSmoothingRatio >> 8;
-		AMBILIGHT_ADDR_LOW = (address + 5) & 0xff;
-		AMBILIGHT_DATA = temporalSmoothingRatio & 0xff;
+		address[4] = temporalSmoothingRatio >> 8;
+		address[5] = temporalSmoothingRatio & 0xff;
 	}
 	//else
 		//printf("err: SD num_frames num_ticks\n");

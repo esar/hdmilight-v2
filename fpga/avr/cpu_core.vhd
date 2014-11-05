@@ -34,14 +34,15 @@ entity cpu_core is
     port (  I_CLK       : in  std_logic;
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
-            I_DIN       : in  std_logic_vector( 7 downto 0);
+            I_DIN       : in  std_logic_vector(15 downto 0);
 
             Q_OPC       : out std_logic_vector(15 downto 0);
             Q_PC        : out std_logic_vector(15 downto 0);
-            Q_DOUT      : out std_logic_vector( 7 downto 0);
-            Q_ADR_IO    : out std_logic_vector( 7 downto 0);
+            Q_DOUT      : out std_logic_vector(15 downto 0);
+            Q_ADR       : out std_logic_vector(15 downto 0);
             Q_RD_IO     : out std_logic;
-            Q_WE_IO     : out std_logic);
+            Q_WE_IO     : out std_logic;
+            Q_WE_SRAM   : out std_logic_vector(1 downto 0));
 end cpu_core;
 
 architecture Behavioral of cpu_core is
@@ -120,7 +121,7 @@ component data_path
             I_AMOD      : in  std_logic_vector( 5 downto 0);
             I_BIT       : in  std_logic_vector( 3 downto 0);
             I_DDDDD     : in  std_logic_vector( 4 downto 0);
-            I_DIN       : in  std_logic_vector( 7 downto 0);
+            I_DIN       : in  std_logic_vector(15 downto 0);
             I_IMM       : in  std_logic_vector(15 downto 0);
             I_JADR      : in  std_logic_vector(15 downto 0);
             I_PC_OP     : in  std_logic_vector( 2 downto 0);
@@ -137,7 +138,7 @@ component data_path
             I_WE_XYZS   : in  std_logic;
  
             Q_ADR       : out std_logic_vector(15 downto 0);
-            Q_DOUT      : out std_logic_vector( 7 downto 0);
+            Q_DOUT      : out std_logic_vector(15 downto 0);
             Q_INT_ENA   : out std_logic;
             Q_LOAD_PC   : out std_logic;
             Q_NEW_PC    : out std_logic_vector(15 downto 0);
@@ -145,7 +146,8 @@ component data_path
             Q_PC        : out std_logic_vector(15 downto 0);
             Q_RD_IO     : out std_logic;
             Q_SKIP      : out std_logic;
-            Q_WE_IO     : out std_logic);
+            Q_WE_IO     : out std_logic;
+            Q_WE_SRAM   : out std_logic_vector(1 downto 0));
 end component;
 
 signal R_INT_ENA        : std_logic;
@@ -156,7 +158,7 @@ signal R_ADR            : std_logic_vector(15 downto 0);
 
 -- local signals
 --
-signal L_DIN            : std_logic_vector( 7 downto 0);
+signal L_DIN            : std_logic_vector(15 downto 0);
 signal L_INTVEC_5       : std_logic;
 
 begin
@@ -235,11 +237,12 @@ begin
                 Q_LOAD_PC   => R_LOAD_PC,
                 Q_RD_IO     => Q_RD_IO,
                 Q_SKIP      => R_SKIP,
-                Q_WE_IO     => Q_WE_IO);
+                Q_WE_IO     => Q_WE_IO,
+                Q_WE_SRAM   => Q_WE_SRAM);
 
-    L_DIN <= F_PM_DOUT when (D_PMS = '1') else I_DIN(7 downto 0);
+    L_DIN <= "00000000" & F_PM_DOUT when (D_PMS = '1') else I_DIN;
     L_INTVEC_5 <= I_INTVEC(5) and R_INT_ENA;
-    Q_ADR_IO <= R_ADR(7 downto 0);
+    Q_ADR <= R_ADR;
 
 end Behavioral;
 

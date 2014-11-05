@@ -35,7 +35,7 @@ void setLight(unsigned int light,
               unsigned char ymin, unsigned char ymax,
               unsigned char shift, unsigned char output)
 {
-	uint16_t address = AMBILIGHT_BASE_ADDR_AREA;
+	uint8_t* address = AMBILIGHT_BASE_ADDR_AREA;
 	address += (uint16_t)light * 4;
 
 	//  31      28      24          18          12          6           0
@@ -45,15 +45,10 @@ void setLight(unsigned int light,
 	// |                 |               |               |               |
 
 	light <<= 2;
-	AMBILIGHT_ADDR_HIGH = address >> 8;
-	AMBILIGHT_ADDR_LOW  = address & 0xff;
-	AMBILIGHT_DATA = (xmin & 0x3f) | (xmax << 6);
-	AMBILIGHT_ADDR_LOW = (address + 1) & 0xff;
-	AMBILIGHT_DATA = ((xmax & 0x3f) >> 2) | (ymin << 4);
-	AMBILIGHT_ADDR_LOW = (address + 2) & 0xff;
-	AMBILIGHT_DATA = ((ymin & 0x3f) >> 4) | (ymax << 2);
-	AMBILIGHT_ADDR_LOW = (address + 3) & 0xff;
-	AMBILIGHT_DATA = (shift & 0xf) | (output << 4);
+	address[0] = (xmin & 0x3f) | (xmax << 6);
+	address[1] = ((xmax & 0x3f) >> 2) | (ymin << 4);
+	address[2] = ((ymin & 0x3f) >> 4) | (ymax << 2);
+	address[3] = (shift & 0xf) | (output << 4);
 }
 
 void cmdSetLight(uint8_t argc, char** argv)
@@ -90,30 +85,20 @@ void cmdGetLight(uint8_t argc, char** argv)
 		getrange(argv[1], &index, &maxIndex);
 		do
 		{
-			uint8_t i;
-			uint8_t values[4];
+			uint8_t* address = AMBILIGHT_BASE_ADDR_AREA + ((uint16_t)index * 4);
 			int x;
 
-			for(i = 0; i < 4; ++i)
-			{
-				uint16_t address = AMBILIGHT_BASE_ADDR_AREA + ((uint16_t)index * 4) + i;
-				AMBILIGHT_ADDR_HIGH = address >> 8;
-				AMBILIGHT_ADDR_LOW  = address & 0xff;
-				asm("nop");
-				values[i] = AMBILIGHT_DATA;
-			}
-
-			x = values[0] & 0x3f; // xmin
+			x = address[0] & 0x3f; // xmin
 			printf_P(PSTR("%d: %d "), index, x);
-			x = (values[0] >> 6) | ((values[1] & 0x0f) << 2); // xmax
+			x = (address[0] >> 6) | ((address[1] & 0x0f) << 2); // xmax
 			printf_P(PSTR("%d "), x);
-			x = (values[1] >> 4) | ((values[2] & 3) << 4); // ymin
+			x = (address[1] >> 4) | ((address[2] & 3) << 4); // ymin
 			printf_P(PSTR("%d "), x);
-			x = (values[2] >> 2); // ymax
+			x = (address[2] >> 2); // ymax
 			printf_P(PSTR("%d "), x);
-			x = values[3] & 0xf; // shift
+			x = address[3] & 0xf; // shift
 			printf_P(PSTR("%d "), x);
-			x = values[3] >> 4; // output
+			x = address[3] >> 4; // output
 			printf_P(PSTR("%d\n"), x);
 
 		} while(index++ < maxIndex);
