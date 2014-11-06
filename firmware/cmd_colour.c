@@ -46,25 +46,15 @@ void setColour(uint8_t index, uint8_t row, uint32_t r, uint32_t g, uint32_t b)
 	*((uint32_t*)(address + 4)) |= (b & 0x3FFFFUL) << 4;
 }
 
-void getColour(uint8_t index, uint8_t row, int* ri, int* rf, int* gi, int* gf, int* bi, int* bf)
+void getColour(uint8_t index, uint8_t row, uint32_t* r, uint32_t* g, uint32_t* b)
 {
-	uint16_t bits;
 	uint8_t* address = AMBILIGHT_BASE_ADDR_COLOUR;
 	address += (uint16_t)index * 32;
 	address += row * 8;
 	
-	bits = (address[1] << 8) | address[0];
-	*rf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (address[2] << 7);
-	*ri = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (address[3] << 6);
-	*gf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (address[4] << 5);
-	*gi = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (address[5] << 4);
-	*bf = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
-	bits = (bits >> 9) | (address[6] << 3);
-	*bi = (bits & 0x100) ? (bits & 0x1ff) | 0xfe00 : (bits & 0xff);
+	*r = *((uint32_t*)(address + 0)) & 0x3FFFFUL;
+	*g = (*((uint32_t*)(address + 2)) >> 2) & 0x3FFFFUL;
+	*b = (*((uint32_t*)(address + 4)) >> 4) & 0x3FFFFUL;
 }
 
 void cmdSetColour(uint8_t argc, char** argv)
@@ -110,11 +100,14 @@ void cmdGetColour(uint8_t argc, char** argv)
 			row = minRow;
 			do
 			{
-				int ri, rf, gi, gf, bi, bf;
+				uint32_t r, g, b;
 
-				getColour(index, row, &ri, &rf, &gi, &gf, &bi, &bf);
+				getColour(index, row, &r, &g, &b);
 
-				printf_P(PSTR("%d: %d: %d:%d %d:%d %d:%d\n"), index, row, ri, rf, gi, gf, bi, bf);
+				printf_P(PSTR("%d %d: %d.%03d %d.%03d %d.%03d\n"), index, row, 
+				         fixed_9_9_int(r), fixed_9_9_fract(r, 3),
+				         fixed_9_9_int(g), fixed_9_9_fract(g, 3),
+				         fixed_9_9_int(b), fixed_9_9_fract(b, 3));
 				
 			} while(row++ < maxRow);
 			

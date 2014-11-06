@@ -2,6 +2,7 @@ MAX_IMAGE_SIZE = 16384
 
 PRG            = image
 OBJ            = main.o serial.o timer.o i2c.o \
+                 fixed_point.o \
                  cmd_addr.o    \
                  cmd_colour.o  \
                  cmd_delay.o   \

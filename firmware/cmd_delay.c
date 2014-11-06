@@ -34,7 +34,7 @@ void cmdGetDelay(uint8_t argc, char** argv)
 	{
 		int frames;
 		uint32_t ticks;
-		uint16_t temporalSmoothingRatio;
+		uint32_t temporalSmoothingRatio;
 		uint8_t* address = (uint8_t*)AMBILIGHT_BASE_ADDR_DELAY;
 		frames = address[0];
 		ticks  = address[1];
@@ -44,7 +44,8 @@ void cmdGetDelay(uint8_t argc, char** argv)
 		temporalSmoothingRatio = address[4];
 		temporalSmoothingRatio = (temporalSmoothingRatio << 8) | address[5];
 
-		printf_P(PSTR("%d %ld %d\n"), frames, ticks, temporalSmoothingRatio);
+		printf_P(PSTR("%d %ld %d.%03d\n"), frames, ticks, 
+		         fixed_9_9_int(temporalSmoothingRatio), fixed_9_9_fract(temporalSmoothingRatio, 3));
 	}
 	//else
 		//printf("err: GD\n");
