@@ -33,27 +33,27 @@
 
 void cmdSetI2C(uint8_t argc, char** argv)
 {
-	if(argc == 3)
+	if(argc == 4)
 	{
 		i2c_start();
-		i2c_write(0x98);
 		i2c_write(getint(&argv[1]));
 		i2c_write(getint(&argv[2]));
+		i2c_write(getint(&argv[3]));
 		i2c_stop();
 		printf_P(PSTR("OK\n"));
 	}
 	//else
-		//printf("err: SI addr value\n");
+		//printf("err: SI addr subaddr value\n");
 }
 
 void cmdGetI2C(uint8_t argc, char** argv)
 {
-	if(argc == 2)
+	if(argc == 3)
 	{
 		int val;
 		i2c_start();
-		i2c_write(0x98);
 		i2c_write(getint(&argv[1]));
+		i2c_write(getint(&argv[2]));
 		i2c_start();
 		i2c_write(0x99);
 		val = i2c_read(0);
