@@ -29,6 +29,7 @@
 #include "i2c.h"
 
 #include "config_hdmi.h"
+#include "config_edid.h"
 
 
 void cmdSetI2C(uint8_t argc, char** argv)
@@ -65,11 +66,27 @@ void cmdGetI2C(uint8_t argc, char** argv)
 		//printf("err: GI addr\n");
 }
 
-void cmdCfgI2C(uint8_t argc, char** argv)
+void writeEdid(const char* edid, int length)
+{
+	int i;
+
+	for(i = 0; i < length; ++i)
+	{
+		uint8_t data = pgm_read_byte(&edid[i]);
+
+		i2c_start();
+		i2c_write(0x6c);
+		i2c_write(i);
+		i2c_write(data);
+		i2c_stop();
+	}
+}
+
+void writeConfig(const struct ConfigTable* table)
 {
 	const struct ConfigTable* p;
 
-	for(p = g_configTable; pgm_read_byte(&p->address) != 0; ++p)
+	for(p = table; pgm_read_byte(&p->address) != 0; ++p)
 	{
 		unsigned char address = pgm_read_byte(&p->address);
 		unsigned char subaddress = pgm_read_byte(&p->subaddress);
@@ -93,4 +110,11 @@ void cmdCfgI2C(uint8_t argc, char** argv)
 			i2c_stop();
 		}
 	}
+}
+
+void cmdCfgI2C(uint8_t argc, char** argv)
+{
+	writeConfig(g_configTablePreEdid);
+	writeEdid(g_edid, sizeof(g_edid));
+	writeConfig(g_configTablePostEdid);
 }
