@@ -34,6 +34,7 @@ use work.common.ALL;
 
 entity data_path is
     port(   I_CLK         : in  std_logic;
+            I_CE          : in  std_logic;
 
             I_ALU_OP    : in  std_logic_vector( 4 downto 0);
             I_AMOD      : in  std_logic_vector( 5 downto 0);
@@ -92,6 +93,7 @@ signal A_FLAGS          : std_logic_vector( 9 downto 0);
 
 component register_file
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_AMOD      : in  std_logic_vector( 5 downto 0);
             I_COND      : in  std_logic_vector( 3 downto 0);
@@ -147,6 +149,7 @@ begin
 
     regs : register_file
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
 
                 I_AMOD      => I_AMOD,
                 I_COND(3)   => I_OPC(10),
@@ -172,9 +175,9 @@ begin
 
     -- remember A_FLAGS(9 downto 8) (within the current instruction).
     --
-    flg98: process(I_CLK)
+    flg98: process(I_CE, I_CLK)
     begin
-        if (rising_edge(I_CLK)) then
+        if (I_CE = '1' and rising_edge(I_CLK)) then
             L_FLAGS_98 <= A_FLAGS(9 downto 8);
         end if;
     end process;

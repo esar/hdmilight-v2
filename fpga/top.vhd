@@ -74,6 +74,7 @@ end component;
 
 component cpu_core
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
             I_DIN       : in  std_logic_vector(15 downto 0);
@@ -209,7 +210,8 @@ U2_UART: uart port map ( CLK16, RST, UART_TX_DATA, UART_RX_DATA, UART_WR, UART_R
 
 -- AVR Core
 U3_AVR_MCU:  cpu_core port map (
-					 I_CLK       => MCU_CLK,
+                I_CLK       => MCU_CLK,
+                I_CE        => MCU_RUN,
                 I_CLR       => MCU_RST,
                 I_DIN       => MCU_DIN,
                 I_INTVEC    => "000000",

@@ -32,6 +32,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity cpu_core is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
             I_DIN       : in  std_logic_vector(15 downto 0);
@@ -49,6 +50,7 @@ architecture Behavioral of cpu_core is
 
 component opc_fetch
     port(   I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
@@ -70,6 +72,7 @@ signal F_T0             : std_logic;
 
 component opc_deco is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_OPC       : in  std_logic_vector(31 downto 0);
             I_PC        : in  std_logic_vector(15 downto 0);
@@ -116,6 +119,7 @@ signal D_WE_XYZS        : std_logic;
 
 component data_path
     port(   I_CLK       : in    std_logic;
+            I_CE        : in    std_logic;
 
             I_ALU_OP    : in  std_logic_vector( 4 downto 0);
             I_AMOD      : in  std_logic_vector( 5 downto 0);
@@ -165,6 +169,7 @@ begin
 
     opcf : opc_fetch
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
 
                 I_CLR       => I_CLR,
                 I_INTVEC(5) => L_INTVEC_5,
@@ -181,6 +186,7 @@ begin
  
     odec : opc_deco
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
 
                 I_OPC       => F_OPC,
                 I_PC        => F_PC,
@@ -207,6 +213,7 @@ begin
 
     dpath : data_path
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
 
                 I_ALU_OP    => D_ALU_OP,
                 I_AMOD      => D_AMOD,

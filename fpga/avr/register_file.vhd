@@ -34,6 +34,7 @@ use work.common.ALL;
 
 entity register_file is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_AMOD      : in  std_logic_vector( 5 downto 0);
             I_COND      : in  std_logic_vector( 3 downto 0);
@@ -61,6 +62,7 @@ architecture Behavioral of register_file is
 
 component reg_16
     port (  I_CLK       : in    std_logic;
+            I_CE        : in    std_logic;
 
             I_D         : in    std_logic_vector(15 downto 0);
             I_WE        : in    std_logic_vector( 1 downto 0);
@@ -88,6 +90,7 @@ signal R_SP             : std_logic_vector(15 downto 0);    -- stack pointer
 
 component status_reg is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_COND      : in  std_logic_vector ( 3 downto 0);
             I_DIN       : in  std_logic_vector ( 7 downto 0);
@@ -128,26 +131,27 @@ signal L_XYZS           : std_logic_vector(15 downto 0);
 
 begin
 
-    r00: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE( 1 downto  0), I_D => I_DIN, Q => R_R00);
-    r02: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE( 3 downto  2), I_D => I_DIN, Q => R_R02);
-    r04: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE( 5 downto  4), I_D => I_DIN, Q => R_R04);
-    r06: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE( 7 downto  6), I_D => I_DIN, Q => R_R06);
-    r08: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE( 9 downto  8), I_D => I_DIN, Q => R_R08);
-    r10: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(11 downto 10), I_D => I_DIN, Q => R_R10);
-    r12: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(13 downto 12), I_D => I_DIN, Q => R_R12);
-    r14: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(15 downto 14), I_D => I_DIN, Q => R_R14);
-    r16: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(17 downto 16), I_D => I_DIN, Q => R_R16);
-    r18: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(19 downto 18), I_D => I_DIN, Q => R_R18);
-    r20: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(21 downto 20), I_D => I_DIN, Q => R_R20);
-    r22: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(23 downto 22), I_D => I_DIN, Q => R_R22);
-    r24: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(25 downto 24), I_D => I_DIN, Q => R_R24);
-    r26: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(27 downto 26), I_D => L_DX,  Q => R_R26);
-    r28: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(29 downto 28), I_D => L_DY,  Q => R_R28);
-    r30: reg_16 port map(I_CLK => I_CLK, I_WE => L_WE(31 downto 30), I_D => L_DZ,  Q => R_R30);
-    sp:  reg_16 port map(I_CLK => I_CLK, I_WE => L_WE_SP,            I_D => L_DSP, Q => R_SP);
+    r00: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE( 1 downto  0), I_D => I_DIN, Q => R_R00);
+    r02: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE( 3 downto  2), I_D => I_DIN, Q => R_R02);
+    r04: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE( 5 downto  4), I_D => I_DIN, Q => R_R04);
+    r06: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE( 7 downto  6), I_D => I_DIN, Q => R_R06);
+    r08: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE( 9 downto  8), I_D => I_DIN, Q => R_R08);
+    r10: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(11 downto 10), I_D => I_DIN, Q => R_R10);
+    r12: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(13 downto 12), I_D => I_DIN, Q => R_R12);
+    r14: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(15 downto 14), I_D => I_DIN, Q => R_R14);
+    r16: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(17 downto 16), I_D => I_DIN, Q => R_R16);
+    r18: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(19 downto 18), I_D => I_DIN, Q => R_R18);
+    r20: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(21 downto 20), I_D => I_DIN, Q => R_R20);
+    r22: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(23 downto 22), I_D => I_DIN, Q => R_R22);
+    r24: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(25 downto 24), I_D => I_DIN, Q => R_R24);
+    r26: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(27 downto 26), I_D => L_DX,  Q => R_R26);
+    r28: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(29 downto 28), I_D => L_DY,  Q => R_R28);
+    r30: reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE(31 downto 30), I_D => L_DZ,  Q => R_R30);
+    sp:  reg_16 port map(I_CLK => I_CLK, I_CE => I_CE, I_WE => L_WE_SP,            I_D => L_DSP, Q => R_SP);
 
     sr: status_reg
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
                 I_COND      => I_COND,
                 I_DIN       => I_DIN(7 downto 0),
                 I_FLAGS     => I_FLAGS,

@@ -34,6 +34,7 @@ use work.common.ALL;
 
 entity opc_deco is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_OPC       : in  std_logic_vector(31 downto 0);
             I_PC        : in  std_logic_vector(15 downto 0);
@@ -63,9 +64,9 @@ architecture Behavioral of opc_deco is
 
 begin
 
-    process(I_CLK)
+    process(I_CE, I_CLK)
     begin
-    if (rising_edge(I_CLK)) then
+    if (I_CE = '1' and rising_edge(I_CLK)) then
         --
         -- set the most common settings as default.
         --

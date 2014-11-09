@@ -32,6 +32,7 @@ use IEEE.std_logic_UNSIGNED.ALL;
 
 entity opc_fetch is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_CLR       : in  std_logic;
             I_INTVEC    : in  std_logic_vector( 5 downto 0);
@@ -90,9 +91,9 @@ begin
                 Q_PC        => P_PC,
                 Q_PM_DOUT   => Q_PM_DOUT);
 
-   lpc: process(I_CLK)
+   lpc: process(I_CE, I_CLK)
     begin
-        if (rising_edge(I_CLK)) then
+        if (I_CE = '1' and rising_edge(I_CLK)) then
             L_PC <= L_NEXT_PC;
             L_T0 <= not L_WAIT;
         end if;
