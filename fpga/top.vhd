@@ -44,7 +44,11 @@ entity HdmilightTop is
 		OUTPUT : out STD_LOGIC_VECTOR(7 downto 0);
 		RX : in STD_LOGIC;
 		TX : inout STD_LOGIC;
-		CLK : in STD_LOGIC
+		CLK : in STD_LOGIC;
+		FLASH_CK : out STD_LOGIC;
+		FLASH_CS : out STD_LOGIC;
+		FLASH_SI : out  STD_LOGIC;
+		FLASH_SO : in STD_LOGIC
 	);
 end HdmilightTop;
 
@@ -110,6 +114,28 @@ component uart
     );
 end component;
 
+component flashDMAController
+Port (
+        clk            : in std_logic;
+        flashStartAddr : in std_logic_vector(23 downto 0);
+	sramStartAddr  : in std_logic_vector(15 downto 0);
+	copySize       : in std_logic_vector(15 downto 0);
+	write          : in std_logic;
+	start          : in std_logic;
+	busy           : out std_logic;
+
+	we    : out std_logic;
+	addr  : out std_logic_vector(15 downto 0);
+	din   : in  std_logic_vector( 7 downto 0);
+	dout  : out std_logic_vector( 7 downto 0);
+
+	spiClk    : out std_logic;
+	spiCs     : out std_logic;
+	spiSi     : out std_logic;
+	spiSo     : in  std_logic
+    );
+end component;
+
 -----------------------------------------------
 -- Signals
 -----------------------------------------------
@@ -147,6 +173,11 @@ signal MCU_DOUT : std_logic_vector(15 downto 0);
 signal MCU_DIN  : std_logic_vector(15 downto 0);
 signal MCU_IO_DATA_READ : std_logic_vector(8-1 downto 0):=(others=>'0');
 
+signal MASTER_WE    : std_logic_vector(1 downto 0);
+signal MASTER_ADDR  : std_logic_vector(15 downto 0);
+signal MASTER_DOUT  : std_logic_vector(15 downto 0);
+signal MASTER_DIN   : std_logic_vector(15 downto 0);
+
 signal SRAM_WE   : std_logic_vector(1 downto 0);
 signal SRAM_DOUT : std_logic_vector(15 downto 0);
 signal SRAM_DIN  : std_logic_vector(15 downto 0);
@@ -159,6 +190,17 @@ signal MCU_TIMER_LATCHED : std_logic_vector(32-1 downto 0):=(others=>'0');
 signal DDRD : std_logic_vector(7 downto 0);
 signal PIND : std_logic_vector(7 downto 0);
 signal PORTD : std_logic_vector(7 downto 0);
+
+signal DMA_SRAM_ADDR  : std_logic_vector(15 downto 0);
+signal DMA_FLASH_ADDR : std_logic_vector(23 downto 0);
+signal DMA_BYTE_COUNT : std_logic_vector(15 downto 0);
+signal DMA_WRITE      : std_logic;
+signal DMA_START      : std_logic;
+signal DMA_BUSY       : std_logic;
+signal DMA_WE         : std_logic;
+signal DMA_ADDR       : std_logic_vector(15 downto 0);
+signal DMA_DOUT       : std_logic_vector(7 downto 0);
+signal DMA_DIN        : std_logic_vector(7 downto 0);
 
 signal vidclk : std_logic;
 signal viddata_r : std_logic_vector(7 downto 0);
@@ -194,9 +236,30 @@ Inst_DCM32to16: DCM32to16 PORT MAP(
 	CLK0_OUT => open
 );
 
+dma : flashDMAController port map(
+	CLK16,
+
+	DMA_FLASH_ADDR,
+	DMA_SRAM_ADDR,
+	DMA_BYTE_COUNT,
+	DMA_WRITE,
+	DMA_START,
+	DMA_BUSY,
+
+	DMA_WE,
+	DMA_ADDR,
+	DMA_DIN,
+	DMA_DOUT,
+
+	FLASH_CK,
+	FLASH_CS,
+	FLASH_SI,
+	FLASH_SO
+);
+
 SRAM : data_mem port map(
 	I_CLK   => CLK16,
-	I_ADR   => MCU_ADDR(10 downto 0),
+	I_ADR   => MASTER_ADDR(10 downto 0),
 	I_DIN   => SRAM_DIN,
 	I_WE    => SRAM_WE,
 	Q_DOUT  => SRAM_DOUT
@@ -257,11 +320,13 @@ begin
 
 		UART_WR <= '0';
 		UART_RD <= '0';
+
+		DMA_START <= '0';
 		
 		-- IO Read Cycle
 		if (MCU_IO_RD = '1') then
 								
-			case MCU_ADDR is
+			case MASTER_ADDR is
 			
 				-- 0x21 -> Uart - UDR - TX BUF
 				when X"0041"  => 
@@ -276,11 +341,11 @@ begin
 		-- IO Write Cycle
 		if (MCU_IO_WR = '1') then
 								
-			case MCU_ADDR is
+			case MASTER_ADDR is
 			
 				-- 0x21 -> Uart - UDR - TX BUF
 				when X"0041"  => 
-					UART_TX_DATA <= MCU_DOUT(7 downto 0);
+					UART_TX_DATA <= MASTER_DOUT(7 downto 0);
 					UART_WR <= '1';
 					
 				-- 0x22 -> 32-bit Timer Control
@@ -289,9 +354,27 @@ begin
 					MCU_TIMER_LATCHED <= MCU_TIMER_VAL;
 					
 				when X"0049"  =>
-					DDRD <= MCU_DOUT(7 downto 0);
+					DDRD <= MASTER_DOUT(7 downto 0);
 				when X"004b"  =>
-					PORTD <= MCU_DOUT(7 downto 0);
+					PORTD <= MASTER_DOUT(7 downto 0);
+
+				when X"004c"  =>
+					DMA_FLASH_ADDR(23 downto 16) <= MASTER_DOUT(7 downto 0);
+				when X"004d"  =>
+					DMA_FLASH_ADDR(15 downto  8) <= MASTER_DOUT(7 downto 0);
+				when X"004e"  =>
+					DMA_FLASH_ADDR( 7 downto  0) <= MASTER_DOUT(7 downto 0);
+				when X"004f"  =>
+					DMA_SRAM_ADDR(15 downto 8) <= MASTER_DOUT(7 downto 0);
+				when X"0050"  =>
+					DMA_SRAM_ADDR( 7 downto 0) <= MASTER_DOUT(7 downto 0);
+				when X"0051"  =>
+					DMA_BYTE_COUNT(15 downto 8) <= MASTER_DOUT(7 downto 0);
+				when X"0052"  =>
+					DMA_BYTE_COUNT( 7 downto 0) <= MASTER_DOUT(7 downto 0);
+				when X"0053"  =>
+					DMA_WRITE <= MASTER_DOUT(0);
+					DMA_START <= '1';
 				
 				when others => 
 				
@@ -303,7 +386,7 @@ begin
 end process;
 
 -- Asynchronous IO Read Process
-process (MCU_IO_RD, MCU_ADDR, UART_RX_ERROR, UART_TX_BUSY, UART_RX_FULL, UART_TX_AVAIL, UART_RX_AVAIL, UART_RX_DATA, MCU_TIMER_LATCHED,
+process (MCU_IO_RD, MASTER_ADDR, UART_RX_ERROR, UART_TX_BUSY, UART_RX_FULL, UART_TX_AVAIL, UART_RX_AVAIL, UART_RX_DATA, MCU_TIMER_LATCHED,
          DDRD, PIND, PORTD)
 
 begin
@@ -311,7 +394,7 @@ begin
 	-- Read cycle?
 	if (MCU_IO_RD = '1') then 
 							
-		case MCU_ADDR is
+		case MASTER_ADDR is
 		
 			-- 0x20 -> Uart - USR - Status Reg
 			when X"0040"  => 
@@ -391,18 +474,24 @@ end process;
 ----------------------------------------------- 
 MCU_CLK <= CLK16;
 MCU_RST <= RST;
-MCU_RUN <= '1';
+MCU_RUN <= not DMA_BUSY;
 
-MCU_DIN <= "00000000" & MCU_IO_DATA_READ when MCU_IO_RD = '1' else
-           SRAM_DOUT when MCU_ADDR(15) = '0' else
-           "00000000" & AMBILIGHT_CFG_DOUT;
+MASTER_WE   <= '0' & DMA_WE when DMA_BUSY = '1' else MCU_SRAM_WR;
+MASTER_ADDR <= DMA_ADDR when DMA_BUSY = '1' else MCU_ADDR;
+MASTER_DIN  <= "00000000" & MCU_IO_DATA_READ when MCU_IO_RD = '1' else
+               SRAM_DOUT when MASTER_ADDR(15) = '0' else
+               "00000000" & AMBILIGHT_CFG_DOUT;
+MASTER_DOUT <= "00000000" & DMA_DOUT when DMA_BUSY = '1' else MCU_DOUT;
 
-AMBILIGHT_CFG_DIN  <= MCU_DOUT(7 downto 0);
-AMBILIGHT_CFG_ADDR <= '0' & MCU_ADDR(14 downto 0);
-AMBILIGHT_CFG_WE   <= MCU_SRAM_WR(0) and MCU_ADDR(15);
+MCU_DIN <= MASTER_DIN;
+DMA_DIN <= MASTER_DIN(7 downto 0);
 
-SRAM_DIN <= MCU_DOUT;
-SRAM_WE  <= MCU_SRAM_WR when MCU_ADDR(15) = '0' else "00";
+AMBILIGHT_CFG_DIN  <= MASTER_DOUT(7 downto 0);
+AMBILIGHT_CFG_ADDR <= '0' & MASTER_ADDR(14 downto 0);
+AMBILIGHT_CFG_WE   <= MASTER_WE(0) and MASTER_ADDR(15);
+
+SRAM_DIN <= MASTER_DOUT;
+SRAM_WE  <= MASTER_WE when MASTER_ADDR(15) = '0' else "00";
 
 ADV_RST <= '1';
 OUTPUT <= driverOutput;

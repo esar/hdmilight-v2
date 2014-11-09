@@ -298,7 +298,73 @@ char cmdSetOutputUsage[] PROGMEM = "output light area coef gamma enable";
 char cmdGetPortUsage[] PROGMEM = "addr";
 char cmdSetPortUsage[] PROGMEM = "addr value";
 char cmdGetResultUsage[] PROGMEM = "index";
+char cmdGetFlashUsage[] PROGMEM = "src dst len";
 
+#define DMA_FLASH_ADDR_H    _SFR_IO8(0x2c)
+#define DMA_FLASH_ADDR_M    _SFR_IO8(0x2d)
+#define DMA_FLASH_ADDR_L    _SFR_IO8(0x2e)
+#define DMA_SRAM_ADDR_H     _SFR_IO8(0x2f)
+#define DMA_SRAM_ADDR_L     _SFR_IO8(0x30)
+#define DMA_LEN_H           _SFR_IO8(0x31)
+#define DMA_LEN_L           _SFR_IO8(0x32)
+#define DMA_START           _SFR_IO8(0x33)
+void cmdGetFlash(uint8_t argc, char** argv)
+{
+	if(argc == 4)
+	{
+		uint16_t src = getint(&argv[1]);
+		uint16_t dst = getint(&argv[2]);
+		uint16_t len = getint(&argv[3]);
+
+
+		if(dst != 0)
+		{
+			printf_P(PSTR("copying %04x bytes from %04x to %04x...\n"), len, src, dst);
+
+			DMA_FLASH_ADDR_H = 0x06;
+			DMA_FLASH_ADDR_M = src >> 8;
+			DMA_FLASH_ADDR_L = src & 0xff;
+			DMA_SRAM_ADDR_H = dst >> 8;
+			DMA_SRAM_ADDR_L = dst & 0xff;
+			DMA_LEN_H = len >> 8;
+			DMA_LEN_L = len & 0xff;
+			DMA_START = 0;
+		}
+		else
+		{
+			static uint8_t buf[18];
+			uint16_t pos;
+
+			printf_P(PSTR("dumping %04x bytes from %04x...\n"), len, src);
+
+			dst = (uint16_t)(&buf);
+			for(pos = 0; pos < len; pos += 16, src += 16)
+			{
+				int i;
+				DMA_FLASH_ADDR_H = 0x06;
+				DMA_FLASH_ADDR_M = src >> 8;
+				DMA_FLASH_ADDR_L = src & 0xff;
+				DMA_SRAM_ADDR_H = dst >> 8;
+				DMA_SRAM_ADDR_L = dst & 0xff;
+				DMA_LEN_H = 0;
+				DMA_LEN_L = 16;
+				DMA_START = 0;
+
+				asm("nop");
+				asm("nop");
+				asm("nop");
+				asm("nop");
+
+				printf("%04x ", pos);
+				for(i = 0; i < 16; ++i)
+					printf("%02x ", (unsigned int)buf[i]);
+				printf("\n");
+			}
+		}
+
+		printf("\ndone.\n");
+	}
+}
 
 int main()
 {
@@ -318,6 +384,7 @@ int main()
 		{ "GD", cmdGetDelay,  cmdBlankUsage     },
 		{ "SD", cmdSetDelay,  cmdSetDelayUsage  },
 		{ "CD", cmdCfgDelay,  cmdBlankUsage     },
+		{ "GF", cmdGetFlash,  cmdGetFlashUsage  },
 		{ "GG", cmdGetGamma,  cmdGetGammaUsage  },
 		{ "SG", cmdSetGamma,  cmdSetGammaUsage  },
 		{ "CG", cmdCfgGamma,  cmdBlankUsage     },
