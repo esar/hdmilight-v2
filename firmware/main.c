@@ -308,9 +308,33 @@ char cmdGetFlashUsage[] PROGMEM = "src dst len";
 #define DMA_LEN_H           _SFR_IO8(0x31)
 #define DMA_LEN_L           _SFR_IO8(0x32)
 #define DMA_START           _SFR_IO8(0x33)
+
+void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
+{
+	section += 6;
+	if(section < 6)
+		section = 6;
+	DMA_FLASH_ADDR_H = section;
+	DMA_FLASH_ADDR_M = src >> 8;
+	DMA_FLASH_ADDR_L = src & 0xff;
+	DMA_SRAM_ADDR_H = dst >> 8;
+	DMA_SRAM_ADDR_L = dst & 0xff;
+	DMA_LEN_H = len >> 8;
+	DMA_LEN_L = len & 0xff;
+	DMA_START = 0;
+}
+
 void cmdGetFlash(uint8_t argc, char** argv)
 {
-	if(argc == 4)
+	if(argc == 2)
+	{
+		int section = getint(&argv[1]);
+
+		printf_P(PSTR("loading config...\n"));
+		dmaRead(section, 0, 0x8000, 0x8000);
+		printf("done.\n");
+	}
+	else if(argc == 4)
 	{
 		uint16_t src = getint(&argv[1]);
 		uint16_t dst = getint(&argv[2]);
@@ -320,15 +344,7 @@ void cmdGetFlash(uint8_t argc, char** argv)
 		if(dst != 0)
 		{
 			printf_P(PSTR("copying %04x bytes from %04x to %04x...\n"), len, src, dst);
-
-			DMA_FLASH_ADDR_H = 0x06;
-			DMA_FLASH_ADDR_M = src >> 8;
-			DMA_FLASH_ADDR_L = src & 0xff;
-			DMA_SRAM_ADDR_H = dst >> 8;
-			DMA_SRAM_ADDR_L = dst & 0xff;
-			DMA_LEN_H = len >> 8;
-			DMA_LEN_L = len & 0xff;
-			DMA_START = 0;
+			dmaRead(0, src, dst, len);
 		}
 		else
 		{
@@ -341,14 +357,8 @@ void cmdGetFlash(uint8_t argc, char** argv)
 			for(pos = 0; pos < len; pos += 16, src += 16)
 			{
 				int i;
-				DMA_FLASH_ADDR_H = 0x06;
-				DMA_FLASH_ADDR_M = src >> 8;
-				DMA_FLASH_ADDR_L = src & 0xff;
-				DMA_SRAM_ADDR_H = dst >> 8;
-				DMA_SRAM_ADDR_L = dst & 0xff;
-				DMA_LEN_H = 0;
-				DMA_LEN_L = 16;
-				DMA_START = 0;
+
+				dmaRead(0, src, dst, 16);
 
 				asm("nop");
 				asm("nop");

@@ -49,7 +49,7 @@ begin
 process(a_clk)
 begin
     if(rising_edge(a_clk)) then
-        if(a_wr = '1') then
+        if(a_wr = '1' and a_addr(11) = '0') then
             mem(conv_integer(a_addr)) := a_din;
         end if;
         a_dout <= mem(conv_integer(a_addr));
