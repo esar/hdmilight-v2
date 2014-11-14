@@ -24,7 +24,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-
+library UNISIM;
+use UNISIM.vcomponents.all;
 
 entity flashDMAController is
     Port (
@@ -72,14 +73,14 @@ begin
 
 process(clk)
 begin
-	if(falling_edge(clk)) then
+	if(rising_edge(clk)) then
 		state <= nextState;
 	end if;
 end process;
 
 process(clk)
 begin
-	if(falling_edge(clk)) then
+	if(rising_edge(clk)) then
 		intWe   <= '0';
 	
 		shiftOut <= shiftOut(6 downto 0) & '0';
@@ -195,15 +196,30 @@ begin
 			end case;
 		end if;
 	end if;
-    end process;
+end process;
 
+clk_fwd : ODDR2
+	generic map
+	(
+		DDR_ALIGNMENT => "NONE",
+		INIT => '1',
+		SRTYPE => "SYNC"
+	)
+	port map
+	(
+		Q => spiClk, 
+		C0 => clk,
+		C1 => not clk, 
+		D0 => '1', 
+		D1 => '0',
+		S => intSpiCs
+	);
 
-busy     <= not intSpiCs;
-we   <= intWe;
-addr <= intAddr;
-spiClk   <= clk or intSpiCs; --when intSpiCs = '1' else '1';
-spiCs    <= intSpiCs;
-spiSi    <= shiftOut(7);
+busy  <= not intSpiCs;
+we    <= intWe;
+addr  <= intAddr;
+spiCs <= intSpiCs;
+spiSi <= shiftOut(7);
 
 end Behavioral;
 
