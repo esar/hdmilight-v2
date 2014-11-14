@@ -16033,13 +16033,13 @@ Copyright: Würth Elektronik</description>
 <part name="P+2" library="supply1" deviceset="+5V" device=""/>
 <part name="C1" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
-<part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="47R"/>
-<part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="47R"/>
-<part name="R7" library="resistor" deviceset="R-EU_" device="R0603" value="47R"/>
-<part name="R8" library="resistor" deviceset="R-EU_" device="R0603" value="47R"/>
+<part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="1K5"/>
+<part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="1K5"/>
+<part name="R7" library="resistor" deviceset="R-EU_" device="R0603" value="47K"/>
+<part name="R8" library="resistor" deviceset="R-EU_" device="R0603" value="47K"/>
 <part name="SUPPLY12" library="supply2" deviceset="V&lt;--" device="" value="VCC_3V3"/>
-<part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="27R"/>
-<part name="R9" library="resistor" deviceset="R-EU_" device="R0603" value="100R"/>
+<part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="27K"/>
+<part name="R9" library="resistor" deviceset="R-EU_" device="R0603" value="100K"/>
 <part name="SUPPLY13" library="supply2" deviceset="V&lt;--" device="" value="VCC_3V3"/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="U$5" library="__SR" deviceset="TXB0108" device=""/>
