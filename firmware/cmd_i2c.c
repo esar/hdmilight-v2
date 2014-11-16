@@ -32,6 +32,20 @@
 #include "config_edid.h"
 
 
+uint8_t i2cRead(uint8_t addr, uint8_t subaddr)
+{
+	int val;
+	i2c_start();
+	i2c_write(addr);
+	i2c_write(subaddr);
+	i2c_start();
+	i2c_write(0x99);
+	val = i2c_read(0);
+	i2c_stop();
+
+	return val;
+}
+
 void cmdSetI2C(uint8_t argc, char** argv)
 {
 	if(argc == 4)
@@ -51,15 +65,7 @@ void cmdGetI2C(uint8_t argc, char** argv)
 {
 	if(argc == 3)
 	{
-		int val;
-		i2c_start();
-		i2c_write(getint(&argv[1]));
-		i2c_write(getint(&argv[2]));
-		i2c_start();
-		i2c_write(0x99);
-		val = i2c_read(0);
-		i2c_stop();
-
+		int val = i2cRead(getint(&argv[1]), getint(&argv[2]));
 		printf_P(PSTR("Read: %d\n"), val);
 	}
 	//else

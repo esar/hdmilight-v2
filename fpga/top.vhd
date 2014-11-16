@@ -89,7 +89,7 @@ component cpu_core
             Q_ADR       : out std_logic_vector(15 downto 0);
             Q_RD_IO     : out std_logic;
             Q_WE_IO     : out std_logic;
-				Q_WE_SRAM   : out std_logic_vector(1 downto 0));
+            Q_WE_SRAM   : out std_logic_vector(1 downto 0));
 end component;
 
 component uart
@@ -160,6 +160,7 @@ signal UART_RX_ERROR : std_logic := '0';
 signal MCU_RST: std_logic:= '1';
 signal MCU_RUN: std_logic:= '0';
 signal MCU_CLK: std_logic:= '0';
+signal MCU_INTVEC: std_logic_vector(5 downto 0);
 
 signal MCU_INST : std_logic_vector(16-1 downto 0):=(others=>'0');
 signal MCU_PC : std_logic_vector(16-1 downto 0):=(others=>'0');
@@ -214,6 +215,8 @@ signal AMBILIGHT_CFG_DIN  : std_logic_vector(7 downto 0);
 signal AMBILIGHT_CFG_DOUT : std_logic_vector(7 downto 0);
 signal driverOutput : std_logic_vector(7 downto 0);
 
+signal formatChanged : std_logic;
+
 begin
 
 -----------------------------------------------
@@ -221,12 +224,13 @@ begin
 -----------------------------------------------
 
 ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank(1), vblank(1),
-                                      CLK16,
-												  AMBILIGHT_CFG_WE,
-												  AMBILIGHT_CFG_ADDR,
-												  AMBILIGHT_CFG_DIN,
-												  AMBILIGHT_CFG_DOUT,
-												  driverOutput);
+                                           CLK16,
+                                           AMBILIGHT_CFG_WE,
+                                           AMBILIGHT_CFG_ADDR,
+                                           AMBILIGHT_CFG_DIN,
+                                           AMBILIGHT_CFG_DOUT,
+                                           driverOutput,
+                                           formatChanged);
 
 												  
 Inst_DCM32to16: DCM32to16 PORT MAP(
@@ -277,7 +281,7 @@ U3_AVR_MCU:  cpu_core port map (
                 I_CE        => MCU_RUN,
                 I_CLR       => MCU_RST,
                 I_DIN       => MCU_DIN,
-                I_INTVEC    => "000000",
+                I_INTVEC    => MCU_INTVEC,
 
                 Q_ADR       => MCU_ADDR,
                 Q_DOUT      => MCU_DOUT,
@@ -300,6 +304,19 @@ begin
 			RST <= '0';
 		else
 			RST_COUNT <= RST_COUNT + 1;
+		end if;
+	end if;
+end process;
+
+process(RST,CLK16)
+begin
+	if(RST = '1') then
+		MCU_INTVEC <= (others => '0');
+	elsif(rising_edge(CLK16)) then
+		MCU_INTVEC <= "000000";
+
+		if(formatChanged = '1') then
+			MCU_INTVEC <= "100001";
 		end if;
 	end if;
 end process;

@@ -37,16 +37,19 @@ entity ambilight is
            viddata_r : in  STD_LOGIC_VECTOR (7 downto 0);
            viddata_g : in  STD_LOGIC_VECTOR (7 downto 0);
            viddata_b : in  STD_LOGIC_VECTOR (7 downto 0);
-			  hblank : in STD_LOGIC;
-			  vblank : in STD_LOGIC;
+           hblank : in STD_LOGIC;
+           vblank : in STD_LOGIC;
 			  
            cfgclk : in  STD_LOGIC;
-			  cfgwe : in STD_LOGIC;
-			  cfgaddr : in STD_LOGIC_VECTOR (15 downto 0);
+           cfgwe : in STD_LOGIC;
+           cfgaddr : in STD_LOGIC_VECTOR (15 downto 0);
            cfgdatain : in  STD_LOGIC_VECTOR (7 downto 0);
            cfgdataout : out  STD_LOGIC_VECTOR (7 downto 0);
 			  
-			  output : out STD_LOGIC_VECTOR(7 downto 0));
+           output : out STD_LOGIC_VECTOR(7 downto 0);
+
+           formatChanged : out std_logic);
+
 end ambilight;
 
 architecture Behavioral of ambilight is
@@ -128,6 +131,14 @@ signal resultDelayFrameCount : std_logic_vector(7 downto 0);
 signal resultDelayTickCount  : std_logic_vector(23 downto 0);
 signal resultDelayTemporalSmoothingRatio : std_logic_vector(8 downto 0);
 
+signal formatCfgDout     : std_logic_vector( 7 downto 0);
+signal formatXSize       : std_logic_vector(11 downto 0);
+signal formatXPreActive  : std_logic_vector(11 downto 0);
+signal formatXPostActive : std_logic_vector(11 downto 0);
+signal formatYSize       : std_logic_vector(10 downto 0);
+signal formatYPreActive  : std_logic_vector(10 downto 0);
+signal formatYPostActive : std_logic_vector(10 downto 0);
+
 signal storeResult : std_logic;
 signal storeResultDelayed : std_logic;
 signal resultLatchAddr : std_logic_vector(31 downto 0);
@@ -144,7 +155,8 @@ signal cfgGammaB : std_logic;
 signal cfgResult : std_logic;
 signal cfgStatus : std_logic;
 signal cfgDelay  : std_logic;
-signal cfgVect   : std_logic_vector(8 downto 0);
+signal cfgFormat : std_logic;
+signal cfgVect   : std_logic_vector(9 downto 0);
 
 signal disabledOutput : std_logic_vector(7 downto 0);
 begin
@@ -153,12 +165,18 @@ hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, viddata_r, viddat
                                        hblank_delayed, vblank_delayed, ce2, ce4, ravg, gavg, bavg);
   
 scaler : entity work.scaler port map(vidclk, ce2, hblank_delayed, vblank_delayed, ravg, gavg, bavg, 
-										       vidclk, lineBufferAddr, lineBufferData, lineReady, yPos);
+                                     vidclk, lineBufferAddr, lineBufferData, lineReady, yPos);
 
 lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
                                                    lineBufferAddr, lineBufferData,
-															      cfgclk, lightCfgWe, lightCfgAddr, lightCfgDin, lightCfgDout,
-															      cfgclk, resultAddr, resultData);
+                                                   cfgclk, lightCfgWe, lightCfgAddr, lightCfgDin, lightCfgDout,
+                                                   cfgclk, resultAddr, resultData);
+
+formatDetector : entity work.formatDetector port map(vidclk, ce2, hblank_delayed, vblank_delayed, ravg, gavg, bavg,
+                                                     cfgclk, x"10", 
+                                                     formatXSize, formatXPreActive, formatXPostActive, 
+                                                     formatYSize, formatYPreActive, formatYPostActive, 
+                                                     formatChanged);
 
 process(cfgclk)
 begin
@@ -374,6 +392,21 @@ with cfgaddr(3 downto 0) select resultCfgDout <=
 	driverResultLatched(23 downto 16)  when "1110",
 	driverResultLatched(31 downto 24)  when "1111";
 
+with cfgaddr(3 downto 0) select formatCfgDout <=
+	formatXSize( 7 downto 0)                 when "0000",
+	"0000" &  formatXSize(11 downto 8)       when "0001",
+        formatXPreActive( 7 downto 0)            when "0010",
+        "0000" & formatXPreActive(11 downto 8)   when "0011",
+        formatXPostActive( 7 downto 0)           when "0100",
+        "0000" & formatXPostActive(11 downto 8)  when "0101",
+	formatYSize( 7 downto 0)                 when "0110",
+	"00000" & formatYSize(10 downto 8)       when "0111",
+        formatYPreActive( 7 downto 0)            when "1000",
+	"00000" & formatYPreActive(10 downto 8)  when "1001",
+	formatYPostActive( 7 downto 0)           when "1010",
+	"00000" & formatYPostActive(10 downto 8) when "1011",
+	"00000000"                               when others;
+
 cfgOutput <= '1' when cfgaddr(15 downto 11) = "00000" or         -- 0x0000 - 0x1FFF
                       cfgaddr(15 downto 11) = "00001" or
                       cfgaddr(15 downto 11) = "00010" or
@@ -388,18 +421,20 @@ cfgGammaB <= '1' when cfgaddr(15 downto 11) = "01010" else '0';  -- 0x5000 - 0x5
 cfgResult <= '1' when cfgaddr(15 downto 11) = "01011" else '0';  -- 0x5800 - 0x5FFF
 cfgStatus <= '1' when cfgaddr(15 downto 11) = "01100" else '0';  -- 0x6000 - 0x67FF
 cfgDelay  <= '1' when cfgaddr(15 downto 11) = "01101" else '0';  -- 0x6800 - 0x6FFF
+cfgFormat <= '1' when cfgaddr(15 downto 11) = "01110" else '0';  -- 0x7000 - 0x77FF
 
-cfgVect <= cfgOutput & cfgCoef & cfgArea & cfgGammaR & cfgGammaG & cfgGammaB & cfgResult & cfgStatus & cfgDelay;
+cfgVect <= cfgOutput & cfgCoef & cfgArea & cfgGammaR & cfgGammaG & cfgGammaB & cfgResult & cfgStatus & cfgDelay & cfgFormat;
 with cfgVect select cfgdataout <= 
-	outputMapCfgDout   when "100000000",
-	colourCoefCfgDout  when "010000000",
-	lightCfgDout       when "001000000",
-	gammaTableRCfgDout when "000100000",
-	gammaTableGCfgDout when "000010000",
-	gammaTableBCfgDout when "000001000",
-	resultCfgDout      when "000000100",
-	statusLatched      when "000000010",
-	resultDelayCfgDout when "000000001",
+	outputMapCfgDout   when "1000000000",
+	colourCoefCfgDout  when "0100000000",
+	lightCfgDout       when "0010000000",
+	gammaTableRCfgDout when "0001000000",
+	gammaTableGCfgDout when "0000100000",
+	gammaTableBCfgDout when "0000010000",
+	resultCfgDout      when "0000001000",
+	statusLatched      when "0000000100",
+	resultDelayCfgDout when "0000000010",
+	formatCfgDout      when "0000000001",
 	"00000000"         when others;
 
 outputMapCfgWr     <= cfgwe when cfgOutput = '1' else '0';

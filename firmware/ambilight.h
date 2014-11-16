@@ -31,9 +31,11 @@
 #define AMBILIGHT_BASE_ADDR_RESULT ((void*)0xd800)
 #define AMBILIGHT_BASE_ADDR_STATUS ((void*)0xe000)
 #define AMBILIGHT_BASE_ADDR_DELAY  ((void*)0xe800)
+#define AMBILIGHT_BASE_ADDR_FORMAT ((void*)0xf000)
 
 
 extern uint8_t silent;
+extern volatile uint8_t g_formatChanged;
 
 
 char readcmd(char** argv, char maxargs);
@@ -43,6 +45,8 @@ void getrange(char* str, uint8_t* min, uint8_t* max);
 uint32_t getfixed_9_9(const char* p);
 int fixed_9_9_fract(int32_t x, int numDigits);
 int fixed_9_9_int(int32_t x);
+
+uint8_t i2cRead(uint8_t addr, uint8_t subaddr);
 
 void cmdGetAddr(uint8_t argc, char** argv);
 void cmdSetAddr(uint8_t argc, char** argv);
@@ -77,3 +81,5 @@ void cmdSetPort(uint8_t argc, char** argv);
 void cmdGetResult(uint8_t argc, char** argv);
 
 void cmdGetStatus(uint8_t argc, char** argv);
+
+void cmdGetFormat(uint8_t argc, char** argv);

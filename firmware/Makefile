@@ -12,7 +12,8 @@ OBJ            = main.o serial.o timer.o i2c.o \
                  cmd_output.o  \
                  cmd_port.o    \
                  cmd_result.o  \
-                 cmd_status.o
+                 cmd_status.o  \
+                 cmd_format.o
 
 MCU_TARGET     = atmega16
 OPTIMIZE       = -Os

@@ -23,6 +23,7 @@
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
+#include <avr/interrupt.h>
 #include <string.h>
 #include <stdio.h>
 #include "ambilight.h"
@@ -37,7 +38,12 @@
 
 
 uint8_t silent = 0;
+volatile uint8_t g_formatChanged = 0;
 
+ISR(_VECTOR(1))
+{
+	g_formatChanged = 1;
+}
 
 char readcmd(char** argv, char maxargs)
 {
@@ -52,7 +58,14 @@ char readcmd(char** argv, char maxargs)
 	{
 		int c = serial_getchar();
 		if(c == -1)
+		{
+			if(g_formatChanged)
+			{
+				cmdGetFormat(1, NULL);
+				g_formatChanged = 0;
+			}
 			continue;
+		}
 
 		switch(c)
 		{
@@ -413,6 +426,7 @@ int main()
 		{ "SP", cmdSetPort,   cmdSetPortUsage   },
 		{ "GR", cmdGetResult, cmdGetResultUsage },
 		{ "GS", cmdGetStatus, cmdBlankUsage     },
+		{ "GX", cmdGetFormat, cmdBlankUsage     },
 		{ "CA", cmdCfgAll,    cmdBlankUsage     },
 	};
 
@@ -437,6 +451,8 @@ int main()
 	//silent = 0;
 
 	//printf("done.\n");
+
+	sei();
 
 	while (1)
 	{
