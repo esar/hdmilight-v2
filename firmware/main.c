@@ -342,37 +342,40 @@ void cmdGetFlash(uint8_t argc, char** argv)
 {
 	if(argc == 2)
 	{
-		int section = getint(&argv[1]);
+		uint32_t config = getint(&argv[1]);
+		config += 1;
+		config *= 0x8000;
 
 		printf_P(PSTR("loading config...\n"));
-		dmaRead(section, 0, 0x8000, 0x8000);
+		dmaRead(config >> 16, config & 0xffff, 0x8000, 0x8000);
 		printf("done.\n");
 	}
-	else if(argc == 4)
+	else if(argc == 5)
 	{
-		uint16_t src = getint(&argv[1]);
-		uint16_t dst = getint(&argv[2]);
-		uint16_t len = getint(&argv[3]);
+		uint16_t sec = getint(&argv[1]);
+		uint16_t src = getint(&argv[2]);
+		uint16_t dst = getint(&argv[3]);
+		uint16_t len = getint(&argv[4]);
 
 
 		if(dst != 0)
 		{
-			printf_P(PSTR("copying %04x bytes from %04x to %04x...\n"), len, src, dst);
-			dmaRead(0, src, dst, len);
+			printf_P(PSTR("copying %04x bytes from %04x%04x to %04x...\n"), len, sec, src, dst);
+			dmaRead(sec, src, dst, len);
 		}
 		else
 		{
 			static uint8_t buf[18];
 			uint16_t pos;
 
-			printf_P(PSTR("dumping %04x bytes from %04x...\n"), len, src);
+			printf_P(PSTR("dumping %04x%04x bytes from %04x...\n"), sec, len, src);
 
 			dst = (uint16_t)(&buf);
 			for(pos = 0; pos < len; pos += 16, src += 16)
 			{
 				int i;
 
-				dmaRead(0, src, dst, 16);
+				dmaRead(sec, src, dst, 16);
 
 				printf("%04x ", pos);
 				for(i = 0; i < 16; ++i)

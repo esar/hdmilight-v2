@@ -180,14 +180,18 @@ void changeFormat()
 	
 	if(hasChanged)
 	{
-		uint16_t config;
+		uint32_t config;
 
 		printf_P(PSTR("format changed: %dx%d (%d): "), currentWidth, currentHeight, currentRatio);
 		printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
 			
 		config = getConfig(currentWidth, currentHeight, currentRatio);
 		if(config != 0xffff)
-			dmaRead(config + 1, 0, 0x8000, 0x8000);
+		{
+			config += 1;
+			config *= 0x8000;
+			dmaRead(config >> 16, config & 0xffff, 0x8000, 0x8000);
+		}
 	}
 }	
 
