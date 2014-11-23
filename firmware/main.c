@@ -61,7 +61,7 @@ char readcmd(char** argv, char maxargs)
 		{
 			if(g_formatChanged)
 			{
-				cmdGetFormat(1, NULL);
+				changeFormat();
 				g_formatChanged = 0;
 			}
 			continue;
@@ -327,6 +327,7 @@ void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
 	section += 6;
 	if(section < 6)
 		section = 6;
+
 	DMA_FLASH_ADDR_H = section;
 	DMA_FLASH_ADDR_M = src >> 8;
 	DMA_FLASH_ADDR_L = src & 0xff;
@@ -372,11 +373,6 @@ void cmdGetFlash(uint8_t argc, char** argv)
 				int i;
 
 				dmaRead(0, src, dst, 16);
-
-				asm("nop");
-				asm("nop");
-				asm("nop");
-				asm("nop");
 
 				printf("%04x ", pos);
 				for(i = 0; i < 16; ++i)

@@ -7,6 +7,9 @@ all: merged.bin
 $(CONFIGS):
 	make -C $@
 
+format.bin: format.conf
+	../tools/format2bin.py $< > $@
+
 merged.bin: merge.conf $(CONFIGS)
 	../tools/mergebin.py merge.conf merged.bin
 

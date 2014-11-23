@@ -27,135 +27,175 @@
 #include <stdio.h>
 #include "ambilight.h"
 
-struct
+#define RATIO_FUZZ    (0x100 / 10)
+#define NOBAR_FUZZ    10
+#define EVENBAR_FUZZ  20
+#define X_RES_FUZZ    8
+#define Y_RES_FUZZ    8
+#define X_ACTIVE_FUZZ 4
+#define Y_ACTIVE_FUZZ 4
+
+#define IS_CENTERED(preActive, postActive)  ((preActive) >= (postActive) - EVENBAR_FUZZ && \
+		                             (preActive) <= (postActive) + EVENBAR_FUZZ)
+#define IS_FULLSCREEN(preActive, postActive) ((preActive) + (postActive) <= NOBAR_FUZZ)
+
+typedef struct
 {
 	uint16_t width;
 	uint16_t height;
+	uint16_t ratio;
+	uint16_t config;
+	
+} __attribute__((packed)) FormatConfig;
 
-} g_hdmiVIC[] PROGMEM = 
-{
-	{ 0,    0    },  // 0
-	{ 640,  480  },  // 1
-	{ 720,  480  },  // 2
-	{ 720,  480  },  // 3
-	{ 1280, 720  },  // 4
-	{ 1920, 1080 },  // 5
-	{ 720,  480  },  // 6
-	{ 720,  480  },  // 7
-        { 720,  240  },  // 8
-	{ 720,  240  },  // 9
-	{ 2880, 480  },  // 10
-	{ 2880, 480  },  // 11
-	{ 2880, 240  },  // 12
-	{ 2880, 240  },  // 13
-	{ 1440, 480  },  // 14
-	{ 1440, 480  },  // 15
-	{ 1920, 1080 },  // 16
-	{ 720,  576  },  // 17
-	{ 720,  576  },  // 18
-	{ 1280, 720  },  // 19
-	{ 1920, 1080 },  // 20
-	{ 720,  576  },  // 21
-	{ 720,  576  },  // 22
-	{ 720,  288  },  // 23
-	{ 720,  288  },  // 24
-	{ 2880, 576  },  // 25
-	{ 2880, 576  },  // 26
-	{ 2880, 288  },  // 27
-	{ 2880, 288  },  // 28
-	{ 1440, 576  },  // 29
-	{ 1440, 576  },  // 30
-	{ 1920, 1080 },  // 31
-	{ 1920, 1080 },  // 32
-	{ 1920, 1080 },  // 33
-	{ 1920, 1080 },  // 34
-	{ 2880, 480  },  // 35
-	{ 2880, 480  },  // 36
-	{ 2880, 576  },  // 37
-	{ 2880, 576  },  // 38
-	{ 1920, 1080 },  // 39
-	{ 1920, 1080 },  // 40
-	{ 1280, 720  },  // 41
-	{ 720,  576  },  // 42
-	{ 720,  576  },  // 43
-	{ 720,  576  },  // 44
-	{ 720,  576  },  // 45
-	{ 1920, 1080 },  // 46
-	{ 1280, 720  },  // 47
-	{ 720,  480  },  // 48
-	{ 720,  480  },  // 49
-	{ 720,  480  },  // 50
-	{ 720,  480  },  // 51
-	{ 720,  576  },  // 52
-	{ 720,  576  },  // 53
-	{ 720,  576  },  // 54
-	{ 720,  576  },  // 55
-	{ 720,  480  },  // 56
-	{ 720,  480  },  // 57
-	{ 720,  480  },  // 58
-	{ 720,  480  },  // 59
-	{ 1280, 720  },  // 60
-	{ 1280, 720  },  // 61
-	{ 1280, 720  },  // 62
-	{ 1920, 1080 },  // 63
-	{ 1920, 1080 },  // 64
-};
-
-struct
+typedef struct
 {
 	uint16_t ratio;
 	char* name;
+	
+} KnownRatio;
 
-} g_ratios[] = 
+KnownRatio g_ratios[] = 
 {
-	{ (uint16_t)(1.33 * 256), "1.33" },
 	{ (uint16_t)(1.78 * 256), "1.77" },
-	{ (uint16_t)(1.85 * 256), "1.85" },
 	{ (uint16_t)(2.40 * 256), "2.40" },
+	{ (uint16_t)(1.33 * 256), "1.33" },
 	{ 0, NULL }
 };
 
-
-void cmdGetFormat(uint8_t argc, char** argv)
+uint16_t getConfig(uint16_t width, uint16_t height, uint16_t ratio)
 {
-	static int last = 0xff;
+	FormatConfig config;
+	int offset = 0;
+	
+	do
+	{
+		dmaRead(0, offset, &config, sizeof(config));
+		if(config.width  >= width  - X_RES_FUZZ && config.width  <= width  + X_RES_FUZZ && 
+		   config.height >= height - Y_RES_FUZZ && config.height <= height + Y_RES_FUZZ &&
+		   config.ratio == ratio)
+		{
+			return config.config;
+		}
 
-	uint16_t* address = AMBILIGHT_BASE_ADDR_FORMAT;
-	uint16_t width  = (address[0] - address[1] - address[2]) * 2;
-	uint16_t height = address[3] - address[4] - address[5];
-	uint32_t ratio  = ((uint32_t)width * 256) / height;
+		offset += sizeof(config);
+		
+	} while(config.width != 0);
+
+	return 0xffff;
+}
+
+uint16_t getRatio(uint16_t width, uint16_t height)
+{
 	int i;
+	uint32_t ratio = ((uint32_t)width * 0x100) / height;
 
 	for(i = 0; i < sizeof(g_ratios) / sizeof(*g_ratios); ++i)
-		if(ratio > g_ratios[i].ratio - 25 && ratio < g_ratios[i].ratio + 25)
+		if(ratio > g_ratios[i].ratio - RATIO_FUZZ && ratio < g_ratios[i].ratio + RATIO_FUZZ)
 			break;
 
 	if(i < sizeof(g_ratios) / sizeof(*g_ratios))
+		return i;
+	else
+		return 0xffff;
+}
+
+void changeFormat()
+{
+	static uint16_t xMinPreActive  = 0;
+	static uint16_t xMinPostActive = 0;
+	static uint16_t yMinPreActive  = 0;
+	static uint16_t yMinPostActive = 0;
+	static uint16_t currentRatio   = 0;
+	static uint16_t currentWidth  = 0xffff;
+	static uint16_t currentHeight = 0xffff;
+
+	uint8_t hasChanged = 0;
+
+	struct
 	{
-		if(i != last)
-		{
-			uint8_t vic = i2cRead(0x7c, 0x04);	
-			if(vic < sizeof(g_hdmiVIC) / sizeof(*g_hdmiVIC))
-			{
-				uint16_t vicWidth = pgm_read_word(&g_hdmiVIC[vic].width);
-				uint16_t vicHeight = pgm_read_word(&g_hdmiVIC[vic].height);
-				int pass = (width > vicWidth - (vicWidth >> 7) && width < vicWidth + (vicWidth >> 7));
-				pass |= (height > vicHeight - (vicHeight >> 7) && height < vicHeight + (vicHeight >> 7));
-				if(!pass)
-					return;
-			}
-			
-			printf_P(PSTR("format changed: %dx%d (%d): "), width, height, (uint16_t)ratio);
-			printf_P(PSTR("%s\n"), g_ratios[i].name);
-			last = i;
-		}
+		uint16_t xSize;
+		uint16_t xPreActive;
+		uint16_t xPostActive;
+		uint16_t ySize;
+		uint16_t yPreActive;
+		uint16_t yPostActive;
+
+	} __attribute__((packed)) *format = AMBILIGHT_BASE_ADDR_FORMAT;
+
+
+	if(format->xSize < currentWidth  - X_RES_FUZZ ||
+	   format->xSize > currentWidth  + X_RES_FUZZ ||
+	   format->ySize < currentHeight - Y_RES_FUZZ ||
+	   format->ySize > currentHeight + Y_RES_FUZZ ||
+	   format->xPreActive  < xMinPreActive  ||
+	   format->xPostActive < xMinPostActive ||
+	   format->yPreActive  < yMinPreActive  ||
+	   format->yPostActive < yMinPostActive)
+	{
+		// Either the resolution has changed or the active
+		// area has left the bounding box of the current ratio
+		// so return to the native ratio for the current resolution
+//printf_P(PSTR("reset: %d %d %d   %d %d %d\n"), format->xSize, format->xPreActive, format->xPostActive, format->ySize, format->yPreActive, format->yPostActive);
+		currentRatio   = 0;
+		currentWidth   = format->xSize;
+		currentHeight  = format->ySize;
+		xMinPreActive  = 0;
+		xMinPostActive = 0;
+		yMinPreActive  = 0;
+		yMinPostActive = 0;
+		hasChanged     = 1;
 	}
 
-/*
+	if(IS_FULLSCREEN(format->xPreActive, format->xPostActive) &&
+	   IS_CENTERED(format->yPreActive, format->yPostActive))
+	{
+		uint16_t ratio = getRatio(format->xSize - format->xPreActive - format->xPostActive,
+		                          format->ySize - format->yPreActive - format->yPostActive);
+		if(ratio != 0xffff && ratio != currentRatio)
+		{
+			currentRatio   = ratio;
+			xMinPreActive  = 0;
+			xMinPostActive = 0;
+			yMinPreActive  = format->yPreActive - Y_ACTIVE_FUZZ;
+			yMinPostActive = format->yPostActive - Y_ACTIVE_FUZZ;
+			hasChanged     = 1;
+		}
+	}
+	else if(IS_FULLSCREEN(format->yPreActive, format->yPostActive) &&
+	        IS_CENTERED(format->xPreActive, format->xPostActive))
+	{
+		uint16_t ratio = getRatio(format->xSize - format->xPreActive - format->xPostActive,
+		                          format->ySize - format->yPreActive - format->yPostActive);
+		if(ratio != 0xffff && ratio != currentRatio)
+		{
+			currentRatio   = ratio;
+			xMinPreActive  = format->xPreActive - X_ACTIVE_FUZZ;
+			xMinPostActive = format->xPostActive - X_ACTIVE_FUZZ;
+			yMinPreActive  = 0;
+			yMinPostActive = 0;
+			hasChanged     = 1;
+		}
+	}
+	
+	if(hasChanged)
+	{
+		uint16_t config;
+
+		printf_P(PSTR("format changed: %dx%d (%d): "), currentWidth, currentHeight, currentRatio);
+		printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
+			
+		config = getConfig(currentWidth, currentHeight, currentRatio);
+		if(config != 0xffff)
+			dmaRead(config + 1, 0, 0x8000, 0x8000);
+	}
+}	
+
+void cmdGetFormat(uint8_t argc, char** argv)
+{
 	if(argc == 1)
 	{
 		uint16_t* address = AMBILIGHT_BASE_ADDR_FORMAT;
 		printf("%d %d %d %d %d %d\n", address[0], address[1], address[2], address[3], address[4], address[5]);
 	}
-*/
 }

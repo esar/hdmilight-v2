@@ -46,7 +46,11 @@ uint32_t getfixed_9_9(const char* p);
 int fixed_9_9_fract(int32_t x, int numDigits);
 int fixed_9_9_int(int32_t x);
 
+void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len);
+
 uint8_t i2cRead(uint8_t addr, uint8_t subaddr);
+
+void changeFormat();
 
 void cmdGetAddr(uint8_t argc, char** argv);
 void cmdSetAddr(uint8_t argc, char** argv);
