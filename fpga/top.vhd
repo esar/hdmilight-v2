@@ -211,6 +211,7 @@ signal viddata_g : std_logic_vector(7 downto 0);
 signal viddata_b : std_logic_vector(7 downto 0);
 signal hblank : std_logic_vector(1 downto 0);
 signal vblank : std_logic_vector(1 downto 0);
+signal dataenable : std_logic_vector(1 downto 0);
 signal AMBILIGHT_CFG_WE   : std_logic;
 signal AMBILIGHT_CFG_ADDR : std_logic_vector(15 downto 0);
 signal AMBILIGHT_CFG_DIN  : std_logic_vector(7 downto 0);
@@ -225,7 +226,7 @@ begin
 -- Instantiation
 -----------------------------------------------
 
-ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank(1), vblank(1),
+ambilight : entity work.ambilight port map(vidclk, viddata_r, viddata_g, viddata_b, hblank(1), vblank(1), dataenable(1),
                                            CLK16,
                                            AMBILIGHT_CFG_WE,
                                            AMBILIGHT_CFG_ADDR,
@@ -492,6 +493,7 @@ begin
 	if(rising_edge(ADV_LLC)) then
 		hblank <= hblank(0) & (not ADV_HS);
 		vblank <= vblank(0) & (not ADV_VS);
+		dataenable <= dataenable(0) & ADV_DE;
 	end if;
 end process;
 

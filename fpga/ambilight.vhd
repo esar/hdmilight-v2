@@ -39,6 +39,7 @@ entity ambilight is
            viddata_b : in  STD_LOGIC_VECTOR (7 downto 0);
            hblank : in STD_LOGIC;
            vblank : in STD_LOGIC;
+           dataenable : in STD_LOGIC;
 			  
            cfgclk : in  STD_LOGIC;
            cfgwe : in STD_LOGIC;
@@ -58,6 +59,7 @@ signal ce2 : std_logic;
 signal ce4 : std_logic;
 signal hblank_delayed : std_logic;
 signal vblank_delayed : std_logic;
+signal dataenable_delayed : std_logic;
 signal ravg : std_logic_vector(7 downto 0);
 signal gavg : std_logic_vector(7 downto 0);
 signal bavg : std_logic_vector(7 downto 0);
@@ -161,8 +163,8 @@ signal cfgVect   : std_logic_vector(9 downto 0);
 signal disabledOutput : std_logic_vector(7 downto 0);
 begin
 
-hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, viddata_r, viddata_g, viddata_b,
-                                       hblank_delayed, vblank_delayed, ce2, ce4, ravg, gavg, bavg);
+hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, dataenable, viddata_r, viddata_g, viddata_b,
+                                       hblank_delayed, vblank_delayed, dataenable_delayed, ce2, ce4, ravg, gavg, bavg);
   
 scaler : entity work.scaler port map(vidclk, ce2, hblank_delayed, vblank_delayed, ravg, gavg, bavg, 
                                      vidclk, lineBufferAddr, lineBufferData, lineReady, yPos);
@@ -172,7 +174,7 @@ lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
                                                    cfgclk, lightCfgWe, lightCfgAddr, lightCfgDin, lightCfgDout,
                                                    cfgclk, resultAddr, resultData);
 
-formatDetector : entity work.formatDetector port map(vidclk, ce2, hblank_delayed, vblank_delayed, ravg, gavg, bavg,
+formatDetector : entity work.formatDetector port map(vidclk, ce2, hblank_delayed, vblank_delayed, dataenable_delayed, ravg, gavg, bavg,
                                                      cfgclk, x"10", 
                                                      formatXSize, formatXPreActive, formatXPostActive, 
                                                      formatYSize, formatYPreActive, formatYPostActive, 
@@ -226,9 +228,12 @@ ws2811Driver5 : entity work.ws2811Driver port map(cfgclk, driverReady(5), driver
 ws2811Driver6 : entity work.ws2811Driver port map(cfgclk, driverReady(6), driverStart(6), driverData, output(6));
 ws2811Driver7 : entity work.ws2811Driver port map(cfgclk, driverReady(7), driverStart(7), driverData, output(7));
 
---output(5) <= delayedStartDistribution;
---output(6) <= startDistribution;
---output(7) <= vblank;
+--output(0) <= delayedStartDistribution;
+--output(1) <= startDistribution;
+--output(2) <= vblank;
+--output(3) <= hblank;
+--output(4) <= dataenable;
+--output(5) <= '1';
 
 outputMapRam : entity work.outputconfigRam
 	 port map(
@@ -407,21 +412,21 @@ with cfgaddr(3 downto 0) select formatCfgDout <=
 	"00000" & formatYPostActive(10 downto 8) when "1011",
 	"00000000"                               when others;
 
-cfgOutput <= '1' when cfgaddr(15 downto 11) = "00000" or         -- 0x0000 - 0x1FFF
+cfgOutput <= '1' when cfgaddr(15 downto 11) = "00000" or                 -- 0x0000 - 0x1FFF
                       cfgaddr(15 downto 11) = "00001" or
                       cfgaddr(15 downto 11) = "00010" or
                       cfgaddr(15 downto 11) = "00011" else '0';
-cfgCoef   <= '1' when cfgaddr(15 downto 11) = "00100" or         -- 0x2000 - 0x2FFF
+cfgCoef   <= '1' when cfgaddr(15 downto 11) = "00100" or                 -- 0x2000 - 0x2FFF
                       cfgaddr(15 downto 11) = "00101" else '0';
-cfgArea   <= '1' when cfgaddr(15 downto 11) = "00110" or         -- 0x3000 - 0x3FFF
+cfgArea   <= '1' when cfgaddr(15 downto 11) = "00110" or                 -- 0x3000 - 0x3FFF
                       cfgaddr(15 downto 11) = "00111" else '0';
-cfgGammaR <= '1' when cfgaddr(15 downto 11) = "01000" else '0';  -- 0x4000 - 0x47FF
-cfgGammaG <= '1' when cfgaddr(15 downto 11) = "01001" else '0';  -- 0x4800 - 0x4FFF
-cfgGammaB <= '1' when cfgaddr(15 downto 11) = "01010" else '0';  -- 0x5000 - 0x57FF
-cfgResult <= '1' when cfgaddr(15 downto 11) = "01011" else '0';  -- 0x5800 - 0x5FFF
-cfgStatus <= '1' when cfgaddr(15 downto 11) = "01100" else '0';  -- 0x6000 - 0x67FF
-cfgDelay  <= '1' when cfgaddr(15 downto 11) = "01101" else '0';  -- 0x6800 - 0x6FFF
-cfgFormat <= '1' when cfgaddr(15 downto 11) = "01110" else '0';  -- 0x7000 - 0x77FF
+cfgGammaR <= '1' when cfgaddr(15 downto 11) = "01000" else '0';          -- 0x4000 - 0x47FF
+cfgGammaG <= '1' when cfgaddr(15 downto 11) = "01001" else '0';          -- 0x4800 - 0x4FFF
+cfgGammaB <= '1' when cfgaddr(15 downto 11) = "01010" else '0';          -- 0x5000 - 0x57FF
+cfgResult <= '1' when cfgaddr(15 downto 11) = "01011" else '0';          -- 0x5800 - 0x5FFF
+cfgStatus <= '1' when cfgaddr(15 downto 11) = "01100" else '0';          -- 0x6000 - 0x67FF
+cfgDelay  <= '1' when cfgaddr(15 downto  3) = "0110100000000" else '0';  -- 0x6800 - 0x6FFF
+cfgFormat <= '1' when cfgaddr(15 downto 11) = "01110" else '0';          -- 0x7000 - 0x77FF
 
 cfgVect <= cfgOutput & cfgCoef & cfgArea & cfgGammaR & cfgGammaG & cfgGammaB & cfgResult & cfgStatus & cfgDelay & cfgFormat;
 with cfgVect select cfgdataout <= 

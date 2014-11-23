@@ -30,6 +30,7 @@ entity formatDetector is
 		ce2    : in std_logic;
 		hblank : in std_logic;
 		vblank : in std_logic;
+                dataenable : in std_logic;
 		r      : in std_logic_vector(7 downto 0);
 		g      : in std_logic_vector(7 downto 0);
 		b      : in std_logic_vector(7 downto 0);
@@ -76,6 +77,7 @@ signal yStepCount : std_logic_vector(4 downto 0);
 
 signal lastvblank   : std_logic;
 signal lasthblank   : std_logic;
+signal lastdataenable : std_logic;
 signal startOfFrame : std_logic;
 signal endOfFrame   : std_logic;
 signal startOfLine  : std_logic;
@@ -113,12 +115,12 @@ begin
 		if(ce2 = '1' and vblank = '0') then
 			startOfLine <= '0';
 			endOfLine   <= '0';
-			if(hblank = '1' and lasthblank = '0') then
-				endOfLine <= '1';
-			elsif(hblank = '0' and lasthblank = '1') then
+			if(dataenable = '1' and lastdataenable = '0') then
 				startOfLine <= '1';
+			elsif(dataenable = '0' and lastdataenable = '1') then
+				endOfLine <= '1';
 			end if;
-			lasthblank <= hblank;
+			lastdataenable <= dataenable;
 		end if;
 	end if;
 end process;
@@ -284,7 +286,7 @@ begin
 		if(ce2 = '1') then
 			if(startOfLine = '1') then
 				xCount <= (others => '0');
-			else
+			elsif(dataenable = '1') then
 				xCount <= std_logic_vector(unsigned(xCount) + 1);
 			end if;
 		end if;
@@ -370,9 +372,9 @@ begin
 	end if;
 end process;
 
-xSize       <= xSizeCfgClk;
-xPreActive  <= xPreActiveCfgClk;
-xPostActive <= xPostActiveCfgClk;
+xSize       <= xSizeCfgClk(10 downto 0) & "0";
+xPreActive  <= xPreActiveCfgClk(10 downto 0) & "0";
+xPostActive <= xPostActiveCfgClk(10 downto 0) & "0";
 ySize       <= ySizeCfgClk;
 yPreActive  <= yPreActiveCfgClk;
 yPostActive <= yPostActiveCfgClk;

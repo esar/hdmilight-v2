@@ -37,13 +37,15 @@ entity hscale4 is
     Port ( CLK : in  STD_LOGIC;
            D_HSYNC : in  STD_LOGIC;
            D_VSYNC : in  STD_LOGIC;
-	        D_R : in  STD_LOGIC_VECTOR (7 downto 0);
+           D_DATAENABLE : in STD_LOGIC;
+           D_R : in  STD_LOGIC_VECTOR (7 downto 0);
            D_G : in  STD_LOGIC_VECTOR (7 downto 0);
            D_B : in  STD_LOGIC_VECTOR (7 downto 0);
            Q_HSYNC : out  STD_LOGIC;
            Q_VSYNC : out  STD_LOGIC;
-			  CE2 : out STD_LOGIC;
-			  CE4 : out STD_LOGIC;
+           Q_DATAENABLE : out STD_LOGIC;
+           CE2 : out STD_LOGIC;
+           CE4 : out STD_LOGIC;
            Q_R : out  STD_LOGIC_VECTOR (7 downto 0);
            Q_G : out  STD_LOGIC_VECTOR (7 downto 0);
            Q_B : out  STD_LOGIC_VECTOR (7 downto 0));
@@ -79,21 +81,9 @@ signal BSUM2 : std_logic_vector(8 downto 0);
 signal BSUM3 : std_logic_vector(8 downto 0);
 signal BAVG  : std_logic_vector(7 downto 0);
 
-signal HSYNC1 : std_logic;
-signal HSYNC2 : std_logic;
-signal HSYNC3 : std_logic;
-signal HSYNC4 : std_logic;
-signal HSYNC5 : std_logic;
-signal HSYNC6 : std_logic;
-signal HSYNC7 : std_logic;
-
-signal VSYNC1 : std_logic;
-signal VSYNC2 : std_logic;
-signal VSYNC3 : std_logic;
-signal VSYNC4 : std_logic;
-signal VSYNC5 : std_logic;
-signal VSYNC6 : std_logic;
-signal VSYNC7 : std_logic;
+signal HSYNC : std_logic_vector(6 downto 0);
+signal VSYNC : std_logic_vector(6 downto 0);
+signal DATAENABLE : std_logic_vector(6 downto 0);
 
 begin
 	process(CLK)
@@ -162,31 +152,15 @@ begin
 	process(CLK)
 	begin
 		if(rising_edge(CLK)) then
-			HSYNC7 <= HSYNC6;
-			HSYNC6 <= HSYNC5;
-			HSYNC5 <= HSYNC4;
-			HSYNC4 <= HSYNC3;
-			HSYNC3 <= HSYNC2;
-			HSYNC2 <= HSYNC1;
-			HSYNC1 <= D_HSYNC;
+			HSYNC <= HSYNC(5 downto 0) & D_HSYNC;
+			VSYNC <= VSYNC(5 downto 0) & D_VSYNC;
+			DATAENABLE <= DATAENABLE(5 downto 0) & D_DATAENABLE;
 		end if;
 	end process;
 
-	process(CLK)
-	begin
-		if(rising_edge(CLK)) then
-			VSYNC7 <= VSYNC6;
-			VSYNC6 <= VSYNC5;
-			VSYNC5 <= VSYNC4;
-			VSYNC4 <= VSYNC3;
-			VSYNC3 <= VSYNC2;
-			VSYNC2 <= VSYNC1;
-			VSYNC1 <= D_VSYNC;
-		end if;
-	end process;
-
-	Q_HSYNC <= HSYNC7;
-	Q_VSYNC <= VSYNC7;
+	Q_HSYNC <= HSYNC(6);
+	Q_VSYNC <= VSYNC(6);
+	Q_DATAENABLE <= DATAENABLE(6);
 	Q_R <= RAVG;
 	Q_G <= GAVG;
 	Q_B <= BAVG;
