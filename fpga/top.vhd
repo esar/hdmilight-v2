@@ -202,6 +202,8 @@ signal DMA_WE         : std_logic;
 signal DMA_ADDR       : std_logic_vector(15 downto 0);
 signal DMA_DOUT       : std_logic_vector(7 downto 0);
 signal DMA_DIN        : std_logic_vector(7 downto 0);
+signal DMA_IN_PROGRESS: std_logic;
+signal DMA_BUSY_PREV  : std_logic;
 
 signal vidclk : std_logic;
 signal viddata_r : std_logic_vector(7 downto 0);
@@ -391,13 +393,20 @@ begin
 					DMA_BYTE_COUNT( 7 downto 0) <= MASTER_DOUT(7 downto 0);
 				when X"0053"  =>
 					DMA_WRITE <= MASTER_DOUT(0);
+					DMA_IN_PROGRESS <= '1';
 					DMA_START <= '1';
 				
 				when others => 
 				
 			end case;												
 		
-		end if;				
+		end if;	
+	
+		if(DMA_BUSY = '0' and DMA_BUSY_PREV = '1') then
+			DMA_IN_PROGRESS <= '0';
+		end if;
+
+		DMA_BUSY_PREV <= DMA_BUSY;
 		
 	end if;
 end process;
@@ -491,14 +500,14 @@ end process;
 ----------------------------------------------- 
 MCU_CLK <= CLK16;
 MCU_RST <= RST;
-MCU_RUN <= not DMA_BUSY;
+MCU_RUN <= not DMA_IN_PROGRESS;
 
-MASTER_WE   <= '0' & DMA_WE when DMA_BUSY = '1' else MCU_SRAM_WR;
-MASTER_ADDR <= DMA_ADDR when DMA_BUSY = '1' else MCU_ADDR;
+MASTER_WE   <= '0' & DMA_WE when DMA_IN_PROGRESS = '1' else MCU_SRAM_WR;
+MASTER_ADDR <= DMA_ADDR when DMA_IN_PROGRESS = '1' else MCU_ADDR;
 MASTER_DIN  <= "00000000" & MCU_IO_DATA_READ when MCU_IO_RD = '1' else
                SRAM_DOUT when MASTER_ADDR(15) = '0' else
                "00000000" & AMBILIGHT_CFG_DOUT;
-MASTER_DOUT <= "00000000" & DMA_DOUT when DMA_BUSY = '1' else MCU_DOUT;
+MASTER_DOUT <= "00000000" & DMA_DOUT when DMA_IN_PROGRESS = '1' else MCU_DOUT;
 
 MCU_DIN <= MASTER_DIN;
 DMA_DIN <= MASTER_DIN(7 downto 0);

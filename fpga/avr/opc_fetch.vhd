@@ -51,6 +51,7 @@ architecture Behavioral of opc_fetch is
 
 component prog_mem
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_WAIT      : in  std_logic;
             I_PC        : in  std_logic_vector (15 downto 0);
@@ -82,6 +83,7 @@ begin
 
     pmem : prog_mem
     port map(   I_CLK       => I_CLK,
+                I_CE        => I_CE,
 
                 I_WAIT      => L_WAIT,
                 I_PC        => L_NEXT_PC,

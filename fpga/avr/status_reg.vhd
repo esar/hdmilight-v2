@@ -31,7 +31,6 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity status_reg is
     port (  I_CLK       : in  std_logic;
-            I_CE        : in  std_logic;
 
             I_COND      : in  std_logic_vector ( 3 downto 0);
             I_DIN       : in  std_logic_vector ( 7 downto 0);
@@ -48,9 +47,9 @@ architecture Behavioral of status_reg is
 signal L                : std_logic_vector ( 7 downto 0);
 begin
 
-    process(I_CLK, I_CE)
+    process(I_CLK)
     begin
-        if (I_CE = '1' and rising_edge(I_CLK)) then
+        if (rising_edge(I_CLK)) then
             if (I_WE_F = '1') then          -- write flags (from ALU)
                 L <= I_FLAGS;
             elsif (I_WE_SR = '1') then      -- write I/O

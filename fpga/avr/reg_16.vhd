@@ -31,7 +31,6 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity reg_16 is
     port (  I_CLK       : in  std_logic;
-            I_CE        : in  std_logic;
 
             I_D         : in  std_logic_vector (15 downto 0);
             I_WE        : in  std_logic_vector ( 1 downto 0);
@@ -44,9 +43,9 @@ architecture Behavioral of reg_16 is
 signal L                : std_logic_vector (15 downto 0) := X"7777";
 begin
 
-    process(I_CLK, I_CE)
+    process(I_CLK)
     begin
-        if (I_CE = '1' and rising_edge(I_CLK)) then
+        if (rising_edge(I_CLK)) then
             if (I_WE(1) = '1') then 
                 L(15 downto 8) <= I_D(15 downto 8);
             end if;

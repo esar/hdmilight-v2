@@ -93,7 +93,6 @@ signal A_FLAGS          : std_logic_vector( 9 downto 0);
 
 component register_file
     port (  I_CLK       : in  std_logic;
-            I_CE        : in  std_logic;
 
             I_AMOD      : in  std_logic_vector( 5 downto 0);
             I_COND      : in  std_logic_vector( 3 downto 0);
@@ -149,7 +148,6 @@ begin
 
     regs : register_file
     port map(   I_CLK       => I_CLK,
-                I_CE        => I_CE,
 
                 I_AMOD      => I_AMOD,
                 I_COND(3)   => I_OPC(10),

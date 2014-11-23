@@ -34,6 +34,7 @@ use unisim.vcomponents.all;
 
 entity prog_mem is
     port (  I_CLK       : in  std_logic;
+            I_CE        : in  std_logic;
 
             I_WAIT      : in  std_logic;
             I_PC        : in  std_logic_vector(15 downto 0); -- word address
@@ -78,6 +79,7 @@ signal L_PM_ADR_13_12 : std_logic_vector( 1 downto 0);
 begin
 
     pe1 : RAMB16_S18_S18
+    generic map(INIT_00 => X"00000000000000000000000000000000000000000000000095082411940c940e")
     port map(ADDRA => L_PC_E,                  ADDRB => I_PM_ADR(11 downto 2),
              CLKA  => I_CLK,                    CLKB  => I_CLK,
              DIA   => "0000000000000000",       DIB   => "0000000000000000",
@@ -122,6 +124,7 @@ begin
              DIPA  => "00",                     DIPB  => "00");
 
     po1 : RAMB16_S18_S18
+    generic map(INIT_00 => X"0000000000000000000000000000000000000000000000000000be1300000004")
     port map(ADDRA => L_PC_O,                   ADDRB => I_PM_ADR(11 downto 2),
              CLKA  => I_CLK,                    CLKB  => I_CLK,
              DIA   => "0000000000000000",       DIB   => "0000000000000000",
@@ -170,7 +173,7 @@ begin
     --
     pc0: process(I_CLK)
     begin
-        if (rising_edge(I_CLK)) then
+        if (I_CE = '1' and rising_edge(I_CLK)) then
             Q_PC <= I_PC;
             L_PM_ADR_1_0 <= I_PM_ADR(1 downto 0);
             L_PM_ADR_13_12 <= I_PM_ADR(13 downto 12);
@@ -181,7 +184,7 @@ begin
         end if;
     end process;
 
-    L_WAIT_N <= not I_WAIT;
+    L_WAIT_N <= I_CE and (not I_WAIT);
 
     -- we use two memory blocks _E and _O (even and odd).
     -- This gives us a quad-port memory so that we can access
