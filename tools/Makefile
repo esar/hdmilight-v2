@@ -5,4 +5,4 @@ makemem: makemem.o
 all: makemem
 
 clean:
-	rm makemem
+	rm -f makemem

@@ -12,5 +12,5 @@ clean:
 	make -C tools clean
 	make -C firmware clean
 	make -C config clean
-	rm hdmilight-preconfig.bit
-	rm hdmilight.bit
+	rm -f hdmilight-preconfig.bit
+	rm -f hdmilight.bit

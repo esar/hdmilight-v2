@@ -1,4 +1,4 @@
-CONFIGS = $(shell awk '{print $$2}' merge.conf)
+CONFIGS = $(shell awk '!/\.bin/{print $$2}' merge.conf)
 
 all: merged.bin
 
@@ -10,9 +10,9 @@ $(CONFIGS):
 format.bin: format.conf
 	../tools/format2bin.py $< > $@
 
-merged.bin: merge.conf $(CONFIGS)
+merged.bin: merge.conf format.bin $(CONFIGS)
 	../tools/mergebin.py merge.conf merged.bin
 
 clean:
 	@$(foreach CONFIG, $(CONFIGS), $(MAKE) -C $(CONFIG) clean;)
-	rm *.bin
+	rm -f *.bin

@@ -22,4 +22,4 @@ merged.bin: merge.conf $(BIN_FILES)
 	../../tools/mergebin.py merge.conf merged.bin
 
 clean:
-	rm *.bin
+	rm -f *.bin
