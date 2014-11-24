@@ -47,8 +47,6 @@ void cmdGetDelay(uint8_t argc, char** argv)
 		printf_P(PSTR("%d %ld %d.%03d\n"), frames, ticks, 
 		         fixed_9_9_int(temporalSmoothingRatio), fixed_9_9_fract(temporalSmoothingRatio, 3));
 	}
-	//else
-		//printf("err: GD\n");
 }
 
 void cmdSetDelay(uint8_t argc, char** argv)
@@ -70,12 +68,10 @@ void cmdSetDelay(uint8_t argc, char** argv)
 		address[4] = temporalSmoothingRatio >> 8;
 		address[5] = temporalSmoothingRatio & 0xff;
 	}
-	//else
-		//printf("err: SD num_frames num_ticks\n");
 }
 
-void cmdCfgDelay(uint8_t argc, char** argv)
+void cmdRstDelay(uint8_t argc, char** argv)
 {
-	
+	memset(AMBILIGHT_BASE_ADDR_DELAY, 0, 8); 
 }
 

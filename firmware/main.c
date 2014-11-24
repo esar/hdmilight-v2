@@ -30,9 +30,6 @@
 #include "serial.h"
 #include "i2c.h"
 
-#include "config_hdmi.h"
-#include "config_lights.h"
-
 
 #define BELL    '\a'
 
@@ -284,34 +281,44 @@ void getrange(char* str, uint8_t* min, uint8_t* max)
 	}
 }
 
-void cmdCfgAll(uint8_t argc, char** argv)
+void cmdRstAll(uint8_t argc, char** argv)
 {
-	cmdCfgI2C(argc, argv);
-	cmdCfgLight(argc, argv);
-	cmdCfgColour(argc, argv);
-	cmdCfgGamma(argc, argv);
-	cmdCfgOutput(argc, argv);
-	cmdCfgDelay(argc, argv);
+	cmdRstI2C(argc, argv);
+	cmdRstArea(argc, argv);
+	cmdRstColour(argc, argv);
+	cmdRstGamma(argc, argv);
+	cmdRstOutput(argc, argv);
+	cmdRstDelay(argc, argv);
 }
 
 char cmdBlankUsage[] PROGMEM = "";
-char cmdGetAddrUsage[] PROGMEM = "addr count";
-char cmdSetAddrUsage[] PROGMEM = "addr byte0 [byte1] [...]";
-char cmdGetColourUsage[] PROGMEM = "index row";
-char cmdSetColourUsage[] PROGMEM = "index row Ri Rf Gi Gf Bi Bf";
-char cmdSetDelayUsage[] PROGMEM = "num_frames num_ticks smooth_ratio";
-char cmdGetGammaUsage[] PROGMEM = "table channel index";
-char cmdSetGammaUsage[] PROGMEM = "table channel index value";
-char cmdGetI2CUsage[] PROGMEM = "addr";
-char cmdSetI2CUsage[] PROGMEM = "addr value";
-char cmdGetLightUsage[] PROGMEM = "index";
-char cmdSetLightUsage[] PROGMEM = "index xmin xmax ymin ymax shift output";
-char cmdGetOutputUsage[] PROGMEM = "output light";
-char cmdSetOutputUsage[] PROGMEM = "output light area coef gamma enable";
-char cmdGetPortUsage[] PROGMEM = "addr";
-char cmdSetPortUsage[] PROGMEM = "addr value";
-char cmdGetResultUsage[] PROGMEM = "index";
-char cmdGetFlashUsage[] PROGMEM = "src dst len";
+char cmdGetAreaUsage[] PROGMEM   = "Get Area:    GA index";
+char cmdSetAreaUsage[] PROGMEM   = "Set Area:    SA index xmin xmax ymin ymax shift output";
+char cmdRstAreaUsage[] PROGMEM   = "Rst Area:    RA";
+char cmdGetAddrUsage[] PROGMEM   = "Get Address: GX addr count";
+char cmdSetAddrUsage[] PROGMEM   = "Set Address: SX addr byte0 [byte1] [...]";
+char cmdGetColourUsage[] PROGMEM = "Get Colour:  GC index row";
+char cmdSetColourUsage[] PROGMEM = "Set Colour:  SC index row r g b";
+char cmdRstColourUsage[] PROGMEM = "Rst Colour:  RC";
+char cmdGetDelayUsage[] PROGMEM  = "Get Delay:   GD";
+char cmdSetDelayUsage[] PROGMEM  = "Set Delay:   SD num_frames num_ticks smooth_ratio";
+char cmdRstDelayUsage[] PROGMEM  = "Rst Delay:   RD";
+char cmdGetFormatUsage[] PROGMEM = "Get Format:  GF";
+char cmdGetGammaUsage[] PROGMEM  = "Get Gamma:   GG table channel index";
+char cmdSetGammaUsage[] PROGMEM  = "Set Gamma:   SG table channel index value";
+char cmdRstGammaUsage[] PROGMEM  = "Rst Gamma:   RG";
+char cmdGetI2CUsage[] PROGMEM    = "Get I2C:     GI addr sub_addr";
+char cmdSetI2CUsage[] PROGMEM    = "Set I2C:     SI addr sub_addr value";
+char cmdRstI2CUsage[] PROGMEM    = "Rst I2C:     RI";
+char cmdGetMemUsage[] PROGMEM    = "Get Memory:  GM index";
+char cmdGetOutputUsage[] PROGMEM = "Get Output:  GO output light";
+char cmdSetOutputUsage[] PROGMEM = "Set Output:  SO output light area coef gamma enable";
+char cmdRstOutputUsage[] PROGMEM = "Rst Output:  RO";
+char cmdGetPortUsage[] PROGMEM   = "Get Port:    GP addr";
+char cmdSetPortUsage[] PROGMEM   = "Set Port:    SP addr value";
+char cmdGetResultUsage[] PROGMEM = "Get Result:  GR index";
+char cmdGetStatusUsage[] PROGMEM = "Get Status:  GS";
+char cmdRstAllUsage[] PROGMEM    = "Rst All:     R";
 
 #define DMA_FLASH_ADDR_H    _SFR_IO8(0x2c)
 #define DMA_FLASH_ADDR_M    _SFR_IO8(0x2d)
@@ -338,56 +345,6 @@ void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
 	DMA_START = 0;
 }
 
-void cmdGetFlash(uint8_t argc, char** argv)
-{
-	if(argc == 2)
-	{
-		uint32_t config = getint(&argv[1]);
-		config += 1;
-		config *= 0x8000;
-
-		printf_P(PSTR("loading config...\n"));
-		dmaRead(config >> 16, config & 0xffff, 0x8000, 0x8000);
-		printf("done.\n");
-	}
-	else if(argc == 5)
-	{
-		uint16_t sec = getint(&argv[1]);
-		uint16_t src = getint(&argv[2]);
-		uint16_t dst = getint(&argv[3]);
-		uint16_t len = getint(&argv[4]);
-
-
-		if(dst != 0)
-		{
-			printf_P(PSTR("copying %04x bytes from %04x%04x to %04x...\n"), len, sec, src, dst);
-			dmaRead(sec, src, dst, len);
-		}
-		else
-		{
-			static uint8_t buf[18];
-			uint16_t pos;
-
-			printf_P(PSTR("dumping %04x%04x bytes from %04x...\n"), sec, len, src);
-
-			dst = (uint16_t)(&buf);
-			for(pos = 0; pos < len; pos += 16, src += 16)
-			{
-				int i;
-
-				dmaRead(sec, src, dst, 16);
-
-				printf("%04x ", pos);
-				for(i = 0; i < 16; ++i)
-					printf("%02x ", (unsigned int)buf[i]);
-				printf("\n");
-			}
-		}
-
-		printf("\ndone.\n");
-	}
-}
-
 int main()
 {
 	static struct
@@ -398,35 +355,33 @@ int main()
 
 	} cmds[] = 
 	{
-		{ "GA", cmdGetAddr,   cmdGetAddrUsage   },
-		{ "SA", cmdSetAddr,   cmdSetAddrUsage   },
+		{ "GA", cmdGetArea,   cmdGetAreaUsage   },
+		{ "SA", cmdSetArea,   cmdSetAreaUsage   },
+		{ "RA", cmdRstArea,   cmdRstAreaUsage   },
 		{ "GC", cmdGetColour, cmdGetColourUsage },
 		{ "SC", cmdSetColour, cmdSetColourUsage },
-		{ "CC", cmdCfgColour, cmdBlankUsage     },
-		{ "GD", cmdGetDelay,  cmdBlankUsage     },
+		{ "RC", cmdRstColour, cmdRstColourUsage },
+		{ "GD", cmdGetDelay,  cmdGetDelayUsage  },
 		{ "SD", cmdSetDelay,  cmdSetDelayUsage  },
-		{ "CD", cmdCfgDelay,  cmdBlankUsage     },
-		{ "GF", cmdGetFlash,  cmdGetFlashUsage  },
+		{ "RD", cmdRstDelay,  cmdRstDelayUsage  },
+		{ "GF", cmdGetFormat, cmdGetFormatUsage },
 		{ "GG", cmdGetGamma,  cmdGetGammaUsage  },
 		{ "SG", cmdSetGamma,  cmdSetGammaUsage  },
-		{ "CG", cmdCfgGamma,  cmdBlankUsage     },
+		{ "RG", cmdRstGamma,  cmdRstGammaUsage  },
 		{ "GI", cmdGetI2C,    cmdGetI2CUsage    },
 		{ "SI", cmdSetI2C,    cmdSetI2CUsage    },
-		{ "CI", cmdCfgI2C,    cmdBlankUsage     },
-		{ "GL", cmdGetLight,  cmdGetLightUsage  },
-		{ "SL", cmdSetLight,  cmdSetLightUsage  },
-		{ "CL", cmdCfgLight,  cmdBlankUsage     },
-		//{ "GM", cmdGetMem                     },
-		//{ "SM", cmdSetMem                     },
+		{ "RI", cmdRstI2C,    cmdRstI2CUsage    },
+		{ "GM", cmdGetMem,    cmdGetMemUsage    },
 		{ "GO", cmdGetOutput, cmdGetOutputUsage },
 		{ "SO", cmdSetOutput, cmdSetOutputUsage },
-		{ "CO", cmdCfgOutput, cmdBlankUsage     },
+		{ "RO", cmdRstOutput, cmdRstOutputUsage },
 		{ "GP", cmdGetPort,   cmdGetPortUsage   },
 		{ "SP", cmdSetPort,   cmdSetPortUsage   },
 		{ "GR", cmdGetResult, cmdGetResultUsage },
-		{ "GS", cmdGetStatus, cmdBlankUsage     },
-		{ "GX", cmdGetFormat, cmdBlankUsage     },
-		{ "CA", cmdCfgAll,    cmdBlankUsage     },
+		{ "GS", cmdGetStatus, cmdGetStatusUsage },
+		{ "GX", cmdGetAddr,   cmdGetAddrUsage   },
+		{ "SX", cmdSetAddr,   cmdSetAddrUsage   },
+		{ "R",  cmdRstAll,    cmdRstAllUsage    },
 	};
 
 	int i;
@@ -434,22 +389,15 @@ int main()
 	int argc;
 
 	serial_init();
-	//printf_register(serial_putchar);
 	
-	//printf("waiting...");
-
 	// Wait a short while
 	for(i = 0; i < 10000; ++i)
 		asm volatile ("nop");
 
-	//printf("configuring...");
-
 	i2c_init();
 	//silent = 1;
-	//cmdCfgAll(1, argv);
+	//cmdRstAll(1, argv);
 	//silent = 0;
-
-	//printf("done.\n");
 
 	sei();
 
@@ -464,7 +412,7 @@ int main()
 			if(strcmp(argv[0], "?") == 0)
 			{
 				for(i = 0; i < sizeof(cmds) / sizeof(*cmds); ++i)
-					printf_P(PSTR("%s %S\n"), cmds[i].cmd, cmds[i].usage);
+					printf_P(PSTR("%S\n"), cmds[i].usage);
 				continue;
 			}
 
@@ -473,7 +421,7 @@ int main()
 				if(strcmp(argv[0], cmds[i].cmd) == 0)
 				{
 					if(argc == 2 && strcmp(argv[1], "?") == 0)
-						printf_P(PSTR("%s %S\n"), cmds[i].cmd, cmds[i].usage);
+						printf_P(PSTR("%S\n"), cmds[i].usage);
 					else
 						cmds[i].handler(argc, argv);
 					break;

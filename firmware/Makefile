@@ -8,12 +8,13 @@ OBJ            = main.o serial.o timer.o i2c.o \
                  cmd_delay.o   \
                  cmd_gamma.o   \
                  cmd_i2c.o     \
-                 cmd_light.o   \
+                 cmd_area.o    \
                  cmd_output.o  \
                  cmd_port.o    \
                  cmd_result.o  \
                  cmd_status.o  \
-                 cmd_format.o
+                 cmd_format.o  \
+                 cmd_mem.o
 
 MCU_TARGET     = atmega16
 OPTIMIZE       = -Os
@@ -41,7 +42,7 @@ MAKEMEM = ../tools/makemem
 
 all: $(PRG).elf lst text mem
 
-main.o: config_lights.h config_hdmi.h
+main.o: config_edid.h config_hdmi.h
 
 $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)

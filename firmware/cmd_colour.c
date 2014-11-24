@@ -82,8 +82,6 @@ void cmdSetColour(uint8_t argc, char** argv)
 			
 		} while(index++ < maxIndex);
 	}
-	//else
-		//printf("err: SC index row ah al bh bl ch cl\n");
 }
 
 void cmdGetColour(uint8_t argc, char** argv)
@@ -113,11 +111,9 @@ void cmdGetColour(uint8_t argc, char** argv)
 			
 		} while(index++ < maxIndex);
 	}
-	//else
-		//printf("err: GC index row\n");
 }
 
-void cmdCfgColour(uint8_t argc, char** argv)
+void cmdRstColour(uint8_t argc, char** argv)
 {
 	int i;
 	for(i = 0; i < 8; ++i)

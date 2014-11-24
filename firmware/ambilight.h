@@ -52,32 +52,34 @@ uint8_t i2cRead(uint8_t addr, uint8_t subaddr);
 
 void changeFormat();
 
+void cmdGetArea(uint8_t argc, char** argv);
+void cmdSetArea(uint8_t argc, char** argv);
+void cmdRstArea(uint8_t argc, char** argv);
+
 void cmdGetAddr(uint8_t argc, char** argv);
 void cmdSetAddr(uint8_t argc, char** argv);
 
 void cmdGetColour(uint8_t argc, char** argv);
 void cmdSetColour(uint8_t argc, char** argv);
-void cmdCfgColour(uint8_t argc, char** argv);
+void cmdRstColour(uint8_t argc, char** argv);
 
 void cmdGetDelay(uint8_t argc, char** argv);
 void cmdSetDelay(uint8_t argc, char** argv);
-void cmdCfgDelay(uint8_t argc, char** argv);
+void cmdRstDelay(uint8_t argc, char** argv);
 
 void cmdGetGamma(uint8_t argc, char** argv);
 void cmdSetGamma(uint8_t argc, char** argv);
-void cmdCfgGamma(uint8_t argc, char** argv);
+void cmdRstGamma(uint8_t argc, char** argv);
 
 void cmdGetI2C(uint8_t argc, char** argv);
 void cmdSetI2C(uint8_t argc, char** argv);
-void cmdCfgI2C(uint8_t argc, char** argv);
+void cmdRstI2C(uint8_t argc, char** argv);
 
-void cmdGetLight(uint8_t argc, char** argv);
-void cmdSetLight(uint8_t argc, char** argv);
-void cmdCfgLight(uint8_t argc, char** argv);
+void cmdGetMem(uint8_t argc, char** argv);
 
 void cmdGetOutput(uint8_t argc, char** argv);
 void cmdSetOutput(uint8_t argc, char** argv);
-void cmdCfgOutput(uint8_t argc, char** argv);
+void cmdRstOutput(uint8_t argc, char** argv);
 
 void cmdGetPort(uint8_t argc, char** argv);
 void cmdSetPort(uint8_t argc, char** argv);

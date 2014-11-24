@@ -85,8 +85,6 @@ void cmdSetOutput(uint8_t argc, char** argv)
 			
 		} while(output++ < maxOutput);
 	}
-	//else
-		//printf("err: SO output light area coef gamma enabled\n");
 }
 
 void cmdGetOutput(uint8_t argc, char** argv)
@@ -113,11 +111,9 @@ void cmdGetOutput(uint8_t argc, char** argv)
 			
 		} while(output++ < maxOutput);
 	}
-	//else
-		//printf("err: GO output light\n");
 }
 
-void cmdCfgOutput(uint8_t argc, char** argv)
+void cmdRstOutput(uint8_t argc, char** argv)
 {
 	int output;
 

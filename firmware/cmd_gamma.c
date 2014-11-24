@@ -85,8 +85,6 @@ void cmdGetGamma(uint8_t argc, char** argv)
 			
 		} while(table++ < maxTable);
 	}
-	//else
-		//printf("err: GG table channel index\n");
 }
 
 void cmdSetGamma(uint8_t argc, char** argv)
@@ -119,11 +117,9 @@ void cmdSetGamma(uint8_t argc, char** argv)
 			
 		} while(table++ < maxTable);
 	}
-	//else
-		//printf("err: SG table channel index value\n");
 }
 
-void cmdCfgGamma(uint8_t argc, char** argv)
+void cmdRstGamma(uint8_t argc, char** argv)
 {
 	int table;
 	for(table = 0; table < 8; ++table)

@@ -70,7 +70,7 @@ uint16_t getConfig(uint16_t width, uint16_t height, uint16_t ratio)
 	
 	do
 	{
-		dmaRead(0, offset, &config, sizeof(config));
+		dmaRead(0, offset, (uint16_t)&config, sizeof(config));
 		if(config.width  >= width  - X_RES_FUZZ && config.width  <= width  + X_RES_FUZZ && 
 		   config.height >= height - Y_RES_FUZZ && config.height <= height + Y_RES_FUZZ &&
 		   config.ratio == ratio)
@@ -136,7 +136,8 @@ void changeFormat()
 		// Either the resolution has changed or the active
 		// area has left the bounding box of the current ratio
 		// so return to the native ratio for the current resolution
-//printf_P(PSTR("reset: %d %d %d   %d %d %d\n"), format->xSize, format->xPreActive, format->xPostActive, format->ySize, format->yPreActive, format->yPostActive);
+
+		//printf_P(PSTR("reset: %d %d %d   %d %d %d\n"), format->xSize, format->xPreActive, format->xPostActive, format->ySize, format->yPreActive, format->yPostActive);
 		currentRatio   = 0;
 		currentWidth   = format->xSize;
 		currentHeight  = format->ySize;
@@ -182,8 +183,8 @@ void changeFormat()
 	{
 		uint32_t config;
 
-		printf_P(PSTR("format changed: %dx%d (%d): "), currentWidth, currentHeight, currentRatio);
-		printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
+		//printf_P(PSTR("format changed: %dx%d (%d): "), currentWidth, currentHeight, currentRatio);
+		//printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
 			
 		config = getConfig(currentWidth, currentHeight, currentRatio);
 		if(config != 0xffff)

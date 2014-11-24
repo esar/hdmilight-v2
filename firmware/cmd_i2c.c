@@ -57,8 +57,6 @@ void cmdSetI2C(uint8_t argc, char** argv)
 		i2c_stop();
 		printf_P(PSTR("OK\n"));
 	}
-	//else
-		//printf("err: SI addr subaddr value\n");
 }
 
 void cmdGetI2C(uint8_t argc, char** argv)
@@ -68,8 +66,6 @@ void cmdGetI2C(uint8_t argc, char** argv)
 		int val = i2cRead(getint(&argv[1]), getint(&argv[2]));
 		printf_P(PSTR("Read: %d\n"), val);
 	}
-	//else
-		//printf("err: GI addr\n");
 }
 
 void writeEdid(const char* edid, int length)
@@ -118,7 +114,7 @@ void writeConfig(const struct ConfigTable* table)
 	}
 }
 
-void cmdCfgI2C(uint8_t argc, char** argv)
+void cmdRstI2C(uint8_t argc, char** argv)
 {
 	writeConfig(g_configTablePreEdid);
 	writeEdid(g_edid, sizeof(g_edid));

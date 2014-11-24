@@ -27,16 +27,14 @@
 #include <stdio.h>
 #include "ambilight.h"
 
-#include "config_lights.h"
 
-
-void setLight(unsigned int light, 
-              unsigned char xmin, unsigned char xmax,
-              unsigned char ymin, unsigned char ymax,
-              unsigned char shift, unsigned char output)
+void setArea(unsigned int area, 
+             unsigned char xmin, unsigned char xmax,
+             unsigned char ymin, unsigned char ymax,
+             unsigned char shift, unsigned char output)
 {
 	uint8_t* address = AMBILIGHT_BASE_ADDR_AREA;
-	address += (uint16_t)light * 4;
+	address += (uint16_t)area * 4;
 
 	//  31      28      24          18          12          6           0
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -44,14 +42,14 @@ void setLight(unsigned int light,
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |                 |               |               |               |
 
-	light <<= 2;
+	area <<= 2;
 	address[0] = (xmin & 0x3f) | (xmax << 6);
 	address[1] = ((xmax & 0x3f) >> 2) | (ymin << 4);
 	address[2] = ((ymin & 0x3f) >> 4) | (ymax << 2);
 	address[3] = (shift & 0xf) | (output << 4);
 }
 
-void cmdSetLight(uint8_t argc, char** argv)
+void cmdSetArea(uint8_t argc, char** argv)
 {
 	if(argc == 8)
 	{
@@ -68,15 +66,13 @@ void cmdSetLight(uint8_t argc, char** argv)
 		getrange(argv[1], &index, &maxIndex);
 		do
 		{
-			setLight(index, xmin, xmax, ymin, ymax, shift, output);
+			setArea(index, xmin, xmax, ymin, ymax, shift, output);
 
 		} while(index++ < maxIndex);
 	}
-	//else
-		//printf("err: SL light xmin xmax ymin ymax shift output\n");
 }
 
-void cmdGetLight(uint8_t argc, char** argv)
+void cmdGetArea(uint8_t argc, char** argv)
 {
 	if(argc == 2)
 	{
@@ -103,23 +99,13 @@ void cmdGetLight(uint8_t argc, char** argv)
 
 		} while(index++ < maxIndex);
 	}
-	//else
-		//printf("err: GL light\n");
 }
 
-void cmdCfgLight(uint8_t argc, char** argv)
+void cmdRstArea(uint8_t argc, char** argv)
 {
 	int i;
 
-	for(i = 0; pgm_read_dword(&g_lightTable[i]) != 0xffffffff; ++i)
-	{
-		unsigned long light = pgm_read_dword(&g_lightTable[i]);
-		setLight(i, 
-		         LIGHT_XMIN(light), LIGHT_XMAX(light),
-		         LIGHT_YMIN(light), LIGHT_YMAX(light),
-		         LIGHT_SHIFT(light), LIGHT_OUTPUT(light));
-		if(!silent)
-			printf_P(PSTR("OK\n"));
-	}
+	for(i = 0; i < 64; ++i)
+		setArea(i, i, i, 0, 8, 3, 0);
 }
 
