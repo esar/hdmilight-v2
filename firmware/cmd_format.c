@@ -63,6 +63,8 @@ KnownRatio g_ratios[] =
 	{ 0, NULL }
 };
 
+static uint8_t g_formatChangeEnabled = 1;
+
 uint16_t getConfig(uint16_t width, uint16_t height, uint16_t ratio)
 {
 	FormatConfig config;
@@ -187,7 +189,7 @@ void changeFormat()
 		//printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
 			
 		config = getConfig(currentWidth, currentHeight, currentRatio);
-		if(config != 0xffff)
+		if(config != 0xffff && g_formatChangeEnabled)
 		{
 			config += 1;
 			config *= 0x8000;
@@ -195,6 +197,18 @@ void changeFormat()
 		}
 	}
 }	
+
+void cmdDisFormat(uint8_t argc, char** argv)
+{
+	if(argc == 1)
+		g_formatChangeEnabled = 0;
+}
+
+void cmdEnaFormat(uint8_t argc, char** argv)
+{
+	if(argc == 1)
+		g_formatChangeEnabled = 1;
+}
 
 void cmdGetFormat(uint8_t argc, char** argv)
 {

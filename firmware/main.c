@@ -303,6 +303,8 @@ char cmdRstColourUsage[] PROGMEM = "Rst Colour:  RC";
 char cmdGetDelayUsage[] PROGMEM  = "Get Delay:   GD";
 char cmdSetDelayUsage[] PROGMEM  = "Set Delay:   SD num_frames num_ticks smooth_ratio";
 char cmdRstDelayUsage[] PROGMEM  = "Rst Delay:   RD";
+char cmdDisFormatUsage[] PROGMEM = "Dis Format:  DF";
+char cmdEnaFormatUsage[] PROGMEM = "Ena Format:  EF";
 char cmdGetFormatUsage[] PROGMEM = "Get Format:  GF";
 char cmdGetGammaUsage[] PROGMEM  = "Get Gamma:   GG table channel index";
 char cmdSetGammaUsage[] PROGMEM  = "Set Gamma:   SG table channel index value";
@@ -364,6 +366,8 @@ int main()
 		{ "GD", cmdGetDelay,  cmdGetDelayUsage  },
 		{ "SD", cmdSetDelay,  cmdSetDelayUsage  },
 		{ "RD", cmdRstDelay,  cmdRstDelayUsage  },
+		{ "DF", cmdDisFormat, cmdDisFormatUsage },
+		{ "EF", cmdEnaFormat, cmdEnaFormatUsage },
 		{ "GF", cmdGetFormat, cmdGetFormatUsage },
 		{ "GG", cmdGetGamma,  cmdGetGammaUsage  },
 		{ "SG", cmdSetGamma,  cmdSetGammaUsage  },

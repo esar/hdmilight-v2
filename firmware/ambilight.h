@@ -88,4 +88,6 @@ void cmdGetResult(uint8_t argc, char** argv);
 
 void cmdGetStatus(uint8_t argc, char** argv);
 
+void cmdDisFormat(uint8_t argc, char** argv);
+void cmdEnaFormat(uint8_t argc, char** argv);
 void cmdGetFormat(uint8_t argc, char** argv);
