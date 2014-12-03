@@ -60,6 +60,7 @@ signal lightIndex  : std_logic_vector(8 downto 0);
 signal driverIndex : std_logic_vector(2 downto 0);
 signal firstLight  : std_logic;
 signal enabled     : std_logic;
+signal skip        : std_logic;
 signal startOne    : std_logic;
 signal startOne_1  : std_logic;
 signal resultReady : std_logic;
@@ -101,7 +102,7 @@ begin
 		if(start = '1' and laststart = '0') then
 			count <= (others => '0');
 			startOne <= '1';
-		elsif((enabled /= '1' or driverStart = '1') and count /= "111111111111") then
+		elsif((skip = '1' or driverStart = '1') and count /= "111111111111") then
 			count <= std_logic_vector(unsigned(count) + 1);
 			startOne <= '1';
 		end if;
@@ -114,9 +115,15 @@ end process;
 process(clk)
 begin
 	if(rising_edge(clk)) then
+		skip <= '0';
+		colourTransformStart <= '0';
+
+		startOne_1 <= startOne;
+
 		if(enabled = '1') then
-			startOne_1 <= startOne;
 			colourTransformStart <= startOne_1;
+		else
+			skip <= startOne_1;
 		end if;
 	end if;
 end process;

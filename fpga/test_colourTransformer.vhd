@@ -155,8 +155,12 @@
 	colourCoef(2) := "0000000000" & ('1' & x"ff" & "000000000") & ('0' & x"00" & "000000000") & ('0' & x"00" & "000000000");
 	colourCoef(3) := "0000000000" & ('0' & x"ff" & "000000000") & ('0' & x"ff" & "000000000") & ('0' & x"ff" & "000000000");
 	
-	for x in 0 to 4096 loop
+	for x in 0 to 4095 loop
 		outputMap(x) := "10000000" & std_logic_vector(to_unsigned(x, 8));
+	end loop;
+	
+	for x in (6*512 + 254) to (6*512 + 511) loop
+		outputMap(x) := "0000000000000000";
 	end loop;
 
 
@@ -173,7 +177,7 @@
 		clk <= '0';
 		wait for clkperiod;
 		
-		for x in 0 to 10000 loop
+		for x in 0 to 1000000 loop
 			clk <= '1';
 			wait for clkperiod;
 			clk <= '0';
