@@ -26,7 +26,7 @@ LIBS           =
 
 CC             = avr-gcc
 
-CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) -Wl,--defsym=__stack=0x8007ff
 LDFLAGS       = -Wl,-Map,$(PRG).map
 
 # Strip unused code
