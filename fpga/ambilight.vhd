@@ -166,8 +166,8 @@ begin
 hscale4 : entity work.hscale4 port map(vidclk, hblank, vblank, dataenable, viddata_r, viddata_g, viddata_b,
                                        hblank_delayed, vblank_delayed, dataenable_delayed, ce2, ce4, ravg, gavg, bavg);
   
-scaler : entity work.scaler port map(vidclk, ce2, hblank_delayed, vblank_delayed, ravg, gavg, bavg, 
-                                     vidclk, lineBufferAddr, lineBufferData, lineReady, yPos);
+scaler : entity work.scaler port map(vidclk, ce2, dataenable_delayed, vblank_delayed, ravg, gavg, bavg, 
+                                     lineBufferAddr, lineBufferData, lineReady, yPos);
 
 lightAverager : entity work.lightAverager port map(vidclk, ce2, lineReady, yPos,
                                                    lineBufferAddr, lineBufferData,

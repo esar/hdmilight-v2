@@ -31,15 +31,14 @@ entity scaler is
 		ydivshift : integer := 5     -- divide Y resolution by 32
 	);
 	port ( 
-		CLK :   in std_logic;
-		CE2 :   in std_logic;
-		HSYNC_DELAYED : in std_logic;
-		VSYNC_DELAYED : in std_logic;
-		RAVG     : in std_logic_vector(7 downto 0);
-		GAVG     : in std_logic_vector(7 downto 0);
-		BAVG     : in std_logic_vector(7 downto 0);
+		CLK    : in std_logic;
+		CE2    : in std_logic;
+		DE     : in std_logic;
+		VBLANK : in std_logic;
+		RAVG   : in std_logic_vector(7 downto 0);
+		GAVG   : in std_logic_vector(7 downto 0);
+		BAVG   : in std_logic_vector(7 downto 0);
 
-		LINE_BUF_CLK  : in  std_logic;
 		LINE_BUF_ADDR : in  std_logic_vector(6 downto 0);
 		LINE_BUF_DATA : out std_logic_vector(23 downto 0);
 		LINE_READY    : out std_logic;
@@ -50,21 +49,8 @@ end scaler;
 
 architecture Behavioral of scaler is
 
-signal HSYNC_LAST  : std_logic;
+signal DE_LAST     : std_logic;
 signal END_OF_LINE : std_logic;
-
-signal HSYNC_LAST_LBC  : std_logic;
-signal END_OF_LINE_LBC : std_logic;
-
---signal HSYNC_DELAYED : std_logic;
---signal VSYNC_DELAYED : std_logic;
-
---signal CE2         : std_logic;
---signal CE4         : std_logic;
-
---signal RAVG        : std_logic_vector(7 downto 0);
---signal GAVG        : std_logic_vector(7 downto 0);
---signal BAVG        : std_logic_vector(7 downto 0);
 
 signal X_COUNT     : std_logic_vector(11 downto 0);
 signal X_COUNT_RST : std_logic;
@@ -87,49 +73,32 @@ begin
 
 line_buffer : entity work.blockram
   GENERIC MAP(
-    ADDR => 7,
-	 DATA => 64
+	ADDR => 7,
+	DATA => 64
   )
   PORT MAP (
-    a_clk => CLK,
-    a_rst => LINEBUF_RST,
-	 a_en => CE2,
-    a_wr => LINEBUF_WE,
-    a_addr => LINEBUF_ADDR,
-    a_din => LINEBUF_D,
-    a_dout => LINEBUF_Q,
-    b_clk => LINE_BUF_CLK,
-	 b_en => '1',
-    b_wr => '0',
-	 b_rst => '0',
-    b_addr => LINE_BUF_ADDR,
-    b_din => (others => '0'),
-    b_dout => LINEBUF_DB
+	a_clk  => CLK,
+	a_rst  => LINEBUF_RST,
+	a_en   => CE2,
+	a_wr   => LINEBUF_WE,
+	a_addr => LINEBUF_ADDR,
+	a_din  => LINEBUF_D,
+	a_dout => LINEBUF_Q,
+	b_clk  => CLK,
+	b_en   => '1',
+	b_wr   => '0',
+	b_rst  => '0',
+	b_addr => LINE_BUF_ADDR,
+	b_din  => (others => '0'),
+	b_dout => LINEBUF_DB
   );
 
---hscale4 : entity work.hscale4 port map(CLK, HSYNC, VSYNC, R, G, B,
---                                       HSYNC_DELAYED, VSYNC_DELAYED, CE2, CE4, RAVG, GAVG, BAVG);
 
-process(LINE_BUF_CLK)
+process(CLK)
 begin
-	if(rising_edge(LINE_BUF_CLK)) then
+	if(rising_edge(CLK)) then
 		if(CE2 = '1') then
-			if(HSYNC_DELAYED = '1' and HSYNC_LAST_LBC = '0') then
-				END_OF_LINE_LBC <= '1';
-			else
-				END_OF_LINE_LBC <= '0';
-			end if;
-			
-			HSYNC_LAST_LBC <= HSYNC_DELAYED;
-		end if;
-	end if;
-end process;
-
-process(LINE_BUF_CLK)
-begin
-	if(rising_edge(LINE_BUF_CLK)) then
-		if(CE2 = '1') then
-			if(Y_COUNT(4 downto 0) = "11111" and END_OF_LINE_LBC = '1') then
+			if(Y_COUNT(4 downto 0) = "11111" and END_OF_LINE = '1') then
 				LINE_ADDR  <= Y_COUNT_LAST(10 downto 5);
 				LINE_READY <= '1';
 			else
@@ -143,13 +112,13 @@ process(CLK)
 begin
 	if(rising_edge(CLK)) then
 		if(CE2 = '1') then
-			if(HSYNC_DELAYED = '1' and HSYNC_LAST = '0') then
+			if(DE = '0' and DE_LAST = '1') then
 				END_OF_LINE <= '1';
 			else
 				END_OF_LINE <= '0';
 			end if;
 
-			HSYNC_LAST <= HSYNC_DELAYED;
+			DE_LAST <= DE;
 		end if;
 	end if;
 end process;
@@ -195,15 +164,15 @@ end process;
 
 
 
-X_COUNT_RST <= HSYNC_DELAYED;
-Y_COUNT_RST <= VSYNC_DELAYED;
-Y_COUNT_CE  <= END_OF_LINE;
+X_COUNT_RST     <= not DE;
+Y_COUNT_RST     <= VBLANK;
+Y_COUNT_CE      <= END_OF_LINE;
 Y_COUNT_LAST_CE <= END_OF_LINE;
 
 
 LINEBUF_ADDR  <= Y_COUNT(5) & X_COUNT(9 downto 4);
 LINEBUF_RST   <= '1' when Y_COUNT(4 downto 0) = "00000" and X_COUNT(3 downto 1) = "000" else '0';
-LINEBUF_WE <= X_COUNT(0);
+LINEBUF_WE    <= X_COUNT(0);
 LINEBUF_D(63 downto 48) <= (others => '0');
 LINEBUF_D(47 downto 32) <= std_logic_vector(unsigned(LINEBUF_Q(47 downto 32)) + unsigned(RAVG));
 LINEBUF_D(31 downto 16) <= std_logic_vector(unsigned(LINEBUF_Q(31 downto 16)) + unsigned(GAVG));

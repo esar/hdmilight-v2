@@ -55,7 +55,7 @@ architecture Behavioral of hscale4 is
 
 signal COUNT : std_logic_vector(1 downto 0);
 
-signal HSYNC_LAST : std_logic;
+signal DATAENABLE_LAST : std_logic;
 
 signal R1    : std_logic_vector(7 downto 0);
 signal R2    : std_logic_vector(7 downto 0);
@@ -89,12 +89,12 @@ begin
 	process(CLK)
 	begin
 		if(rising_edge(CLK)) then
-			if(D_HSYNC = '0' and HSYNC_LAST = '1') then
+			if(D_DATAENABLE = '1' and DATAENABLE_LAST = '0') then
 				COUNT <= (others => '0');
 			else
 				COUNT <= std_logic_vector(unsigned(COUNT) + 1);
 			end if;
-			HSYNC_LAST <= D_HSYNC;
+			DATAENABLE_LAST <= D_DATAENABLE;
 		end if;
 	end process;
 
