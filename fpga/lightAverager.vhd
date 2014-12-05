@@ -86,7 +86,6 @@ signal XMAX_p0         : std_logic_vector(5 downto 0);
 signal YMIN_p0         : std_logic_vector(5 downto 0);
 signal YMAX_p0         : std_logic_vector(5 downto 0);
 signal SHIFT_p0        : std_logic_vector(3 downto 0);
-signal OUT_ADDR_p0     : std_logic_vector(2 downto 0);
 signal R_TOTAL_p0      : std_logic_vector(20 downto 0);
 signal G_TOTAL_p0      : std_logic_vector(20 downto 0);
 signal B_TOTAL_p0      : std_logic_vector(20 downto 0);
@@ -99,14 +98,12 @@ signal YPOS_p0         : std_logic_vector(5 downto 0);
 signal RUNNING_p0      : std_logic;
 
 signal SHIFT_p1        : std_logic_vector(3 downto 0);
-signal OUT_ADDR_p1     : std_logic_vector(2 downto 0);
 signal R_TOTAL_p1      : std_logic_vector(20 downto 0);
 signal G_TOTAL_p1      : std_logic_vector(20 downto 0);
 signal B_TOTAL_p1      : std_logic_vector(20 downto 0);
 signal WRITE_ADDR_p1   : std_logic_vector(7 downto 0);
 signal WRITE_ENABLE_p1 : std_logic;
 
-signal OUT_ADDR_p2     : std_logic_vector(2 downto 0);
 signal R_TOTAL_p2      : std_logic_vector(20 downto 0);
 signal G_TOTAL_p2      : std_logic_vector(20 downto 0);
 signal B_TOTAL_p2      : std_logic_vector(20 downto 0);
@@ -182,7 +179,6 @@ begin
 				YMIN_p0     <= CONFIG_DATA(17 downto 12);
 				YMAX_p0     <= CONFIG_DATA(23 downto 18);
 				SHIFT_p0    <= CONFIG_DATA(27 downto 24);
-				OUT_ADDR_p0 <= CONFIG_DATA(30 downto 28);
 
 				R_TOTAL_p0 <= RESULT_RAM_Q(20 downto  0);
 				G_TOTAL_p0 <= RESULT_RAM_Q(41 downto 21);
@@ -230,7 +226,6 @@ begin
 			end if;
 
 			WRITE_ADDR_p1 <= WRITE_ADDR_p0;
-			OUT_ADDR_p1   <= OUT_ADDR_p0;
 		end if;
 	end if;
 end process;
@@ -245,7 +240,6 @@ begin
 
 			WRITE_ENABLE_p2 <= WRITE_ENABLE_p1;
 			WRITE_ADDR_p2   <= WRITE_ADDR_p1;
-			OUT_ADDR_p2     <= OUT_ADDR_p1;
 		end if;
 	end if;
 end process;
@@ -255,8 +249,7 @@ WRITE_ADDR   <= WRITE_ADDR_p2;
 WRITE_DATA(20 downto  0) <= R_TOTAL_p2;
 WRITE_DATA(41 downto 21) <= G_TOTAL_p2;
 WRITE_DATA(62 downto 42) <= B_TOTAL_p2;
-WRITE_DATA(65 downto 63) <= OUT_ADDR_p2;
-WRITE_DATA(71 downto 66) <= (others => '0');
+WRITE_DATA(71 downto 63) <= (others => '0');
 
 
 WRITE_CYCLE <= COUNT(0);

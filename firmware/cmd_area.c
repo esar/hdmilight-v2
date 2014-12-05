@@ -31,14 +31,14 @@
 void setArea(unsigned int area, 
              unsigned char xmin, unsigned char xmax,
              unsigned char ymin, unsigned char ymax,
-             unsigned char shift, unsigned char output)
+             unsigned char shift)
 {
 	uint8_t* address = AMBILIGHT_BASE_ADDR_AREA;
 	address += (uint16_t)area * 4;
 
 	//  31      28      24          18          12          6           0
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	// | | out   | shift | ymax      | ymin      | xmax      | xmin      |
+	// | unused  | shift | ymax      | ymin      | xmax      | xmin      |
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |                 |               |               |               |
 
@@ -46,27 +46,26 @@ void setArea(unsigned int area,
 	address[0] = (xmin & 0x3f) | (xmax << 6);
 	address[1] = ((xmax & 0x3f) >> 2) | (ymin << 4);
 	address[2] = ((ymin & 0x3f) >> 4) | (ymax << 2);
-	address[3] = (shift & 0xf) | (output << 4);
+	address[3] = shift & 0xf;
 }
 
 void cmdSetArea(uint8_t argc, char** argv)
 {
-	if(argc == 8)
+	if(argc == 7)
 	{
 		uint8_t index, maxIndex;
-		uint8_t xmin, xmax, ymin, ymax, shift, output;
+		uint8_t xmin, xmax, ymin, ymax, shift;
 		
 		xmin = getint(&argv[2]);
 		xmax = getint(&argv[3]);
 		ymin = getint(&argv[4]);
 		ymax = getint(&argv[5]);
 		shift = getint(&argv[6]);
-		output = getint(&argv[7]);
 
 		getrange(argv[1], &index, &maxIndex);
 		do
 		{
-			setArea(index, xmin, xmax, ymin, ymax, shift, output);
+			setArea(index, xmin, xmax, ymin, ymax, shift);
 
 		} while(index++ < maxIndex);
 	}
@@ -94,8 +93,6 @@ void cmdGetArea(uint8_t argc, char** argv)
 			printf_P(PSTR("%d "), x);
 			x = address[3] & 0xf; // shift
 			printf_P(PSTR("%d "), x);
-			x = address[3] >> 4; // output
-			printf_P(PSTR("%d\n"), x);
 
 		} while(index++ < maxIndex);
 	}
@@ -106,6 +103,6 @@ void cmdRstArea(uint8_t argc, char** argv)
 	int i;
 
 	for(i = 0; i < 64; ++i)
-		setArea(i, i, i, 0, 8, 3, 0);
+		setArea(i, i, i, 0, 8, 3);
 }
 
