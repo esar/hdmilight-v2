@@ -51,7 +51,7 @@ entity lightAverager is
 		CFG_DOUT : out std_logic_vector(7 downto 0);
 
 		RESULT_CLK  : in  std_logic;
-		RESULT_ADDR : in  std_logic_vector(8 downto 0);
+		RESULT_ADDR : in  std_logic_vector(7 downto 0);
 		RESULT_DATA : out std_logic_vector(31 downto 0)
 	);
 end lightAverager;
@@ -264,7 +264,7 @@ RESULT_RAM_ADDR  <= (not FRAME) & LIGHT_ADDR when WRITE_CYCLE = '0' else (not FR
 RESULT_RAM_WE    <= '0'                      when WRITE_CYCLE = '0' else WRITE_ENABLE;
 RESULT_RAM_D     <= WRITE_DATA;
 
-RESULT_RAM_B_ADDR <= FRAME & RESULT_ADDR(7 downto 0);
+RESULT_RAM_B_ADDR <= FRAME & RESULT_ADDR;
 RESULT_DATA( 7 downto  0) <= RESULT_RAM_B_Q( 7 downto  0);
 RESULT_DATA(15 downto  8) <= RESULT_RAM_B_Q(28 downto 21);
 RESULT_DATA(23 downto 16) <= RESULT_RAM_B_Q(49 downto 42);

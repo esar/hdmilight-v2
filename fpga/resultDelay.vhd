@@ -27,10 +27,10 @@ use ieee.numeric_std.all;
 entity resultDelay is
     Port ( clk : in  STD_LOGIC;
            in_vblank : in  STD_LOGIC;
-           in_addr : out  STD_LOGIC_VECTOR (8 downto 0);
+           in_addr : out  STD_LOGIC_VECTOR (7 downto 0);
            in_data : in  STD_LOGIC_VECTOR (31 downto 0);
            out_vblank : out  STD_LOGIC;
-           out_addr : in  STD_LOGIC_VECTOR (8 downto 0);
+           out_addr : in  STD_LOGIC_VECTOR (7 downto 0);
            out_data : out  STD_LOGIC_VECTOR (31 downto 0);
            delayFrames : in std_logic_vector(7 downto 0);
            delayTicks  : in std_logic_vector(23 downto 0);
@@ -195,12 +195,12 @@ begin
 	end if;
 end process;
 
-in_addr <= "0" & count(9 downto 2);
+in_addr <= count(9 downto 2);
 ram_addr_in <= count_ram_in & count(9 downto 2);
 ram_data_in <= "00000000" & Bprod(25 downto 18) & Gprod(25 downto 18) & Rprod(25 downto 18);
 ram_wr_in <= '1' when count(1 downto 0) = "11" else '0';
 
-ram_addr_out <= (count_ram_in_prev & count(9 downto 2)) when enable = '1' else (count_ram_out & out_addr(7 downto 0));
+ram_addr_out <= (count_ram_in_prev & count(9 downto 2)) when enable = '1' else (count_ram_out & out_addr);
 out_data <= ram_data_out;
 
 end Behavioral;

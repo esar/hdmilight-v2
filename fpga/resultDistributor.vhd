@@ -35,7 +35,7 @@ entity resultDistributor is
 		outputMapAddr   : out std_logic_vector(11 downto 0);
 		outputMapData   : in  std_logic_vector(15 downto 0);
 
-		areaResultAddr  : out std_logic_vector(8 downto 0);
+		areaResultAddr  : out std_logic_vector(7 downto 0);
 		areaResultR     : in  std_logic_vector(7 downto 0);
 		areaResultG     : in  std_logic_vector(7 downto 0);
 		arearesultB     : in  std_logic_vector(7 downto 0);
@@ -66,7 +66,7 @@ signal startOne_1  : std_logic;
 signal resultReady : std_logic;
 signal driverReady : std_logic;
 signal driverStart : std_logic;
-signal colourCoefIndex : std_logic_vector(2 downto 0);
+signal colourCoefIndex : std_logic_vector(3 downto 0);
 signal colourTransformStart : std_logic;
 signal colourTransformDone  : std_logic;
 signal transformedR : std_logic_vector(7 downto 0);
@@ -143,11 +143,11 @@ firstLight     <= '1' when lightIndex = "000000000" else '0';
 driverStart    <= (driverReady or firstLight) and resultReady;
 
 outputMapAddr   <= driverIndex & lightIndex;
-areaResultAddr  <= outputMapData(8  downto 0);
-gammaTableRAddr <= outputMapData(11 downto 9) & transformedR;
-gammaTableGAddr <= outputMapData(11 downto 9) & transformedG;
-gammaTableBAddr <= outputMapData(11 downto 9) & transformedB;
-colourCoefIndex <= outputMapData(14 downto 12);
+areaResultAddr  <= outputMapData(7  downto 0);
+gammaTableRAddr <= outputMapData(10 downto 8) & transformedR;
+gammaTableGAddr <= outputMapData(10 downto 8) & transformedG;
+gammaTableBAddr <= outputMapData(10 downto 8) & transformedB;
+colourCoefIndex <= outputMapData(14 downto 11);
 enabled         <= outputMapData(15);
 driverData      <= gammaTableRData & gammaTableGData & gammaTableBData;
 

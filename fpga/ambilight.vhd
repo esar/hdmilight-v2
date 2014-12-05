@@ -74,7 +74,7 @@ signal lightCfgAddr : std_logic_vector(11 downto 0);
 signal lightCfgDin : std_logic_vector(7 downto 0);
 signal lightCfgDout : std_logic_vector(7 downto 0);
 
-signal resultAddr : std_logic_vector(8 downto 0);
+signal resultAddr : std_logic_vector(7 downto 0);
 signal resultData : std_logic_vector(31 downto 0);
 signal resultLatched : std_logic_vector(31 downto 0);
 signal resultCfgDout : std_logic_vector(7 downto 0);
@@ -86,7 +86,7 @@ signal vblanklast : std_logic;
 signal startDistribution : std_logic;
 signal delayedStartDistribution : std_logic;
 signal delayedResultVblank : std_logic;
-signal delayedResultAddr : std_logic_vector(8 downto 0);
+signal delayedResultAddr : std_logic_vector(7 downto 0);
 signal delayedResultData : std_logic_vector(31 downto 0);
 
 signal driverReady        : std_logic_vector(7 downto 0);
@@ -341,10 +341,10 @@ begin
 	if(rising_edge(cfgclk)) then
 		storeResult <= '0';
 		storeResultDelayed <= '0';
-		if(resultAddr(7 downto 0) = resultLatchAddr(7 downto 0)) then
+		if(resultAddr = resultLatchAddr(7 downto 0)) then
 			storeResult <= '1';
 		end if;
-		if(delayedResultAddr(7 downto 0) = resultLatchAddr(7 downto 0)) then
+		if(delayedResultAddr = resultLatchAddr(7 downto 0)) then
 			storeResultDelayed <= '1';
 		end if;
 	end if;

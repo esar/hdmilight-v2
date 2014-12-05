@@ -32,7 +32,7 @@ void setOutput(uint8_t output, uint16_t light, uint8_t area, uint8_t coef, uint8
 {
 	//  15    12    9                 0
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	// |E| coe | gam | area            |
+	// |E| coe  | gam  | area          |
 	// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	// |               |               |
 
@@ -44,7 +44,7 @@ void setOutput(uint8_t output, uint16_t light, uint8_t area, uint8_t coef, uint8
 		enabled = 0x80;
 
 	address[0] = area & 0xff;
-	address[1] = enabled | ((coef & 7) << 4) | ((gamma & 7) << 1) | ((area >> 8) & 1);
+	address[1] = enabled | ((coef & 15) << 3) | (gamma & 7);
 }
 
 void getOutput(uint8_t output, uint16_t light, int* area, int* coef, int* gamma, int* enabled)
@@ -53,9 +53,9 @@ void getOutput(uint8_t output, uint16_t light, int* area, int* coef, int* gamma,
 	address += (uint16_t)output * 1024;
 	address += light * 2;
 
-	*area = (((uint16_t)address[1] & 1) << 8) | address[0];
-	*gamma = (address[1] >> 1) & 7;
-	*coef = (address[1] >> 4) & 7;
+	*area = address[0];
+	*gamma = address[1] & 7;
+	*coef = (address[1] >> 3) & 15;
 	*enabled = address[1] & 0x80;
 }
 

@@ -31,7 +31,7 @@ entity colourTransformer is
 		start : in  std_logic;
 		done  : out std_logic;
 
-		coefIndex : in  std_logic_vector(2 downto 0);
+		coefIndex : in  std_logic_vector(3 downto 0);
 		coefAddr  : out std_logic_vector(8 downto 0);
 		coefData  : in  std_logic_vector(63 downto 0);
 
@@ -114,7 +114,7 @@ Badd <= (others => '0') when count = "01" else Bprod;
 -- Rb  Gb  Bb
 -- Rx  Gx  Bx
 
-coefAddr <= "0000" & coefIndex & count;
+coefAddr <= "000" & coefIndex & count;
 Rcoef <= coefData(17 downto 0);
 Gcoef <= coefData(35 downto 18);
 Bcoef <= coefData(53 downto 36);
