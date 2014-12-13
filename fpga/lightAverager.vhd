@@ -180,9 +180,9 @@ begin
 				YMAX_p0     <= CONFIG_DATA(23 downto 18);
 				SHIFT_p0    <= CONFIG_DATA(27 downto 24);
 
-				R_TOTAL_p0 <= RESULT_RAM_Q(20 downto  0);
+				R_TOTAL_p0 <= RESULT_RAM_Q(62 downto 42);
 				G_TOTAL_p0 <= RESULT_RAM_Q(41 downto 21);
-				B_TOTAL_p0 <= RESULT_RAM_Q(62 downto 42);
+				B_TOTAL_p0 <= RESULT_RAM_Q(20 downto  0);
 				
 				R_p0       <= LINE_BUF_DATA(23 downto 16);
 				G_p0       <= LINE_BUF_DATA(15 downto  8);
@@ -246,10 +246,10 @@ end process;
 
 WRITE_ENABLE <= '1' when WRITE_ENABLE_p2 = '1' and WRITE_CYCLE = '1' else '0';
 WRITE_ADDR   <= WRITE_ADDR_p2;
-WRITE_DATA(20 downto  0) <= R_TOTAL_p2;
-WRITE_DATA(41 downto 21) <= G_TOTAL_p2;
-WRITE_DATA(62 downto 42) <= B_TOTAL_p2;
 WRITE_DATA(71 downto 63) <= (others => '0');
+WRITE_DATA(62 downto 42) <= R_TOTAL_p2;
+WRITE_DATA(41 downto 21) <= G_TOTAL_p2;
+WRITE_DATA(20 downto  0) <= B_TOTAL_p2;
 
 
 WRITE_CYCLE <= COUNT(0);

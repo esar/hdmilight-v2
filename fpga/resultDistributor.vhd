@@ -149,6 +149,6 @@ gammaTableGAddr <= outputMapData(10 downto 8) & transformedG;
 gammaTableBAddr <= outputMapData(10 downto 8) & transformedB;
 colourCoefIndex <= outputMapData(14 downto 11);
 enabled         <= outputMapData(15);
-driverData      <= gammaTableRData & gammaTableGData & gammaTableBData;
+driverData      <= gammaTableGData & gammaTableRData & gammaTableBData;
 
 end Behavioral;
