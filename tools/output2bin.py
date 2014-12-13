@@ -21,7 +21,7 @@ for (linenum, line) in enumerate(input):
 		sys.stderr.write('bad value at line %s\n' % linenum)
 		sys.exit(1)
 
-	data = (area & 0x1ff) | ((gamma & 7) << 9) | ((colour & 7) << 12) | (enabled << 15)
+	data = (area & 0xff) | ((gamma & 7) << 8) | ((colour & 15) << 11) | (enabled << 15)
 	
 	sys.stdout.write(chr(data & 0xff))
 	sys.stdout.write(chr(data >> 8))
