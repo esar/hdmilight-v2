@@ -16046,16 +16046,16 @@ Copyright: Würth Elektronik</description>
 <part name="GND14" library="supply1" deviceset="GND" device=""/>
 <part name="GND15" library="supply1" deviceset="GND" device=""/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
-<part name="C22" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C15" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C23" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C34" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C16" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C17" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C24" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C35" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C18" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C19" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="C22" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C15" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C23" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C34" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C16" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C17" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C24" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C35" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C18" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C19" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="GND17" library="supply1" deviceset="GND" device=""/>
 <part name="GND18" library="supply1" deviceset="GND" device=""/>
@@ -16068,10 +16068,10 @@ Copyright: Würth Elektronik</description>
 <part name="SUPPLY16" library="supply2" deviceset="V&lt;--" device="" value="DVDDIO_3V3"/>
 <part name="SUPPLY17" library="supply2" deviceset="V&lt;--" device="" value="TVDD_3V3"/>
 <part name="SUPPLY18" library="supply2" deviceset="V&lt;--" device="" value="VCC_3V3"/>
-<part name="C37" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C33" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C25" library="resistor" deviceset="C-EU" device="C0402"/>
-<part name="C36" library="resistor" deviceset="C-EU" device="C0402"/>
+<part name="C37" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C33" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C25" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
+<part name="C36" library="resistor" deviceset="C-EU" device="C0402" value="0.1uF"/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
 <part name="R6" library="resistor" deviceset="R-EU_" device="R0603" value="1K"/>
 <part name="R5" library="resistor" deviceset="R-EU_" device="R0603" value="100K"/>
@@ -16089,12 +16089,12 @@ Copyright: Würth Elektronik</description>
 <part name="SUPPLY19" library="supply2" deviceset="V&lt;--" device="" value="VCC_5V0"/>
 <part name="SUPPLY20" library="supply2" deviceset="V&lt;--" device="" value="VCC_5V0"/>
 <part name="SUPPLY21" library="supply2" deviceset="V&lt;--" device="" value="VCC_5V0"/>
-<part name="C20" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="C20" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND27" library="supply1" deviceset="GND" device=""/>
 <part name="SUPPLY22" library="supply2" deviceset="V&lt;--" device="" value="VCC_5V0"/>
-<part name="C21" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C26" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="C21" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
+<part name="C26" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
 <part name="GND28" library="supply1" deviceset="GND" device=""/>
 <part name="R13" library="resistor" deviceset="R-EU_" device="R0603" value="4K7"/>
 <part name="R14" library="resistor" deviceset="R-EU_" device="R0603" value="4K7"/>
