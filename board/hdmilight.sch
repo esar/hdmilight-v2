@@ -15984,7 +15984,7 @@ Based on the following sources:
 <part name="U$7" library="__SR" deviceset="MEGAWING_FULL_P1" device="MEGAWING_P1"/>
 <part name="U$6" library="__SR" deviceset="ADV7611" device=""/>
 <part name="U$1" library="__SR" deviceset="FCI_HDMI_SOCKET_10029449-001RCF" device=""/>
-<part name="U$4" library="__SR" deviceset="IP4776CZ38" device=""/>
+<part name="U$4" library="__SR" deviceset="IP4776CZ38" device="" value="TPD12S520"/>
 <part name="F1" library="SparkFun" deviceset="PTC" device="SMD" value="1206L050YR"/>
 <part name="R11" library="varistor" deviceset="VARISTOR" device="CN0603" value="V5.5MLA0603H"/>
 <part name="C4" library="resistor" deviceset="C-EU" device="C0603" value="0.1uF"/>
