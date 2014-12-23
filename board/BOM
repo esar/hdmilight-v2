@@ -1,0 +1,61 @@
+Qty Value                           Package                         Parts                                                                                   Supplier US                                    Supplier UK                             
+
+Capacitors:
+7   0.1uF                           C0402                           C15, C18, C23, C25, C34, C35, C36, C37                                                  Mouser:  77-VJ0402V104ZXQPBC                    Farnell: 2320773                                                                  
+18  0.1uF                           C0603                           C1, C4, C16, C17, C19, C21, C22, C24, C26, C27, C28, C29, C30, C31, C32, C33            Mouser:  77-VJ0603Y104JXJPBC                    Farnell: 1759037                                                                  
+2   18pF                            C0603                           C2, C3                                                                                  Mouser:  77-VJ0603A180JXACBC                    Farnell: 2320779                                                                  
+2   22uF(PolarizedTant ESR <0.5Ohm) C1206                           C7, C8                                                                                  Mouser:  80-T520A226M10ATE80                    Farnell: 1108329                                                                                                                                        
+2   10uF                            C1210                           C5, C6                                                                                  Mouser:  77-VJ1210V106ZXJTBC                    Farnell: 2112722                                                                                                                                                 
+6   33uF(PolarizedSolidTant LowESR) SMC_B                           C9, C10, C11, C12, C13, C14                                                             Mouser:  581-TPSB336K010R0250                   Farnell: 1658538                                                        
+
+
+Resistors(all 5% or better):
+3   0                               R0603                           R16, R17, R19                                                                           Mouser:  71-CRCW06030000Z0EB                    Farnell: 2309106                                                                 
+1   150R                            R0603                           R4                                                                                      Mouser:  71-CRCW0603-150-E3                     Farnell: 2333549                                                      
+1   330R                            R0603                           R12                                                                                     Mouser:  71-CRCW0603-330-E3                     Farnell: 2303104                                                                  
+1   1K                              R0603                           R6                                                                                      Mouser:  71-CRCW0603-1.0K-E3                    Farnell: 1652848                                                                                  
+2   1K5                             R0603                           R2, R3                                                                                  Mouser:  71-CRCW0603-1.5K-E3                    Farnell: 2303156                                                                                         
+3   4K7                             R0603                           R13, R14, R15                                                                           Mouser:  71-CRCW0603-4.7K-E3                    Farnell: 2303181                                                                                                         
+1   27K                             R0603                           R1                                                                                      Mouser:  71-CRCW0603J-27K-E3                    Farnell: 1652864                                                                                                                        
+2   47K                             R0603                           R7, R8                                                                                  Mouser:  71-CRCW0603-47K-E3                     Farnell: 2333548                                                                                                                     
+2   100K                            R0603                           R5, R9                                                                                  Mouser:  71-CRCW0603-100K-E3                    Farnell: 1652826                                                                                                                    
+1   390K                            R0603                           R10                                                                                     Mouser:  71-CRCW0603J-390K-E3                   Farnell: 2332037                                                                                                                        
+Farnell: 
+
+Semiconductors:
+1   ADV7611                         TQFP64-10X10                    U$6                                                                                     Digikey: ADV7611BSWZ-P-RL                       Farnell: 1903660                                                                                       
+1   TPD12S520DBTR                   TSSOP38                         U$4                                                                                     Mouser:  595-TPD12S520DBTR                      Farnell: 2335625                                                                                         
+1   SN74HCT541DW                    SOIC20                          U$8                                                                                     Mouser:  595-SN74HCT245PWR                      Farnell: 9592059
+1   BSS123LT1G                      SOT23                           U$3                                                                                     Mouser:  863-BSS123LT1G                         Farnell: 9558640
+1   REG1117A-1.8 (1.8V)             SOT223                          IC1                                                                                     Mouser:  595-REG1117A-1.8                       Farnell: 1097499
+1   REG1117-3.3  (3.3V)             SOT223                          IC2                                                                                     Mouser:  595-REG1117-3.3/2K5                    Farnell: 1212355
+1   FDY3000NZ                       SC89-6                          U$2                                                                                     Mouser:  512-FDY3000NZ                          Farnell: 1495194                                                                                          
+1   V5.5MLA0603H                    CT/CN0603                       R11                                                                                     Mouser:  576-V5.5MLA0603H (Cheaper at Digikey)  Farnell: 1757273                          
+1   LG R971-KN-1 (Green)            CHIP-LED0805                    LED2                                                                                    Mouser:  720-LGR971-KN-1  (Cheaper at Digikey)  Farnell: 1318243                                                                               
+1   LH R974-LP-1 (Red)              CHIP-LED0805                    LED1                                                                                    Mouser:  720-LHR974-LP-1  (Cheaper at Digikey)  Farnell: 1685054                                                                                           
+
+
+Miscellaneous:
+1   1206L050YR                      PTC-1206                        F1                                                                                      Mouser:  576-1206L050YR                         Farnell: 1596993                                                                 
+1   28.63636MHz (18pF)              SM49                            Q1                                                                                      Mouser:  815-ABLS-28.63MF-T                     Farnell: 1842320
+	(alternative): 9C-28.63636MEEJ-T  Mostly NonStocked)
+6   WE-CBF_0805                     0805                            L2, L3, L4, L5, L6, L7                                                                  Mouser:  81-BLM21PG220SH1D                      Farnell: 1515658
+
+Connectors:
+1   8x2_0.1"Header                  MA08-2                          SV1                                                                                     Mouser:  517-9612166404AR                       Farnell: 1097954   
+1   FCI_HDMI_SOCKET_10029449-001RCF FCI_HDMI_SOCKET_10029449-001RCF U$1                                                                                     Mouser:  649-10029449-001RLF                    Farnell: 2112524                                                                                                                                                                               
+2   36x1_0.1”Header Papilio Connect MEGAWING_FULL_NOHOLES_P1        U$7                                                                                     Mouser:  517-9614369040304AR                    Farnell: 1097954                                                                                            
+
+
+Additional Requirements (Not part of board):
+
+1 x Papilio Pro:
+	http://store.gadgetfactory.net/papilio-pro/
+	http://www.amazon.com/Gadget-Factory-Papilio-Pro/dp/B00CBASPUO
+	http://www.seeedstudio.com/depot/Papilio-Pro-p-1301.html
+
+NeoPixel RGB LED Strip (or WS2811 RGB LEDs):
+	https://www.adafruit.com/category/168
+
+5V Regulated PSU:
+	Spec to 1.0A + NeoPixel total current draw + headroom=
