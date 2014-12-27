@@ -25,7 +25,7 @@ Farnell:
 Semiconductors:
 1   ADV7611                         TQFP64-10X10                    U$6                                                                                     Digikey: ADV7611BSWZ-P-RL                       Farnell: 1903660                                                                                       
 1   TPD12S520DBTR                   TSSOP38                         U$4                                                                                     Mouser:  595-TPD12S520DBTR                      Farnell: 2335625                                                                                         
-1   SN74HCT541DW                    SOIC20                          U$8                                                                                     Mouser:  595-SN74HCT245PWR                      Farnell: 9592059
+1   SN74HCT541DW                    SOIC20                          U$8                                                                                     Mouser:  595-SN74HCT541DWE4                     Farnell: 9592059
 1   BSS123LT1G                      SOT23                           U$3                                                                                     Mouser:  863-BSS123LT1G                         Farnell: 9558640
 1   REG1117A-1.8 (1.8V)             SOT223                          IC1                                                                                     Mouser:  595-REG1117A-1.8                       Farnell: 1097499
 1   REG1117-3.3  (3.3V)             SOT223                          IC2                                                                                     Mouser:  595-REG1117-3.3/2K5                    Farnell: 1212355
