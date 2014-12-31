@@ -43,6 +43,8 @@ Connectors:
 1   FCI_HDMI_SOCKET_10029449-001RCF FCI_HDMI_SOCKET_10029449-001RCF U$1                                                                                     Mouser:  649-10029449-001RLF                    Farnell: 2112524
 2   36x1_0.1”Header Papilio Connect MEGAWING_FULL_NOHOLES_P1        U$7                                                                                     Mouser:  517-9614369040304AR                    Farnell: 1097954
 
+Optional Connectors:
+1   4x2_0.1"_StackThrough_Socket    MEGAWING_FULL_NOHOLES_P1        U$7                                                                                                                                     Farnell: 1769150
 
 Additional Requirements (Not part of board):
 
