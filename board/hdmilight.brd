@@ -177,7 +177,6 @@
 <text x="3.556" y="59.436" size="1.27" layer="21" font="vector">OSHW</text>
 <text x="37.592" y="58.42" size="1.27" layer="25" font="vector" ratio="16">+</text>
 <text x="60.452" y="58.42" size="1.27" layer="25" font="vector" ratio="16">+</text>
-<text x="4.826" y="71.374" size="1.6764" layer="48" font="vector" ratio="12">*** THIS REVISION HAS NOT BEEN TESTED ***</text>
 <text x="8.128" y="37.592" size="0.8128" layer="25" font="vector" ratio="16">LRCLK</text>
 <text x="7.874" y="1.524" size="1.778" layer="25" font="vector" ratio="16">-</text>
 <text x="7.874" y="4.064" size="1.778" layer="25" font="vector" ratio="16">+</text>
