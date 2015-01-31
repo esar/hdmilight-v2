@@ -31,6 +31,11 @@
 #include "i2c.h"
 
 
+// If this line is commented out, the ADV7611 will not be started
+// at power on and HDMI handshaking will not occur, in which case "R"
+// needs to be run from the serial console to start the ADV7611
+#define AUTO_INITIALIZATION
+
 #define BELL    '\a'
 
 
@@ -291,36 +296,36 @@ void cmdRstAll(uint8_t argc, char** argv)
 	cmdRstDelay(argc, argv);
 }
 
-char cmdBlankUsage[] PROGMEM = "";
-char cmdGetAreaUsage[] PROGMEM   = "Get Area:    GA index";
-char cmdSetAreaUsage[] PROGMEM   = "Set Area:    SA index xmin xmax ymin ymax shift output";
-char cmdRstAreaUsage[] PROGMEM   = "Rst Area:    RA";
-char cmdGetAddrUsage[] PROGMEM   = "Get Address: GX addr count";
-char cmdSetAddrUsage[] PROGMEM   = "Set Address: SX addr byte0 [byte1] [...]";
-char cmdGetColourUsage[] PROGMEM = "Get Colour:  GC index row";
-char cmdSetColourUsage[] PROGMEM = "Set Colour:  SC index row r g b";
-char cmdRstColourUsage[] PROGMEM = "Rst Colour:  RC";
-char cmdGetDelayUsage[] PROGMEM  = "Get Delay:   GD";
-char cmdSetDelayUsage[] PROGMEM  = "Set Delay:   SD num_frames num_ticks smooth_ratio";
-char cmdRstDelayUsage[] PROGMEM  = "Rst Delay:   RD";
-char cmdDisFormatUsage[] PROGMEM = "Dis Format:  DF";
-char cmdEnaFormatUsage[] PROGMEM = "Ena Format:  EF";
-char cmdGetFormatUsage[] PROGMEM = "Get Format:  GF";
-char cmdGetGammaUsage[] PROGMEM  = "Get Gamma:   GG table channel index";
-char cmdSetGammaUsage[] PROGMEM  = "Set Gamma:   SG table channel index value";
-char cmdRstGammaUsage[] PROGMEM  = "Rst Gamma:   RG";
-char cmdGetI2CUsage[] PROGMEM    = "Get I2C:     GI addr sub_addr";
-char cmdSetI2CUsage[] PROGMEM    = "Set I2C:     SI addr sub_addr value";
-char cmdRstI2CUsage[] PROGMEM    = "Rst I2C:     RI";
-char cmdGetMemUsage[] PROGMEM    = "Get Memory:  GM index";
-char cmdGetOutputUsage[] PROGMEM = "Get Output:  GO output light";
-char cmdSetOutputUsage[] PROGMEM = "Set Output:  SO output light area coef gamma enable";
-char cmdRstOutputUsage[] PROGMEM = "Rst Output:  RO";
-char cmdGetPortUsage[] PROGMEM   = "Get Port:    GP addr";
-char cmdSetPortUsage[] PROGMEM   = "Set Port:    SP addr value";
-char cmdGetResultUsage[] PROGMEM = "Get Result:  GR index";
-char cmdGetStatusUsage[] PROGMEM = "Get Status:  GS";
-char cmdRstAllUsage[] PROGMEM    = "Rst All:     R";
+const char cmdBlankUsage[] PROGMEM = "";
+const char cmdGetAreaUsage[] PROGMEM   = "Get Area:    GA index";
+const char cmdSetAreaUsage[] PROGMEM   = "Set Area:    SA index xmin xmax ymin ymax shift output";
+const char cmdRstAreaUsage[] PROGMEM   = "Rst Area:    RA";
+const char cmdGetAddrUsage[] PROGMEM   = "Get Address: GX addr count";
+const char cmdSetAddrUsage[] PROGMEM   = "Set Address: SX addr byte0 [byte1] [...]";
+const char cmdGetColourUsage[] PROGMEM = "Get Colour:  GC index row";
+const char cmdSetColourUsage[] PROGMEM = "Set Colour:  SC index row r g b";
+const char cmdRstColourUsage[] PROGMEM = "Rst Colour:  RC";
+const char cmdGetDelayUsage[] PROGMEM  = "Get Delay:   GD";
+const char cmdSetDelayUsage[] PROGMEM  = "Set Delay:   SD num_frames num_ticks smooth_ratio";
+const char cmdRstDelayUsage[] PROGMEM  = "Rst Delay:   RD";
+const char cmdDisFormatUsage[] PROGMEM = "Dis Format:  DF";
+const char cmdEnaFormatUsage[] PROGMEM = "Ena Format:  EF";
+const char cmdGetFormatUsage[] PROGMEM = "Get Format:  GF";
+const char cmdGetGammaUsage[] PROGMEM  = "Get Gamma:   GG table channel index";
+const char cmdSetGammaUsage[] PROGMEM  = "Set Gamma:   SG table channel index value";
+const char cmdRstGammaUsage[] PROGMEM  = "Rst Gamma:   RG";
+const char cmdGetI2CUsage[] PROGMEM    = "Get I2C:     GI addr sub_addr";
+const char cmdSetI2CUsage[] PROGMEM    = "Set I2C:     SI addr sub_addr value";
+const char cmdRstI2CUsage[] PROGMEM    = "Rst I2C:     RI";
+const char cmdGetMemUsage[] PROGMEM    = "Get Memory:  GM index";
+const char cmdGetOutputUsage[] PROGMEM = "Get Output:  GO output light";
+const char cmdSetOutputUsage[] PROGMEM = "Set Output:  SO output light area coef gamma enable";
+const char cmdRstOutputUsage[] PROGMEM = "Rst Output:  RO";
+const char cmdGetPortUsage[] PROGMEM   = "Get Port:    GP addr";
+const char cmdSetPortUsage[] PROGMEM   = "Set Port:    SP addr value";
+const char cmdGetResultUsage[] PROGMEM = "Get Result:  GR index";
+const char cmdGetStatusUsage[] PROGMEM = "Get Status:  GS";
+const char cmdRstAllUsage[] PROGMEM    = "Rst All:     R";
 
 #define DMA_FLASH_ADDR_H    _SFR_IO8(0x2c)
 #define DMA_FLASH_ADDR_M    _SFR_IO8(0x2d)
@@ -349,11 +354,11 @@ void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
 
 int main()
 {
-	static struct
+	const struct
 	{
 		const char* cmd;
 		void (*handler)(uint8_t argc, char** argv);
-		char* usage;
+		PGM_P usage;
 
 	} cmds[] = 
 	{
@@ -399,9 +404,13 @@ int main()
 		asm volatile ("nop");
 
 	i2c_init();
-	//silent = 1;
-	//cmdRstAll(1, argv);
-	//silent = 0;
+
+#ifdef AUTO_INITIALIZATION
+	silent = 1;
+	argv[0] = "R";
+	cmdRstAll(1, argv);
+	silent = 0;
+#endif
 
 	sei();
 
