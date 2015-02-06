@@ -671,7 +671,7 @@ begin
                     Q_WE_D <= "01";
                 else                    -- BST: register to T flag
                     Q_AMOD <= AMOD_ABS;
-                    Q_BIT(3) <= I_OPC(10);
+                    Q_BIT(3) <= '1';
                     Q_IMM(4 downto 0) <= I_OPC(8 downto 4);
                     Q_ALU_OP <= ALU_BIT_CS;
                     Q_WE_F <= '1';
