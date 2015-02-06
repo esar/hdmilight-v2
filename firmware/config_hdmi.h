@@ -53,7 +53,7 @@ static const struct ConfigTable g_configTablePostEdid[] PROGMEM =
 	{ 0x64, 0x74, 0x03 },  // Enable the Internal EDID for Ports
 
 	{ 0x98, 0x01, 0x06 },  // Prim_Mode =110b HDMI-GR
-	{ 0x98, 0x02, 0x12 },  // Auto CSC, YCrCb out, Set op_656 bit
+	{ 0x98, 0x02, 0xF2 },  // Auto CSC, YCrCb out, Set op_656 bit
 	{ 0x98, 0x03, 0x40 },  // 24 bit SDR 444 Mode 0 
 	{ 0x98, 0x05, 0x28 },  // AV Codes Off
 	{ 0x98, 0x0B, 0x44 },  // Power up part
