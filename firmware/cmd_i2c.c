@@ -39,8 +39,8 @@ uint8_t i2cRead(uint8_t addr, uint8_t subaddr)
 	i2c_write(addr);
 	i2c_write(subaddr);
 	i2c_start();
-	i2c_write(0x99);
-	val = i2c_read(0);
+	i2c_write(addr + 1);
+	val = i2c_read();
 	i2c_stop();
 
 	return val;
@@ -64,7 +64,25 @@ void cmdGetI2C(uint8_t argc, char** argv)
 	if(argc == 3)
 	{
 		int val = i2cRead(getint(&argv[1]), getint(&argv[2]));
-		printf_P(PSTR("Read: %d\n"), val);
+		printf_P(PSTR("Read: %d (0x%02x)\n"), val, val);
+	}
+	else if(argc == 4)
+	{
+		uint8_t minBit, maxBit;
+		int val = i2cRead(getint(&argv[1]), getint(&argv[2]));
+		
+		getrange(argv[3], &minBit, &maxBit);
+		if(maxBit < minBit)
+		{
+			uint8_t tmp = maxBit;
+			maxBit = minBit;
+			minBit = tmp;
+		}
+
+		val >>= minBit;
+		val &= (1 << (maxBit - minBit + 1)) - 1;
+		
+		printf_P(PSTR("Read: %d (0x%02x)\n"), val, val);
 	}
 }
 
