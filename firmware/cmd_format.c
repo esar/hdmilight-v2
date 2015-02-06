@@ -64,6 +64,9 @@ KnownRatio g_ratios[] =
 };
 
 static uint8_t g_formatChangeEnabled = 1;
+static uint16_t g_currentRatio   = 0;
+static uint16_t g_currentWidth  = 0xffff;
+static uint16_t g_currentHeight = 0xffff;
 
 uint16_t getConfig(uint16_t width, uint16_t height, uint16_t ratio)
 {
@@ -108,9 +111,6 @@ void changeFormat()
 	static uint16_t xMinPostActive = 0;
 	static uint16_t yMinPreActive  = 0;
 	static uint16_t yMinPostActive = 0;
-	static uint16_t currentRatio   = 0;
-	static uint16_t currentWidth  = 0xffff;
-	static uint16_t currentHeight = 0xffff;
 
 	uint8_t hasChanged = 0;
 
@@ -126,10 +126,10 @@ void changeFormat()
 	} __attribute__((packed)) *format = AMBILIGHT_BASE_ADDR_FORMAT;
 
 
-	if(format->xSize < currentWidth  - X_RES_FUZZ ||
-	   format->xSize > currentWidth  + X_RES_FUZZ ||
-	   format->ySize < currentHeight - Y_RES_FUZZ ||
-	   format->ySize > currentHeight + Y_RES_FUZZ ||
+	if(format->xSize < g_currentWidth  - X_RES_FUZZ ||
+	   format->xSize > g_currentWidth  + X_RES_FUZZ ||
+	   format->ySize < g_currentHeight - Y_RES_FUZZ ||
+	   format->ySize > g_currentHeight + Y_RES_FUZZ ||
 	   format->xPreActive  < xMinPreActive  ||
 	   format->xPostActive < xMinPostActive ||
 	   format->yPreActive  < yMinPreActive  ||
@@ -140,9 +140,9 @@ void changeFormat()
 		// so return to the native ratio for the current resolution
 
 		//printf_P(PSTR("reset: %d %d %d   %d %d %d\n"), format->xSize, format->xPreActive, format->xPostActive, format->ySize, format->yPreActive, format->yPostActive);
-		currentRatio   = 0;
-		currentWidth   = format->xSize;
-		currentHeight  = format->ySize;
+		g_currentRatio   = 0;
+		g_currentWidth   = format->xSize;
+		g_currentHeight  = format->ySize;
 		xMinPreActive  = 0;
 		xMinPostActive = 0;
 		yMinPreActive  = 0;
@@ -155,9 +155,9 @@ void changeFormat()
 	{
 		uint16_t ratio = getRatio(format->xSize - format->xPreActive - format->xPostActive,
 		                          format->ySize - format->yPreActive - format->yPostActive);
-		if(ratio != 0xffff && ratio != currentRatio)
+		if(ratio != 0xffff && ratio != g_currentRatio)
 		{
-			currentRatio   = ratio;
+			g_currentRatio   = ratio;
 			xMinPreActive  = 0;
 			xMinPostActive = 0;
 			yMinPreActive  = format->yPreActive - Y_ACTIVE_FUZZ;
@@ -170,9 +170,9 @@ void changeFormat()
 	{
 		uint16_t ratio = getRatio(format->xSize - format->xPreActive - format->xPostActive,
 		                          format->ySize - format->yPreActive - format->yPostActive);
-		if(ratio != 0xffff && ratio != currentRatio)
+		if(ratio != 0xffff && ratio != g_currentRatio)
 		{
-			currentRatio   = ratio;
+			g_currentRatio   = ratio;
 			xMinPreActive  = format->xPreActive - X_ACTIVE_FUZZ;
 			xMinPostActive = format->xPostActive - X_ACTIVE_FUZZ;
 			yMinPreActive  = 0;
@@ -185,10 +185,10 @@ void changeFormat()
 	{
 		uint32_t config;
 
-		//printf_P(PSTR("format changed: %dx%d (%d): "), currentWidth, currentHeight, currentRatio);
-		//printf_P(PSTR("%s\n"), g_ratios[currentRatio].name);
+		//printf_P(PSTR("format changed: %dx%d (%d): "), g_currentWidth, g_currentHeight, g_currentRatio);
+		//printf_P(PSTR("%s\n"), g_ratios[g_currentRatio].name);
 			
-		config = getConfig(currentWidth, currentHeight, currentRatio);
+		config = getConfig(g_currentWidth, g_currentHeight, g_currentRatio);
 		if(config != 0xffff && g_formatChangeEnabled)
 		{
 			config += 1;
@@ -215,6 +215,8 @@ void cmdGetFormat(uint8_t argc, char** argv)
 	if(argc == 1)
 	{
 		uint16_t* address = AMBILIGHT_BASE_ADDR_FORMAT;
-		printf("%d %d %d %d %d %d\n", address[0], address[1], address[2], address[3], address[4], address[5]);
+		printf("raw: %d %d %d %d %d %d\n", address[0], address[1], address[2], address[3], address[4], address[5]);
+		printf_P(PSTR("fmt: %dx%d %s (%d)\n"), g_currentWidth, g_currentHeight, 
+		                                       g_ratios[g_currentRatio].name, g_currentRatio);
 	}
 }
