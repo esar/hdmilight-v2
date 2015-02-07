@@ -111,6 +111,17 @@
 #define AREA_WIDTH 1	// >=1 and integer:  Typically 1 or 2 (if you have fewer LEDs per strip)
 #define AREA_DEPTH 8	// >=1 and integer:  Start at 8, and reduce after you've tuned CELLGRID_BOUNDS
 
+// Defining the letter box ratio avoids having to change the CELLGRID_BOUNDS and LEDS_BOUNDS
+// for different Letterbox formats at the same resolution.
+// To use this, define CELLGRID_BOUNDS / LEDS_BOUNDS for the base resolution defined in PIXELS_WIDTH/HEIGHT,
+// and then generate configs with a different LETTERBOX_RATIO for the letterboxes required
+// Note that the base letterbox ratio is calculated from PIXELS_WIDTH/HEIGHT, so if that ratio is 1.77,
+// and LETTERBOX_RATIO is 1.77, then there is no change made to the bounds of the screen
+// Letterbox ratio must be > 0.0
+#define LETTERBOX_RATIO 1.77	// 16:9
+//#define LETTERBOX_RATIO 2.40	// Modern anamorphic (2-4-0)
+//#define LETTERBOX_RATIO 1.33	// 4:3
+
 // If the span of leds exceed the displayed picture area, there will be leds that should be dark,
 // but because they are not are causing leds to not line up with the picture.
 // Force the leds to be ignored by adjusting the bounds of the LED causing outermost leds to be ignored 
@@ -142,6 +153,10 @@
 
 #define LEDS_WIDTH  ((LEDS_X) + (LEDS_BOUNDS_END_X_OFFSET) - (LEDS_BOUNDS_START_X_OFFSET))
 #define LEDS_HEIGHT ((LEDS_Y) + (LEDS_BOUNDS_END_Y_OFFSET) - (LEDS_BOUNDS_START_Y_OFFSET))
+
+#define LETTERBOX_FUDGE_FACTOR (0.01)
+
+#define SCREEN_ASPECT_RATIO ((float)(PIXELS_WIDTH) / (float)(PIXELS_HEIGHT))
 
 
 
@@ -204,6 +219,9 @@ int verifySettings(void)
 		{fprintf(stderr, "Error: LEDS_BOUNDS_END_X_OFFSET should be <=0 and integer\n");return 0;}
 	if ( LEDS_BOUNDS_END_Y_OFFSET > 0 || ( ! isInteger(LEDS_BOUNDS_END_Y_OFFSET) ) )
 		{fprintf(stderr, "Error: LEDS_BOUNDS_END_Y_OFFSET should be <=0 and integer\n");return 0;}
+
+	if ( LETTERBOX_RATIO <= 0.0 )
+		{fprintf(stderr, "Error: LETTER_BOX_RATIO should be >0.0\n");return 0;}
 	
 	return 1;
 }
@@ -250,7 +268,7 @@ FILE *outputConfCreate(void)
 
 
 
-int areaConfGenerate(FILE *fp, int *areasX, int *areasY)
+int areaConfGenerate(FILE *fp, int *areasX, int *areasY, float letterBoxXPercent, float letterBoxYPercent)
 {
 	int i, divshift = 0;
 
@@ -276,31 +294,43 @@ int areaConfGenerate(FILE *fp, int *areasX, int *areasY)
 	cellMinY += CELLGRID_BOUNDS_START_Y_OFFSET;
 	cellMaxY += CELLGRID_BOUNDS_END_Y_OFFSET;
 
+	// Figure out the letterbox adjustment
+	int letterBoxXAdjust, letterBoxYAdjust;
+
+	if ( letterBoxXPercent == 1.0 )
+		letterBoxXAdjust = 0;
+	else	letterBoxXAdjust = (int)((1.0 - letterBoxXPercent) * (float)((cellMaxX - cellMinX) + 1) * 0.5);
+
+	if ( letterBoxYPercent == 1.0 )
+		letterBoxYAdjust = 0;
+	else	letterBoxYAdjust = (int)((1.0 - letterBoxYPercent) * (float)((cellMaxY - cellMinY) + 1) * 0.5);
+
+
 	int countAreas = 0;
 
 	// Top row running left to right
 	fprintf(fp, "# Top Row running left to right\n");
 	areaConfHeader(fp);
 	for ( i = cellMinX; i <= cellMaxX; i += AREA_WIDTH )
-		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", i, (i + AREA_WIDTH) - 1, cellMinY, (cellMinY + AREA_DEPTH) - 1, divshift, countAreas++); (*areasX) ++; }
+		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", i, (i + AREA_WIDTH) - 1, letterBoxYAdjust + cellMinY, letterBoxYAdjust + (cellMinY + AREA_DEPTH) - 1, divshift, countAreas++); (*areasX) ++; }
 	
 	// Right column running top to bottom
 	fprintf(fp, "# Right Column running top to bottom\n");
 	areaConfHeader(fp);
 	for ( i = cellMinY; i <= cellMaxY; i += AREA_WIDTH )
-		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", (cellMaxX - AREA_DEPTH) + 1, cellMaxX, i, (i + AREA_WIDTH) - 1, divshift, countAreas++); (*areasY) ++; }
+		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", -letterBoxXAdjust + (cellMaxX - AREA_DEPTH) + 1, -letterBoxXAdjust + cellMaxX, i, (i + AREA_WIDTH) - 1, divshift, countAreas++); (*areasY) ++; }
 
 	// Bottom row running left to right
 	fprintf(fp, "# Bottom Row running left to right\n");
 	areaConfHeader(fp);
 	for ( i = cellMinX; i <= cellMaxX; i += AREA_WIDTH )
-		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", i, (i + AREA_WIDTH) - 1, (cellMaxY - AREA_DEPTH) + 1, cellMaxY, divshift, countAreas++); }
+		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", i, (i + AREA_WIDTH) - 1, -letterBoxYAdjust + (cellMaxY - AREA_DEPTH) + 1, -letterBoxYAdjust + cellMaxY, divshift, countAreas++); }
 
 	// Left column running top to bottom
 	fprintf(fp, "# Left Column running top to bottom\n");
 	areaConfHeader(fp);
 	for ( i = cellMinY; i <= cellMaxY; i += AREA_WIDTH )
-		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", cellMinX, (cellMinX + AREA_DEPTH ) - 1, i, (i + AREA_WIDTH) - 1, divshift, countAreas++); }
+		{ fprintf(fp, "  %-5d %-5d %-5d %-5d %-8d # %d\n", letterBoxXAdjust + cellMinX, letterBoxXAdjust + (cellMinX + AREA_DEPTH ) - 1, i, (i + AREA_WIDTH) - 1, divshift, countAreas++); }
 
 	printf("Number of areas: %d XAreas: %d YAreas: %d\n", countAreas, *areasX, *areasY);
 
@@ -356,6 +386,36 @@ int dumpActiveLed(FILE *fp, int from, int to, int ledCount, int baseArea, int x,
 
 
 
+int aspectRatioMatch(float aspectRatio1, float aspectRatio2)
+{
+	if ( fabsf(aspectRatio2 - aspectRatio1) <= LETTERBOX_FUDGE_FACTOR ) return 1;
+	return 0;
+}
+
+
+
+// Figure out the percentage (0-1) we need to adjust X or Y for letter boxing
+
+void calculateLetterBoxAdjustment(float *letterBoxXPercent, float *letterBoxYPercent)
+{
+	if ( aspectRatioMatch( SCREEN_ASPECT_RATIO, LETTERBOX_RATIO ) )
+	{
+		*letterBoxXPercent = *letterBoxYPercent = 1.0;
+	}
+	else if ( (LETTERBOX_RATIO) > SCREEN_ASPECT_RATIO )
+	{
+		*letterBoxXPercent = 1.0;
+		*letterBoxYPercent = SCREEN_ASPECT_RATIO / (LETTERBOX_RATIO); 
+	}
+	else if ( (LETTERBOX_RATIO) < SCREEN_ASPECT_RATIO )
+	{
+		*letterBoxXPercent = (LETTERBOX_RATIO) / SCREEN_ASPECT_RATIO; 
+		*letterBoxYPercent = 1.0;
+	}	
+}
+
+
+
 void outputConfGenerate(FILE *fp, int areasX, int areasY)
 {
 	int i, ledCount = 0, baseArea = 0;
@@ -405,6 +465,7 @@ int main(void)
 {
 	int areasX, areasY;
 	FILE *areaConfFp, *outputConfFp;
+	float letterBoxYPercent, letterBoxXPercent;
 
 	if ( ! verifySettings() )	return 1;
 
@@ -412,8 +473,11 @@ int main(void)
 	if (( areaConfFp   = areaConfCreate()   ) == NULL )	return 2;
 	if (( outputConfFp = outputConfCreate() ) == NULL )	return 3;
 
+	// Calculate the adjustment for letter boxing
+	calculateLetterBoxAdjustment(&letterBoxXPercent, &letterBoxYPercent);
+
 	// Generate area file contents
-	areaConfGenerate(areaConfFp, &areasX, &areasY);
+	areaConfGenerate(areaConfFp, &areasX, &areasY, letterBoxXPercent, letterBoxYPercent);
 
 	// Generate output file contents
 	outputConfGenerate(outputConfFp, areasX, areasY);
