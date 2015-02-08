@@ -73,9 +73,9 @@ void togglePower()
 		uint8_t x;
 
 		// set free run colour to black
-		i2cWrite(0x44, 0xC0, 200);
-		i2cWrite(0x44, 0xC1, 200);
-		i2cWrite(0x44, 0xC2, 200);
+		i2cWrite(0x44, 0xC0, 0);
+		i2cWrite(0x44, 0xC1, 0);
+		i2cWrite(0x44, 0xC2, 0);
 
 		// force free run mode with manual colour selection
 		x = i2cRead(0x44, 0xBF);
