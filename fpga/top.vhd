@@ -218,6 +218,9 @@ signal AMBILIGHT_CFG_DIN  : std_logic_vector(7 downto 0);
 signal AMBILIGHT_CFG_DOUT : std_logic_vector(7 downto 0);
 signal driverOutput : std_logic_vector(7 downto 0);
 
+signal INT_CLEAR  : std_logic_vector(7 downto 0);
+signal INT_FORMAT : std_logic;
+
 signal formatChanged : std_logic;
 
 begin
@@ -314,12 +317,21 @@ end process;
 process(RST,CLK16)
 begin
 	if(RST = '1') then
+		INT_FORMAT <= '0';
 		MCU_INTVEC <= (others => '0');
 	elsif(rising_edge(CLK16)) then
-		MCU_INTVEC <= "000000";
-
 		if(formatChanged = '1') then
+			INT_FORMAT <= '1';
+		elsif(INT_CLEAR(0) = '1') then
+			INT_FORMAT <= '0';
+		end if;
+
+		if(ADV_INT1 = '1') then
+			MCU_INTVEC <= "100010";
+		elsif(INT_FORMAT = '1') then
 			MCU_INTVEC <= "100001";
+		else
+			MCU_INTVEC <= (others => '0');
 		end if;
 	end if;
 end process;
@@ -336,12 +348,16 @@ begin
 		
 		MCU_TIMER_LATCHED <= (others=>'0');
 		
+		INT_CLEAR <= (others => '0');
+
 	elsif (rising_edge(CLK16)) then
 
 		UART_WR <= '0';
 		UART_RD <= '0';
 
 		DMA_START <= '0';
+
+		INT_CLEAR <= (others => '0');
 		
 		-- IO Read Cycle
 		if (MCU_IO_RD = '1') then
@@ -396,6 +412,8 @@ begin
 					DMA_WRITE <= MASTER_DOUT(0);
 					DMA_IN_PROGRESS <= '1';
 					DMA_START <= '1';
+				when X"0054"  =>
+					INT_CLEAR <= MASTER_DOUT(7 downto 0);
 				
 				when others => 
 				

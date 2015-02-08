@@ -33,6 +33,16 @@
 #define AMBILIGHT_BASE_ADDR_DELAY  ((void*)0xe800)
 #define AMBILIGHT_BASE_ADDR_FORMAT ((void*)0xf000)
 
+#define DMA_FLASH_ADDR_H    _SFR_IO8(0x2c)
+#define DMA_FLASH_ADDR_M    _SFR_IO8(0x2d)
+#define DMA_FLASH_ADDR_L    _SFR_IO8(0x2e)
+#define DMA_SRAM_ADDR_H     _SFR_IO8(0x2f)
+#define DMA_SRAM_ADDR_L     _SFR_IO8(0x30)
+#define DMA_LEN_H           _SFR_IO8(0x31)
+#define DMA_LEN_L           _SFR_IO8(0x32)
+#define DMA_START           _SFR_IO8(0x33)
+#define INT_CLEAR           _SFR_IO8(0x34)
+
 
 extern uint8_t silent;
 extern volatile uint8_t g_formatChanged;

@@ -88,6 +88,7 @@ static const struct ConfigTable g_configTablePostEdid[] PROGMEM =
 	{ 0x68, 0x57, 0xDA },  // ADI recommended setting
 	{ 0x68, 0x58, 0x01 },  // ADI recommended setting
 	{ 0x68, 0x75, 0x10 },  // DDC drive strength
+	{ 0x98, 0x40, 0xE2 },  // INT1 active high, active until cleared
 
 	{ 0x00 }
 };

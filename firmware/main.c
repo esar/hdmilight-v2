@@ -45,6 +45,11 @@ volatile uint8_t g_formatChanged = 0;
 ISR(_VECTOR(1))
 {
 	g_formatChanged = 1;
+	INT_CLEAR = 1;
+}
+
+ISR(_VECTOR(2))
+{
 }
 
 char readcmd(char** argv, char maxargs)
@@ -326,15 +331,6 @@ const char cmdSetPortUsage[] PROGMEM   = "Set Port:    SP addr value";
 const char cmdGetResultUsage[] PROGMEM = "Get Result:  GR index";
 const char cmdGetStatusUsage[] PROGMEM = "Get Status:  GS";
 const char cmdRstAllUsage[] PROGMEM    = "Rst All:     R";
-
-#define DMA_FLASH_ADDR_H    _SFR_IO8(0x2c)
-#define DMA_FLASH_ADDR_M    _SFR_IO8(0x2d)
-#define DMA_FLASH_ADDR_L    _SFR_IO8(0x2e)
-#define DMA_SRAM_ADDR_H     _SFR_IO8(0x2f)
-#define DMA_SRAM_ADDR_L     _SFR_IO8(0x30)
-#define DMA_LEN_H           _SFR_IO8(0x31)
-#define DMA_LEN_L           _SFR_IO8(0x32)
-#define DMA_START           _SFR_IO8(0x33)
 
 void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
 {
