@@ -59,6 +59,7 @@ int fixed_9_9_int(int32_t x);
 void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len);
 
 uint8_t i2cRead(uint8_t addr, uint8_t subaddr);
+void i2cWrite(uint8_t addr, uint8_t subaddr, uint8_t value);
 
 void changeFormat();
 

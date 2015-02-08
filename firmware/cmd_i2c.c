@@ -46,15 +46,20 @@ uint8_t i2cRead(uint8_t addr, uint8_t subaddr)
 	return val;
 }
 
+void i2cWrite(uint8_t addr, uint8_t subaddr, uint8_t value)
+{
+	i2c_start();
+	i2c_write(addr);
+	i2c_write(subaddr);
+	i2c_write(value);
+	i2c_stop();
+}
+
 void cmdSetI2C(uint8_t argc, char** argv)
 {
 	if(argc == 4)
 	{
-		i2c_start();
-		i2c_write(getint(&argv[1]));
-		i2c_write(getint(&argv[2]));
-		i2c_write(getint(&argv[3]));
-		i2c_stop();
+		i2cWrite(getint(&argv[1]), getint(&argv[2]), getint(&argv[3]));
 		printf_P(PSTR("OK\n"));
 	}
 }
@@ -91,15 +96,7 @@ void writeEdid(const char* edid, int length)
 	int i;
 
 	for(i = 0; i < length; ++i)
-	{
-		uint8_t data = pgm_read_byte(&edid[i]);
-
-		i2c_start();
-		i2c_write(0x6c);
-		i2c_write(i);
-		i2c_write(data);
-		i2c_stop();
-	}
+		i2cWrite(0x6c, i, pgm_read_byte(&edid[i]));
 }
 
 void writeConfig(const struct ConfigTable* table)
@@ -122,13 +119,7 @@ void writeConfig(const struct ConfigTable* table)
 			i2c_stop();
 		}
 		else
-		{
-			i2c_start();
-			i2c_write(address);
-			i2c_write(subaddress);
-			i2c_write(data);
-			i2c_stop();
-		}
+			i2cWrite(address, subaddress, data);
 	}
 }
 
