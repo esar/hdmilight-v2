@@ -14,6 +14,7 @@ OBJ            = main.o serial.o timer.o i2c.o \
                  cmd_result.o  \
                  cmd_status.o  \
                  cmd_format.o  \
+                 cmd_keys.o    \
                  cmd_mem.o
 
 MCU_TARGET     = atmega16

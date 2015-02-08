@@ -46,6 +46,8 @@
 
 extern uint8_t silent;
 extern volatile uint8_t g_formatChanged;
+extern volatile uint8_t g_cecMessage[16];
+extern volatile uint8_t g_cecMessageLength;
 
 
 char readcmd(char** argv, char maxargs);
@@ -62,6 +64,8 @@ uint8_t i2cRead(uint8_t addr, uint8_t subaddr);
 void i2cWrite(uint8_t addr, uint8_t subaddr, uint8_t value);
 
 void changeFormat();
+
+void processCecMessage();
 
 void cmdGetArea(uint8_t argc, char** argv);
 void cmdSetArea(uint8_t argc, char** argv);
@@ -85,6 +89,9 @@ void cmdRstGamma(uint8_t argc, char** argv);
 void cmdGetI2C(uint8_t argc, char** argv);
 void cmdSetI2C(uint8_t argc, char** argv);
 void cmdRstI2C(uint8_t argc, char** argv);
+
+void cmdSetKeys(uint8_t argc, char** argv);
+void cmdRstKeys(uint8_t argc, char** argv);
 
 void cmdGetMem(uint8_t argc, char** argv);
 

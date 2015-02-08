@@ -41,6 +41,9 @@
 
 uint8_t silent = 0;
 volatile uint8_t g_formatChanged = 0;
+volatile uint8_t g_cecMessage[16];
+volatile uint8_t g_cecMessageLength;
+
 
 ISR(_VECTOR(1))
 {
@@ -50,6 +53,43 @@ ISR(_VECTOR(1))
 
 ISR(_VECTOR(2))
 {
+	uint8_t cecRxIntState = i2cRead(0x98, 0x93);
+
+	// if this is a CEC RX message 0 ready interupt
+	if(cecRxIntState & 8)
+	{
+		int i;
+
+		// copy the received message
+		g_cecMessageLength = i2cRead(0x80, 0x25);
+		if(g_cecMessageLength > sizeof(g_cecMessage))
+			g_cecMessageLength = sizeof(g_cecMessage);
+		for(i = 0; i < g_cecMessageLength; ++i)
+			g_cecMessage[i] = i2cRead(0x80, 0x15 + i);
+
+		// clear the message buffer ready for a new message
+		i2cWrite(0x80, 0x2C, 0x02);
+
+		// clear the interrupt
+		i2cWrite(0x98, 0x94, 0x08);
+	}
+}
+
+void idle()
+{
+	if(g_formatChanged)
+	{
+		changeFormat();
+		g_formatChanged = 0;
+	}
+
+	if(g_cecMessageLength != 0)
+	{
+		cli();
+		processCecMessage();
+		g_cecMessageLength = 0;
+		sei();
+	}
 }
 
 char readcmd(char** argv, char maxargs)
@@ -66,11 +106,7 @@ char readcmd(char** argv, char maxargs)
 		int c = serial_getchar();
 		if(c == -1)
 		{
-			if(g_formatChanged)
-			{
-				changeFormat();
-				g_formatChanged = 0;
-			}
+			idle();
 			continue;
 		}
 
@@ -322,6 +358,8 @@ const char cmdRstGammaUsage[] PROGMEM  = "Rst Gamma:   RG";
 const char cmdGetI2CUsage[] PROGMEM    = "Get I2C:     GI addr sub_addr [bit_range]";
 const char cmdSetI2CUsage[] PROGMEM    = "Set I2C:     SI addr sub_addr value";
 const char cmdRstI2CUsage[] PROGMEM    = "Rst I2C:     RI";
+const char cmdSetKeysUsage[] PROGMEM   = "Set Keys:    SK key_code";
+const char cmdRstKeysUsage[] PROGMEM   = "Rst Keys:    RK";
 const char cmdGetMemUsage[] PROGMEM    = "Get Memory:  GM index";
 const char cmdGetOutputUsage[] PROGMEM = "Get Output:  GO output light";
 const char cmdSetOutputUsage[] PROGMEM = "Set Output:  SO output light area coef gamma enable";
@@ -376,6 +414,8 @@ int main()
 		{ "GI", cmdGetI2C,    cmdGetI2CUsage    },
 		{ "SI", cmdSetI2C,    cmdSetI2CUsage    },
 		{ "RI", cmdRstI2C,    cmdRstI2CUsage    },
+		{ "SK", cmdSetKeys,   cmdSetKeysUsage   },
+		{ "RK", cmdRstKeys,   cmdRstKeysUsage   },
 		{ "GM", cmdGetMem,    cmdGetMemUsage    },
 		{ "GO", cmdGetOutput, cmdGetOutputUsage },
 		{ "SO", cmdSetOutput, cmdSetOutputUsage },
