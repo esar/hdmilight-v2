@@ -92,14 +92,45 @@ void idle()
 	}
 }
 
+// Print a section of the ring buffer to stdout, wrapping around when passing the end.
+// Also replacing NULLs with spaces as old commands have had spaces replaced with NULLs
+// when they were being split into args
+void ringBufPrint(char* buf, uint8_t pos, int len)
+{
+	while(len--)
+	{
+		if(buf[pos] == '\0')
+			fputc(' ', stdout);
+		else
+			fputc(buf[pos], stdout);
+		++pos;
+	}
+}
+
+void ringBufCopy(char* buf, uint8_t dst, uint8_t src, int len)
+{
+	while(len--)
+		buf[dst++] = buf[src++];
+}
+
+void ringBufCopyReverse(char* buf, uint8_t dst, uint8_t src, int len)
+{
+	dst += len;
+	src += len;
+	while(len--)
+		buf[--dst] = buf[--src];
+}
+
 char readcmd(char** argv, char maxargs)
 {
 	static char cmdbuf[256] = {0, 0};
 	static unsigned char current = 0;
+
 	unsigned char history = 0;
 	unsigned char pos = current + 1;
-	unsigned char end = current + 2;
+	unsigned char end = current + 1;
 	unsigned char arg;
+
 
 	while(1)
 	{
@@ -142,9 +173,16 @@ char readcmd(char** argv, char maxargs)
 			case 0x7f:
 				if(pos > 0)
 				{
-					memmove(cmdbuf + pos - 1, cmdbuf + pos, end - pos);
+					// move partial line left in buffer to fill hole
+					ringBufCopy(cmdbuf, pos - 1, pos, end - pos);
 					--pos; --end;
-					printf_P(PSTR("\x1B[D%s \x1B[%dD"), cmdbuf + pos, end - pos); // move left
+
+					// move cursor left one place and print the partial line
+					printf_P(PSTR("\x1B[D"));
+					ringBufPrint(cmdbuf, pos, end - pos);
+
+					// move the cursor left, back to the edit position
+					printf_P(PSTR(" \x1B[%dD"), end - pos + 1);
 				}
 				else
 					serial_putchar(BELL);
@@ -180,15 +218,27 @@ char readcmd(char** argv, char maxargs)
 					if(i == history + 1)
 					{
 						++history;
-						for(i = 0; i < len - 1; ++i)
-							cmdbuf[current + 1 + i] = (cmdbuf[p + 1 + i] == '\0' ? 
-							                           ' ' : cmdbuf[p + 1 + i]);
-						cmdbuf[current + len - 1] = '\0';
-						printf_P(PSTR(" \x1B[%dD%s"), pos - current, cmdbuf + current + 1);
+
+						// lines in the history are NULL terminated, remove the termination
+						--len;
+
+						// copy the old line into the current position in the buffer
+						ringBufCopy(cmdbuf, current + 1, p + 1, len - 1);
+						cmdbuf[current + len] = '\0';
+
+						// move the cursor to the beginning of the line and print the copied line
+						printf_P(PSTR(" \x1B[%dD"), pos - current);
+						ringBufPrint(cmdbuf, current + 1, len - 1);
+
+						// if the copied line is shorter then overwrite any extra characters with spaces
 						if(end - (current + len) > 0)
-							printf_P(PSTR("%*s\x1B[%dD"), end - (current + len), "", end - (current + len));
+						{
+							for(i = 0; i < end - (current + len); ++i)
+								serial_putchar(' ');
+							printf_P(PSTR("\x1B[%dD"), end - (current + len));
+						}
 						end = current + len;
-						pos = end - 1;
+						pos = end;
 					}
 					else
 						serial_putchar(BELL);
@@ -211,15 +261,26 @@ char readcmd(char** argv, char maxargs)
 						p -= len;
 					}
 
-					for(i = 0; i < len - 1; ++i)
-						cmdbuf[current + 1 + i] = (cmdbuf[p + 1 + i] == '\0' ? 
-									   ' ' : cmdbuf[p + 1 + i]);
-					cmdbuf[current + len - 1] = '\0';
-					printf_P(PSTR(" \x1B[%dD%s"), pos - current, cmdbuf + current + 1);
+					// the lines in the history are NULL terminated, remove the termination
+					--len;
+
+					// copy the old line to the current position in the buffer
+					ringBufCopy(cmdbuf, current + 1, p + 1, len - 1);
+					cmdbuf[current + len] = '\0';
+
+					// move the cursor to the beginning of the line and print the copied line
+					printf_P(PSTR(" \x1B[%dD"), pos - current);
+					ringBufPrint(cmdbuf, current + 1, len - 1);
+
+					// if the copied line is shorter then overwrite the extra characters with spaces
 					if(end - (current + len) > 0)
-						printf_P(PSTR("%*s\x1B[%dD"), end - (current + len), "", end - (current + len));
+					{
+						for(i = 0; i < end - (current + len); ++i)
+							serial_putchar(' ');
+						printf_P(PSTR("\x1B[%dD"), end - (current + len));
+					}
 					end = current + len;
-					pos = end - 1;
+					pos = end;
 				}
 				else if(history == 1)
 				{
@@ -230,11 +291,17 @@ char readcmd(char** argv, char maxargs)
 			default:
 				if(end + 1 != current)
 				{
-					int i;
-					for(i = end; i > pos; --i)
-						cmdbuf[i] = cmdbuf[i - 1];
+					// copy any characters after the current edit point to the right to make room
+					ringBufCopyReverse(cmdbuf, pos + 1, pos, end - pos);
+
+					// add the new character
 					cmdbuf[pos] = c;
-					printf_P(PSTR("%s \x1B[%dD"), cmdbuf + pos, end - pos);
+
+					// print the buffer from the current edit point to the end
+					ringBufPrint(cmdbuf, pos, end - pos + 1);
+
+					// move the cursor back to the edit point
+					printf_P(PSTR(" \x1B[%dD"), end - pos + 1);
 					++pos;
 					++end;
 
@@ -246,22 +313,43 @@ char readcmd(char** argv, char maxargs)
 	}
 
 DONE:
+	// if the current line wraps around the end of the buffer then rotate the
+	// buffer so that the line is all in one piece
+	if(end < current)
+	{
+		uint8_t offset = 0x100 - current;
+		ringBufCopyReverse(cmdbuf, end + offset, end, 0x100);
+		pos += offset;
+		end += offset;
+		current += offset;
+	}
+
+	// NULL terminate the current line
+	cmdbuf[end] = '\0';
+
+	// split the line into args
 	pos = current + 1;
 	for(arg = 0; arg < maxargs; ++arg)
 	{
-		if(cmdbuf[pos] == '\0')
+		if(pos == end)
 			break; 
 
-		while(cmdbuf[pos] == ' ')
+		while((cmdbuf[pos] == ' ' || cmdbuf[pos] == '\0') && pos != end)
 			cmdbuf[pos++] = '\0';
 
 		argv[arg] = cmdbuf + pos;
 
-		while(cmdbuf[pos] != ' ' && cmdbuf[pos] != '\0')
+		while(cmdbuf[pos] != ' ' && cmdbuf[pos] != '\0' && pos != end)
 			++pos;
 	}
 	
+	// account for added NULL termination of the line
+	++end;
+
+	// store the length of the line for history navigation
 	cmdbuf[end] = end - current;
+
+	// setup ready for the next line
 	cmdbuf[end + 1] = '\0';
 	current = end;
 	
