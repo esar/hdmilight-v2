@@ -471,7 +471,10 @@ void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
 	DMA_SRAM_ADDR_L = dst & 0xff;
 	DMA_LEN_H = len >> 8;
 	DMA_LEN_L = len & 0xff;
+
+	cli();
 	DMA_START = 0;
+	sei();
 }
 
 int main()
