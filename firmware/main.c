@@ -456,6 +456,7 @@ const char cmdGetPortUsage[] PROGMEM   = "Get Port:    GP addr";
 const char cmdSetPortUsage[] PROGMEM   = "Set Port:    SP addr value";
 const char cmdGetResultUsage[] PROGMEM = "Get Result:  GR index";
 const char cmdGetStatusUsage[] PROGMEM = "Get Status:  GS";
+const char cmdGetStackUsage[] PROGMEM  = "Get Stack:   GZ";
 const char cmdRstAllUsage[] PROGMEM    = "Rst All:     R";
 
 void dmaRead(uint8_t section, uint16_t src, uint16_t dst, uint16_t len)
@@ -517,6 +518,7 @@ int main()
 		{ "GS", cmdGetStatus, cmdGetStatusUsage },
 		{ "GX", cmdGetAddr,   cmdGetAddrUsage   },
 		{ "SX", cmdSetAddr,   cmdSetAddrUsage   },
+		{ "GZ", cmdGetStack,  cmdGetStackUsage  },
 		{ "R",  cmdRstAll,    cmdRstAllUsage    },
 	};
 
