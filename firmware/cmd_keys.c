@@ -110,21 +110,25 @@ void processCecMessage()
 
 	if(g_cecMessage[1] == CEC_OP_USER_CONTROL_PRESSED)
 	{
-		if(g_cecMessage[2] == CEC_KEY_POWER)
+		uint8_t action;
+
+		dmaRead(0, 0x7f00 + g_cecMessage[2], (uint16_t)&action, sizeof(action));
+		
+		if(action == ACTION_POWER_TOGGLE)
 			togglePower();
-		else if(g_cecMessage[2] == CEC_KEY_INPUT_SELECT)
+		else if(action == ACTION_CONFIG_CYCLE)
 			printf_P(PSTR("cycle preset\n"));
-		else if(g_cecMessage[2] == CEC_KEY_UP)
+		else if(action == ACTION_ADJUST_UP)
 			adjustUp();
-		else if(g_cecMessage[2] == CEC_KEY_DOWN)
+		else if(action == ACTION_ADJUST_DOWN)
 			adjustDown();
-		else if(g_cecMessage[2] == CEC_KEY_RIGHT)
+		else if(action == ACTION_ADJUST_CYCLE)
 			adjustCycle();
-		else if(g_cecMessage[2] == CEC_KEY_0)
+		else if(action == ACTION_CONFIG_AUTO)
 			cmdEnaFormat(0, NULL);
-		else if(g_cecMessage[2] >= CEC_KEY_1 && g_cecMessage[2] <= CEC_KEY_9)
+		else if(action >= ACTION_CONFIG_0 && action <= ACTION_CONFIG_8)
 		{
-			uint32_t config = g_cecMessage[2] - CEC_KEY_1;
+			uint32_t config = action - ACTION_CONFIG_0;
 
 			printf_P(PSTR("config %lu\n"), config);
 

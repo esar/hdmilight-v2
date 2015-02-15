@@ -43,6 +43,26 @@
 #define DMA_START           _SFR_IO8(0x33)
 #define INT_CLEAR           _SFR_IO8(0x34)
 
+#define ACTION_NONE           0
+#define ACTION_POWER_TOGGLE    1
+#define ACTION_CONFIG_AUTO     2
+#define ACTION_CONFIG_0        3
+#define ACTION_CONFIG_1        4
+#define ACTION_CONFIG_2        5
+#define ACTION_CONFIG_3        6
+#define ACTION_CONFIG_4        7
+#define ACTION_CONFIG_5        8
+#define ACTION_CONFIG_6        9
+#define ACTION_CONFIG_7        10
+#define ACTION_CONFIG_8        11
+#define ACTION_CONFIG_CYCLE    12
+#define ACTION_ADJUST_CYCLE    13
+#define ACTION_ADJUST_UP       14
+#define ACTION_ADJUST_DOWN     15
+#define ACTION_ADJUST_BRIGHTNESS 16
+#define ACTION_ADJUST_CONTRAST   17
+#define ACTION_ADJUST_SATURATION 18
+#define ACTION_ADJUST_HUE        19
 
 extern uint8_t silent;
 extern volatile uint8_t g_formatChanged;

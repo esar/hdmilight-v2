@@ -10,7 +10,10 @@ $(CONFIGS):
 format.bin: format.conf
 	../tools/format2bin.py $< > $@
 
-merged.bin: merge.conf format.bin $(CONFIGS)
+keys.bin: keys.conf
+	../tools/keys2bin.py ../firmware/ $< > $@
+
+merged.bin: merge.conf format.bin keys.bin $(CONFIGS)
 	../tools/mergebin.py merge.conf merged.bin
 
 clean:
