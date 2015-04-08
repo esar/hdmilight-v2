@@ -48,7 +48,8 @@ entity HdmilightTop is
 		FLASH_CK : out STD_LOGIC;
 		FLASH_CS : out STD_LOGIC;
 		FLASH_SI : out  STD_LOGIC;
-		FLASH_SO : in STD_LOGIC
+		FLASH_SO : in STD_LOGIC;
+		GPIO : inout STD_LOGIC_VECTOR(3 downto 0)
 	);
 end HdmilightTop;
 
@@ -544,7 +545,11 @@ OUTPUT <= driverOutput;
 
 ADV_SCL <= PORTD(7) when DDRD(7) = '1' else 'Z';
 ADV_SDA <= PORTD(6) when DDRD(6) = '1' else 'Z';
-PIND <= ADV_SCL & ADV_SDA & "000000";
+GPIO(3) <= PORTD(3) when DDRD(3) = '1' else 'Z';
+GPIO(2) <= PORTD(2) when DDRD(2) = '1' else 'Z';
+GPIO(1) <= PORTD(1) when DDRD(1) = '1' else 'Z';
+GPIO(0) <= PORTD(0) when DDRD(0) = '1' else 'Z';
+PIND <= ADV_SCL & ADV_SDA & "00" & GPIO(3) & GPIO(2) & GPIO(1) & GPIO(0);
 
 vidclk <= ADV_LLC;
 

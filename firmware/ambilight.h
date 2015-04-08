@@ -22,6 +22,22 @@
 
 #define BELL    '\a'
 
+#ifdef PORTD
+#undef PORTD
+#endif
+
+#ifdef PIND
+#undef PIND
+#endif
+
+#ifdef DDRD
+#undef DDRD
+#endif
+
+#define DDRD     _SFR_IO8(0x29)
+#define PIND     _SFR_IO8(0x2a)
+#define PORTD    _SFR_IO8(0x2b)
+
 #define AMBILIGHT_BASE_ADDR_OUTPUT ((void*)0x8000)
 #define AMBILIGHT_BASE_ADDR_COLOUR ((void*)0xa000)
 #define AMBILIGHT_BASE_ADDR_AREA   ((void*)0xb000)
@@ -64,6 +80,10 @@
 #define ACTION_ADJUST_SATURATION 18
 #define ACTION_ADJUST_HUE        19
 
+#define GPIO_POWER_PIN         0
+#define DEBOUNCE_TICK_COUNT    16
+
+
 extern uint8_t silent;
 extern volatile uint8_t g_formatChanged;
 extern volatile uint8_t g_cecMessage[16];
@@ -86,6 +106,8 @@ void i2cWrite(uint8_t addr, uint8_t subaddr, uint8_t value);
 void changeFormat();
 
 void processCecMessage();
+void powerOn();
+void powerOff();
 
 void cmdGetArea(uint8_t argc, char** argv);
 void cmdSetArea(uint8_t argc, char** argv);

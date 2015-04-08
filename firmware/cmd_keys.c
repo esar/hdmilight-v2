@@ -66,35 +66,41 @@ void adjustCycle()
 	printf_P(PSTR("adjust cycle: %02x\n"), currentAdjust);
 }
 
+void powerOn()
+{
+	uint8_t x;
+
+	// turn off forced free run mode and manual colour selection
+	x = i2cRead(0x44, 0xBF);
+	x &= ~5;
+	i2cWrite(0x44, 0xBF, x);
+	
+	printf_P(PSTR("power on\n"));
+}
+
+void powerOff()
+{
+	uint8_t x;
+
+	// set free run colour to black
+	i2cWrite(0x44, 0xC0, 0);
+	i2cWrite(0x44, 0xC1, 0);
+	i2cWrite(0x44, 0xC2, 0);
+
+	// force free run mode with manual colour selection
+	x = i2cRead(0x44, 0xBF);
+	x |= 5;
+	i2cWrite(0x44, 0xBF, x);
+
+	printf_P(PSTR("power off\n"));
+}
+
 void togglePower()
 {
 	if(on)
-	{
-		uint8_t x;
-
-		// set free run colour to black
-		i2cWrite(0x44, 0xC0, 0);
-		i2cWrite(0x44, 0xC1, 0);
-		i2cWrite(0x44, 0xC2, 0);
-
-		// force free run mode with manual colour selection
-		x = i2cRead(0x44, 0xBF);
-		x |= 5;
-		i2cWrite(0x44, 0xBF, x);
-
-		printf_P(PSTR("power off\n"));
-	}
+		powerOff();
 	else
-	{
-		uint8_t x;
-
-		// turn off forced free run mode and manual colour selection
-		x = i2cRead(0x44, 0xBF);
-		x &= ~5;
-		i2cWrite(0x44, 0xBF, x);
-		
-		printf_P(PSTR("power on\n"));
-	}
+		powerOn();
 
 	on ^= 1;
 }

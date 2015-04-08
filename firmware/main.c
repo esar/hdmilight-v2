@@ -77,6 +77,9 @@ ISR(_VECTOR(2))
 
 void idle()
 {
+	static uint8_t debounceValue = 0;
+	static uint8_t debounceTicks = 0;
+
 	if(g_formatChanged)
 	{
 		changeFormat();
@@ -89,6 +92,25 @@ void idle()
 		processCecMessage();
 		g_cecMessageLength = 0;
 		sei();
+	}
+
+	if((PIND & (1 << GPIO_POWER_PIN)) == debounceValue)
+	{
+		if(debounceTicks == DEBOUNCE_TICK_COUNT)
+		{
+			if(debounceValue)
+				powerOn();
+			else
+				powerOff();
+			++debounceTicks;
+		}
+		else if(debounceTicks < DEBOUNCE_TICK_COUNT)
+			++debounceTicks;
+	}
+	else
+	{
+		debounceValue = PIND & (1 << GPIO_POWER_PIN);
+		debounceTicks = 0;
 	}
 }
 
