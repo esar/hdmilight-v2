@@ -36,6 +36,10 @@
 // needs to be run from the serial console to start the ADV7611
 #define AUTO_INITIALIZATION
 
+// Uncomment to enable power on/off via physical switch.
+// Requires a pull-up resistor and switch to be added.
+//#define ENABLE_POWER_SWITCH
+
 #define BELL    '\a'
 
 
@@ -77,8 +81,10 @@ ISR(_VECTOR(2))
 
 void idle()
 {
+#ifdef ENABLE_POWER_SWITCH
 	static uint8_t debounceValue = 0;
 	static uint8_t debounceTicks = 0;
+#endif // ENABLE_POWER_SWITCH
 
 	if(g_formatChanged)
 	{
@@ -94,6 +100,7 @@ void idle()
 		sei();
 	}
 
+#ifdef ENABLE_POWER_SWITCH
 	if((PIND & (1 << GPIO_POWER_PIN)) == debounceValue)
 	{
 		if(debounceTicks == DEBOUNCE_TICK_COUNT)
@@ -112,6 +119,7 @@ void idle()
 		debounceValue = PIND & (1 << GPIO_POWER_PIN);
 		debounceTicks = 0;
 	}
+#endif // ENABLE_POWER_SWITCH
 }
 
 // Print a section of the ring buffer to stdout, wrapping around when passing the end.
