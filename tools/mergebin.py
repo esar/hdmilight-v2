@@ -14,4 +14,4 @@ for line in conf:
 	if os.path.isdir(filename):
 		filename = os.path.join(filename, 'merged.bin')
 	output.seek(int(address, 0))
-	output.write(open(filename).read())
+	output.write(open(filename, 'rb').read())

@@ -2,7 +2,6 @@
 
 # Originally from http://code.google.com/p/fpga-sram-bootstrap/source/browse/trunk/bitmerge.py
 
-# To run this script, use Python version 2.7 not version 3.x
 import argparse
 import struct
 
@@ -55,7 +54,7 @@ while section != 'd':
 	(length,) = struct.unpack(">H", data)
 	desc = args.ifile.read(length)
 	args.ofile.write(desc)
-	print "Section '%c' (size %6d) '%s'" % (section, length, desc)
+	print("Section '%c' (size %6d) '%s'" % (section, length, desc))
 
 #process section 'e' (main bit file data)
 section = args.ifile.read(1)
@@ -64,19 +63,19 @@ assert section=="e", "Unexpected section"
 data =  args.ifile.read(4)
 #this is the actual size of the FPGA bit stream contents
 (length,) = struct.unpack(">L", data)
-print "Section '%c' (size %6d) '%s'" % (section, length, "FPGA bitstream")
+print("Section '%c' (size %6d) '%s'" % (section, length, "FPGA bitstream"))
 #we can't merge a "merged" file, well..., we could, but we won't
 assert length<=bit_size, "Section 'e' length of %d seems unreasonably long\nCould this file have already been merged with a binary file?" %length
 
 if length % args.pad != 0:
 	padsize = args.pad - (length % args.pad)
-	print "Padding by %s" % padsize
+	print("Padding by %s" % padsize)
 else:
 	padsize = 0
 
 #check that both files will fit in flash
 assert (length+bsize+padsize) <= flash_size, "Combined files sizes of %d would exceed flash capacity of %d bytes" % ((length+bsize), flash_size)
-print "Merged user data begins at FLASH address 0x%06X" % (length + padsize)
+print("Merged user data begins at FLASH address 0x%06X" % (length + padsize))
 
 #write recalculated section length
 data = struct.pack(">L", length+bsize+padsize)

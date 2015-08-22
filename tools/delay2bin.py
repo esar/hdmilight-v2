@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import sys
+import sys, os
+
+if sys.version_info < (3,):
+	def tobyte(x): return chr(x)
+else:
+	def tobyte(x): return bytes([x])
 
 class Values:
 	def __init__(self):
@@ -28,13 +33,13 @@ for (linenum, line) in enumerate(input):
 	t = type(getattr(values, parts[0]))
 	setattr(values, parts[0], t(parts[2]))
 
-sys.stdout.write(chr(values.frames & 0xff))
-sys.stdout.write(chr((values.ticks >> 16) & 0xff))
-sys.stdout.write(chr((values.ticks >>  8) & 0xff))
-sys.stdout.write(chr(values.ticks & 0xff))
+os.write(sys.stdout.fileno(), tobyte(values.frames & 0xff))
+os.write(sys.stdout.fileno(), tobyte((values.ticks >> 16) & 0xff))
+os.write(sys.stdout.fileno(), tobyte((values.ticks >>  8) & 0xff))
+os.write(sys.stdout.fileno(), tobyte(values.ticks & 0xff))
 
 smooth = int(values.smooth * 512)
 si = (smooth >> 9) & 0x1ff
 sf = smooth & 0x1ff
-sys.stdout.write(chr((smooth >> 8) & 3))
-sys.stdout.write(chr(smooth & 0xff))
+os.write(sys.stdout.fileno(), tobyte((smooth >> 8) & 3))
+os.write(sys.stdout.fileno(), tobyte(smooth & 0xff))

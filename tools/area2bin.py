@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import sys
+import sys, os
+
+if sys.version_info < (3,):
+	def tobyte(x): return chr(x)
+else:
+	def tobyte(x): return bytes([x])
 
 input = open(sys.argv[1])
 for (linenum, line) in enumerate(input):
@@ -21,7 +26,7 @@ for (linenum, line) in enumerate(input):
 
 	data = ((divshift & 15) << 24) | ((ymax & 63) << 18) | ((ymin & 63) << 12) | ((xmax & 63) << 6) | (xmin & 63);
 	
-	sys.stdout.write(chr(data & 0xff))
-	sys.stdout.write(chr((data >>  8) & 0xff))
-	sys.stdout.write(chr((data >> 16) & 0xff))
-	sys.stdout.write(chr((data >> 24) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(data & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >>  8) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 16) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 24) & 0xff))

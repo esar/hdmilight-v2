@@ -2,6 +2,11 @@
 
 import sys, os
 
+if sys.version_info < (3,):
+	def tobyte(x): return chr(x)
+else:
+	def tobyte(x): return bytes([x])
+
 keyNames = {}
 actionNames = {}
 keyTable = [0 for x in range(256)]
@@ -33,5 +38,5 @@ for line in f:
 		keyTable[keyIndex] = actionIndex
 
 for key in keyTable:
-	sys.stdout.write(chr(key))
+	os.write(sys.stdout.fileno(), tobyte(key))
 

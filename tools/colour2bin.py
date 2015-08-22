@@ -1,7 +1,13 @@
 #!/usr/bin/python
 
-import sys
+import sys, os
 import numpy as np
+
+if sys.version_info < (3,):
+	def tobyte(x): return chr(x)
+else:
+	long = int
+	def tobyte(x): return bytes([x])
 
 # weights taken from http://graficaobscura.com/matrix/index.html
 WR = 0.3086
@@ -87,11 +93,11 @@ for row in result.tolist():
 
 	data = (b << 36) | (g << 18) | r
 
-	sys.stdout.write(chr(data & 0xff))
-	sys.stdout.write(chr((data >>  8) & 0xff))
-	sys.stdout.write(chr((data >> 16) & 0xff))
-	sys.stdout.write(chr((data >> 24) & 0xff))
-	sys.stdout.write(chr((data >> 32) & 0xff))
-	sys.stdout.write(chr((data >> 40) & 0xff))
-	sys.stdout.write(chr((data >> 48) & 0xff))
-	sys.stdout.write(chr((data >> 56) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(data & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >>  8) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 16) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 24) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 32) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 40) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 48) & 0xff))
+	os.write(sys.stdout.fileno(), tobyte((data >> 56) & 0xff))

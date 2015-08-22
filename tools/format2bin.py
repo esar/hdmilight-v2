@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import sys
+import sys, os
+
+if sys.version_info < (3,):
+	def tobyte(x): return chr(x)
+else:
+	def tobyte(x): return bytes([x])
 
 input = open(sys.argv[1])
 for (linenum, line) in enumerate(input):
@@ -31,20 +36,14 @@ for (linenum, line) in enumerate(input):
 	else:
 		sys.stderr.write('unknown ratio at line %s\n' % linenum)
 
-	sys.stdout.write(chr(width & 0xff))
-	sys.stdout.write(chr(width >> 8))
-	sys.stdout.write(chr(height & 0xff))
-	sys.stdout.write(chr(height >> 8))
-	sys.stdout.write(chr(ratio & 0xff))
-	sys.stdout.write(chr(ratio >> 8))
-	sys.stdout.write(chr(config & 0xff))
-	sys.stdout.write(chr(config >> 8))
+	os.write(sys.stdout.fileno(), tobyte(width & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(width >> 8))
+	os.write(sys.stdout.fileno(), tobyte(height & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(height >> 8))
+	os.write(sys.stdout.fileno(), tobyte(ratio & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(ratio >> 8))
+	os.write(sys.stdout.fileno(), tobyte(config & 0xff))
+	os.write(sys.stdout.fileno(), tobyte(config >> 8))
 
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
-sys.stdout.write(chr(0))
+for i in range(8):
+	os.write(sys.stdout.fileno(), tobyte(0))
