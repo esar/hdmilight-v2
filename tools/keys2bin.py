@@ -7,6 +7,10 @@ if sys.version_info < (3,):
 else:
 	def tobyte(x): return bytes([x])
 
+if sys.platform == 'win32':
+	import msvcrt
+	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 keyNames = {}
 actionNames = {}
 keyTable = [0 for x in range(256)]

@@ -9,6 +9,10 @@ else:
 	long = int
 	def tobyte(x): return bytes([x])
 
+if sys.platform == 'win32':
+	import msvcrt
+	msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 # weights taken from http://graficaobscura.com/matrix/index.html
 WR = 0.3086
 WG = 0.6094
