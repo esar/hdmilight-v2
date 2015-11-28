@@ -1,4 +1,4 @@
-ADDRESS_SPACE progmem RAMB16 [0x00:0x3FFF]
+ADDRESS_SPACE progmem RAMB16 [0x00:0x5FFF]
   BUS_BLOCK
     U3_AVR_MCU/opcf/pmem/pe1 [15:0];
     U3_AVR_MCU/opcf/pmem/po1 [31:16];
@@ -14,6 +14,14 @@ ADDRESS_SPACE progmem RAMB16 [0x00:0x3FFF]
   BUS_BLOCK
     U3_AVR_MCU/opcf/pmem/pe4 [15:0];
     U3_AVR_MCU/opcf/pmem/po4 [31:16];
+  END_BUS_BLOCK;
+  BUS_BLOCK
+    U3_AVR_MCU/opcf/pmem/pe5 [15:0];
+    U3_AVR_MCU/opcf/pmem/po5 [31:16];
+  END_BUS_BLOCK;
+  BUS_BLOCK
+    U3_AVR_MCU/opcf/pmem/pe6 [15:0];
+    U3_AVR_MCU/opcf/pmem/po6 [31:16];
   END_BUS_BLOCK;
 END_ADDRESS_SPACE;
 

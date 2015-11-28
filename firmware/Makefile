@@ -1,4 +1,4 @@
-MAX_IMAGE_SIZE = 16384
+MAX_IMAGE_SIZE = 24576
 
 PRG            = image
 OBJ            = main.o serial.o timer.o i2c.o \

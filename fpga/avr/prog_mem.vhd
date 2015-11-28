@@ -54,27 +54,35 @@ signal M_OPC_E1      : std_logic_vector(15 downto 0);
 signal M_OPC_E2      : std_logic_vector(15 downto 0);
 signal M_OPC_E3      : std_logic_vector(15 downto 0);
 signal M_OPC_E4      : std_logic_vector(15 downto 0);
+signal M_OPC_E5      : std_logic_vector(15 downto 0);
+signal M_OPC_E6      : std_logic_vector(15 downto 0);
 signal M_OPC_O1      : std_logic_vector(15 downto 0);
 signal M_OPC_O2      : std_logic_vector(15 downto 0);
 signal M_OPC_O3      : std_logic_vector(15 downto 0);
 signal M_OPC_O4      : std_logic_vector(15 downto 0);
+signal M_OPC_O5      : std_logic_vector(15 downto 0);
+signal M_OPC_O6      : std_logic_vector(15 downto 0);
 signal M_PMD_E1      : std_logic_vector(15 downto 0);
 signal M_PMD_E2      : std_logic_vector(15 downto 0);
 signal M_PMD_E3      : std_logic_vector(15 downto 0);
 signal M_PMD_E4      : std_logic_vector(15 downto 0);
+signal M_PMD_E5      : std_logic_vector(15 downto 0);
+signal M_PMD_E6      : std_logic_vector(15 downto 0);
 signal M_PMD_O1      : std_logic_vector(15 downto 0);
 signal M_PMD_O2      : std_logic_vector(15 downto 0);
 signal M_PMD_O3      : std_logic_vector(15 downto 0);
 signal M_PMD_O4      : std_logic_vector(15 downto 0);
+signal M_PMD_O5      : std_logic_vector(15 downto 0);
+signal M_PMD_O6      : std_logic_vector(15 downto 0);
 
 signal L_WAIT_N       : std_logic;
 signal L_PC_0         : std_logic;
-signal L_PC_12_11     : std_logic_vector( 1 downto 0);
+signal L_PC_13_11     : std_logic_vector( 2 downto 0);
 signal L_PC_E         : std_logic_vector(10 downto 1);
 signal L_PC_O         : std_logic_vector(10 downto 1);
 signal L_PMD          : std_logic_vector(15 downto 0);
 signal L_PM_ADR_1_0   : std_logic_vector( 1 downto 0);
-signal L_PM_ADR_13_12 : std_logic_vector( 1 downto 0);
+signal L_PM_ADR_14_12 : std_logic_vector( 2 downto 0);
 
 begin
 
@@ -123,6 +131,28 @@ begin
              DOPA  => open,                     DOPB  => open,
              DIPA  => "00",                     DIPB  => "00");
 
+    pe5 : RAMB16_S18_S18
+    port map(ADDRA => L_PC_E,                   ADDRB => I_PM_ADR(11 downto 2),
+             CLKA  => I_CLK,                    CLKB  => I_CLK,
+             DIA   => "0000000000000000",       DIB   => "0000000000000000",
+             ENA   => L_WAIT_N,                 ENB   => '1',
+             SSRA  => '0',                      SSRB  => '0',
+             WEA   => '0',                      WEB   => '0',
+             DOA   => M_OPC_E5,                 DOB   => M_PMD_E5,
+             DOPA  => open,                     DOPB  => open,
+             DIPA  => "00",                     DIPB  => "00");
+
+    pe6 : RAMB16_S18_S18
+    port map(ADDRA => L_PC_E,                   ADDRB => I_PM_ADR(11 downto 2),
+             CLKA  => I_CLK,                    CLKB  => I_CLK,
+             DIA   => "0000000000000000",       DIB   => "0000000000000000",
+             ENA   => L_WAIT_N,                 ENB   => '1',
+             SSRA  => '0',                      SSRB  => '0',
+             WEA   => '0',                      WEB   => '0',
+             DOA   => M_OPC_E6,                 DOB   => M_PMD_E6,
+             DOPA  => open,                     DOPB  => open,
+             DIPA  => "00",                     DIPB  => "00");
+
     po1 : RAMB16_S18_S18
     generic map(INIT_00 => X"0000000000000000000000000000000000000000000000000000be1300000004")
     port map(ADDRA => L_PC_O,                   ADDRB => I_PM_ADR(11 downto 2),
@@ -168,6 +198,28 @@ begin
              DOPA  => open,                     DOPB  => open,
              DIPA  => "00",                     DIPB  => "00");
 
+    po5 : RAMB16_S18_S18
+    port map(ADDRA => L_PC_O,                   ADDRB => I_PM_ADR(11 downto 2),
+             CLKA  => I_CLK,                    CLKB  => I_CLK,
+             DIA   => "0000000000000000",       DIB   => "0000000000000000",
+             ENA   => L_WAIT_N,                 ENB   => '1',
+             SSRA  => '0',                      SSRB  => '0',
+             WEA   => '0',                      WEB   => '0',
+             DOA   => M_OPC_O5,                 DOB   => M_PMD_O5,
+             DOPA  => open,                     DOPB  => open,
+             DIPA  => "00",                     DIPB  => "00");
+
+    po6 : RAMB16_S18_S18
+    port map(ADDRA => L_PC_O,                   ADDRB => I_PM_ADR(11 downto 2),
+             CLKA  => I_CLK,                    CLKB  => I_CLK,
+             DIA   => "0000000000000000",       DIB   => "0000000000000000",
+             ENA   => L_WAIT_N,                 ENB   => '1',
+             SSRA  => '0',                      SSRB  => '0',
+             WEA   => '0',                      WEB   => '0',
+             DOA   => M_OPC_O6,                 DOB   => M_PMD_O6,
+             DOPA  => open,                     DOPB  => open,
+             DIPA  => "00",                     DIPB  => "00");
+
 
     -- remember I_PC0 and I_PM_ADR for the output mux.
     --
@@ -176,10 +228,10 @@ begin
         if (I_CE = '1' and rising_edge(I_CLK)) then
             Q_PC <= I_PC;
             L_PM_ADR_1_0 <= I_PM_ADR(1 downto 0);
-            L_PM_ADR_13_12 <= I_PM_ADR(13 downto 12);
+            L_PM_ADR_14_12 <= I_PM_ADR(14 downto 12);
             if ((I_WAIT = '0')) then
                 L_PC_0 <= I_PC(0);
-                L_PC_12_11 <= I_PC(12 downto 11);
+                L_PC_13_11 <= I_PC(13 downto 11);
             end if;
         end if;
     end process;
@@ -204,33 +256,45 @@ begin
 
     L_PC_O <= I_PC(10 downto 1);
     L_PC_E <= I_PC(10 downto 1) + ("000000000" & I_PC(0));
-    Q_OPC(15 downto  0)  <= M_OPC_E1 when L_PC_12_11 = "00" and L_PC_0 = '0' else
-                            M_OPC_E2 when L_PC_12_11 = "01" and L_PC_0 = '0' else
-                            M_OPC_E3 when L_PC_12_11 = "10" and L_PC_0 = '0' else
-                            M_OPC_E4 when L_PC_12_11 = "11" and L_PC_0 = '0' else
-                            M_OPC_O1 when L_PC_12_11 = "00" and L_PC_0 = '1' else
-                            M_OPC_O2 when L_PC_12_11 = "01" and L_PC_0 = '1' else
-                            M_OPC_O3 when L_PC_12_11 = "10" and L_PC_0 = '1' else
-                            M_OPC_O4;
-    Q_OPC(31 downto  16) <= M_OPC_E1 when L_PC_12_11 = "00" and L_PC_0 = '1' else
-                            M_OPC_E2 when L_PC_12_11 = "01" and L_PC_0 = '1' else
-                            M_OPC_E3 when L_PC_12_11 = "10" and L_PC_0 = '1' else
-                            M_OPC_E4 when L_PC_12_11 = "11" and L_PC_0 = '1' else
-                            M_OPC_O1 when L_PC_12_11 = "00" and L_PC_0 = '0' else
-                            M_OPC_O2 when L_PC_12_11 = "01" and L_PC_0 = '0' else
-                            M_OPC_O3 when L_PC_12_11 = "10" and L_PC_0 = '0' else
-                            M_OPC_O4;
+    Q_OPC(15 downto  0)  <= M_OPC_E1 when L_PC_13_11 = "000" and L_PC_0 = '0' else
+                            M_OPC_E2 when L_PC_13_11 = "001" and L_PC_0 = '0' else
+                            M_OPC_E3 when L_PC_13_11 = "010" and L_PC_0 = '0' else
+                            M_OPC_E4 when L_PC_13_11 = "011" and L_PC_0 = '0' else
+                            M_OPC_E5 when L_PC_13_11 = "100" and L_PC_0 = '0' else
+                            M_OPC_E6 when L_PC_13_11 = "101" and L_PC_0 = '0' else
+                            M_OPC_O1 when L_PC_13_11 = "000" and L_PC_0 = '1' else
+                            M_OPC_O2 when L_PC_13_11 = "001" and L_PC_0 = '1' else
+                            M_OPC_O3 when L_PC_13_11 = "010" and L_PC_0 = '1' else
+                            M_OPC_O4 when L_PC_13_11 = "011" and L_PC_0 = '1' else
+                            M_OPC_O5 when L_PC_13_11 = "100" and L_PC_0 = '1' else
+                            M_OPC_O6;
+    Q_OPC(31 downto  16) <= M_OPC_E1 when L_PC_13_11 = "000" and L_PC_0 = '1' else
+                            M_OPC_E2 when L_PC_13_11 = "001" and L_PC_0 = '1' else
+                            M_OPC_E3 when L_PC_13_11 = "010" and L_PC_0 = '1' else
+                            M_OPC_E4 when L_PC_13_11 = "011" and L_PC_0 = '1' else
+                            M_OPC_E5 when L_PC_13_11 = "100" and L_PC_0 = '1' else
+                            M_OPC_E6 when L_PC_13_11 = "101" and L_PC_0 = '1' else
+                            M_OPC_O1 when L_PC_13_11 = "000" and L_PC_0 = '0' else
+                            M_OPC_O2 when L_PC_13_11 = "001" and L_PC_0 = '0' else
+                            M_OPC_O3 when L_PC_13_11 = "010" and L_PC_0 = '0' else
+                            M_OPC_O4 when L_PC_13_11 = "011" and L_PC_0 = '0' else
+                            M_OPC_O5 when L_PC_13_11 = "100" and L_PC_0 = '0' else
+                            M_OPC_O6;
     --Q_OPC(15 downto  0) <= M_OPC_E when L_PC_0 = '0' else M_OPC_O;
     --Q_OPC(31 downto 16) <= M_OPC_E when L_PC_0 = '1' else M_OPC_O;
 
-    L_PMD <= M_PMD_E1 when L_PM_ADR_13_12 = "00" and L_PM_ADR_1_0(1) = '0' else
-             M_PMD_O1 when L_PM_ADR_13_12 = "00" and L_PM_ADR_1_0(1) = '1' else
-             M_PMD_E2 when L_PM_ADR_13_12 = "01" and L_PM_ADR_1_0(1) = '0' else
-             M_PMD_O2 when L_PM_ADR_13_12 = "01" and L_PM_ADR_1_0(1) = '1' else
-             M_PMD_E3 when L_PM_ADR_13_12 = "10" and L_PM_ADR_1_0(1) = '0' else
-             M_PMD_O3 when L_PM_ADR_13_12 = "10" and L_PM_ADR_1_0(1) = '1' else
-             M_PMD_E4 when L_PM_ADR_13_12 = "11" and L_PM_ADR_1_0(1) = '0' else
-             M_PMD_O4;
+    L_PMD <= M_PMD_E1 when L_PM_ADR_14_12 = "000" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O1 when L_PM_ADR_14_12 = "000" and L_PM_ADR_1_0(1) = '1' else
+             M_PMD_E2 when L_PM_ADR_14_12 = "001" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O2 when L_PM_ADR_14_12 = "001" and L_PM_ADR_1_0(1) = '1' else
+             M_PMD_E3 when L_PM_ADR_14_12 = "010" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O3 when L_PM_ADR_14_12 = "010" and L_PM_ADR_1_0(1) = '1' else
+             M_PMD_E4 when L_PM_ADR_14_12 = "011" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O4 when L_PM_ADR_14_12 = "011" and L_PM_ADR_1_0(1) = '1' else
+             M_PMD_E5 when L_PM_ADR_14_12 = "100" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O5 when L_PM_ADR_14_12 = "100" and L_PM_ADR_1_0(1) = '1' else
+             M_PMD_E6 when L_PM_ADR_14_12 = "101" and L_PM_ADR_1_0(1) = '0' else
+             M_PMD_O6;
     --L_PMD <= M_PMD_E               when (L_PM_ADR_1_0(1) = '0') else M_PMD_O;
     Q_PM_DOUT <= L_PMD(7 downto 0) when (L_PM_ADR_1_0(0) = '0')
             else L_PMD(15 downto 8);
